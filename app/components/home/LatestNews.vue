@@ -1,49 +1,9 @@
 <script setup lang="ts">
-interface NewsItem {
-  title: string
-  author: string
-  date: string
-  excerpt: string
-  image?: string
-  variant: 'featured' | 'text' | 'side'
-}
+import { latestNews } from '~/data/home'
 
-const newsItems: NewsItem[] = [
-  {
-    title: 'Post with Image Here',
-    author: 'Rashed kabir',
-    date: '24 Feb, 2014',
-    excerpt: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.',
-    image: '/images/news/news-img1.png',
-    variant: 'featured'
-  },
-  {
-    title: 'Post with Image Here',
-    author: 'Rashed kabir',
-    date: '24 Feb, 2014',
-    excerpt: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.',
-    variant: 'text'
-  },
-  {
-    title: 'Post with Image Here',
-    author: 'Rashed kabir',
-    date: '24 Feb, 2014',
-    excerpt: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.',
-    variant: 'text'
-  },
-  {
-    title: 'Post with Image Here',
-    author: 'Rashed kabir',
-    date: '24 Feb, 2014',
-    excerpt: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.',
-    image: '/images/news/news-img2.png',
-    variant: 'side'
-  }
-]
-
-const featured = newsItems[0]!
-const textCards = newsItems.filter(item => item.variant === 'text')
-const sideCard = newsItems.find(item => item.variant === 'side')!
+const featured = latestNews.find(item => item.variant === 'featured')!
+const textCards = latestNews.filter(item => item.variant === 'text')
+const sideCard = latestNews.find(item => item.variant === 'side')!
 </script>
 
 <template>
@@ -88,6 +48,7 @@ const sideCard = newsItems.find(item => item.variant === 'side')!
                   :alt="featured.title"
                   class="block h-auto w-full"
                   loading="lazy"
+                  decoding="async"
                 >
               </div>
               <div class="w-full px-[15px] min-[768px]:w-1/2">
@@ -108,7 +69,7 @@ const sideCard = newsItems.find(item => item.variant === 'side')!
                     {{ featured.excerpt }}
                   </p>
                   <NuxtLink
-                    to="/blog"
+                    :to="featured.to"
                     class="inline-block rounded-[3px] border border-solid border-[#f15b22] bg-[#f15b22] px-7 py-[9px] text-center text-lg leading-5 text-white shadow-[inset_0_1px_0_#e0a97f] transition-colors duration-1000 hover:bg-[#e7480b] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f15b22]"
                   >
                     Read More
@@ -142,7 +103,7 @@ const sideCard = newsItems.find(item => item.variant === 'side')!
                     {{ card.excerpt }}
                   </p>
                   <NuxtLink
-                    to="/blog"
+                    :to="card.to"
                     class="inline-block rounded-[3px] border border-solid border-[#f15b22] bg-[#f15b22] px-7 py-[9px] text-center text-lg leading-5 text-white shadow-[inset_0_1px_0_#e0a97f] transition-colors duration-1000 hover:bg-[#e7480b] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f15b22]"
                   >
                     Read More
@@ -161,6 +122,7 @@ const sideCard = newsItems.find(item => item.variant === 'side')!
                 :alt="sideCard.title"
                 class="block h-auto w-full max-[991px]:w-1/2 max-[991px]:pr-[15px] max-[767px]:w-full max-[767px]:pr-0"
                 loading="lazy"
+                decoding="async"
               >
               <div
                 class="px-[50px] pt-[50px] pb-[60px] max-[991px]:w-1/2 max-[991px]:float-left max-[991px]:pt-[30px] max-[767px]:float-none max-[767px]:w-full max-[767px]:p-[30px]"
@@ -181,7 +143,7 @@ const sideCard = newsItems.find(item => item.variant === 'side')!
                   {{ sideCard.excerpt }}
                 </p>
                 <NuxtLink
-                  to="/blog"
+                  :to="sideCard.to"
                   class="inline-block rounded-[3px] border border-solid border-[#f15b22] bg-[#f15b22] px-7 py-[9px] text-center text-lg leading-5 text-white shadow-[inset_0_1px_0_#e0a97f] transition-colors duration-1000 hover:bg-[#e7480b] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f15b22]"
                 >
                   Read More

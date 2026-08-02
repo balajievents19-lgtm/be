@@ -1,20 +1,9 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import Lightbox from '~/components/shared/Lightbox.vue'
+import { galleryImages } from '~/data/home'
 
-const images = [
-  '/images/gallery/home3-galleryImg1.jpg',
-  '/images/gallery/home3-galleryImg2.jpg',
-  '/images/gallery/home3-galleryImg3.jpg',
-  '/images/gallery/home3-galleryImg4.jpg',
-  '/images/gallery/home3-galleryImg5.jpg',
-  '/images/gallery/home3-galleryImg6.jpg',
-  '/images/gallery/home3-galleryImg7.jpg',
-  '/images/gallery/home3-galleryImg8.jpg',
-  '/images/gallery/home3-galleryImg9.jpg',
-  '/images/gallery/home3-galleryImg10.jpg'
-]
-
+const images = computed(() => galleryImages.map(item => item.src))
 const isLightboxOpen = ref(false)
 const activeIndex = ref(0)
 
@@ -55,18 +44,19 @@ const openLightbox = (index: number) => {
 
     <div class="mt-[50px] flex flex-wrap overflow-hidden px-0">
       <button
-        v-for="(src, index) in images"
-        :key="src"
+        v-for="(item, index) in galleryImages"
+        :key="item.src"
         type="button"
         class="group relative w-1/2 bg-[#e1e8ed] p-[2px] md:w-1/5"
-        :aria-label="`Open gallery image ${index + 1}`"
+        :aria-label="`Open ${item.alt}`"
         @click="openLightbox(index)"
       >
         <img
-          :src="src"
-          :alt="`Gallery image ${index + 1}`"
+          :src="item.src"
+          :alt="item.alt"
           class="block h-auto w-full"
           loading="lazy"
+          decoding="async"
         >
 
         <span

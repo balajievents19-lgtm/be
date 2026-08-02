@@ -1,21 +1,5 @@
 <script setup lang="ts">
-interface ServiceItem {
-  icon: string
-  title: string
-}
-
-const services: ServiceItem[] = [
-  { icon: 'icon-caterers', title: 'Caterers' },
-  { icon: 'icon-flower-pot', title: 'Decor & Florists' },
-  { icon: 'icon-calander', title: 'Event Planner' },
-  { icon: 'icon-beauty', title: 'Make-up and Hair' },
-  { icon: 'icon-wedding-card', title: 'Wedding Cards' },
-  { icon: 'icon-mehandi', title: 'Mehandi' },
-  { icon: 'icon-cake', title: 'Cakes' },
-  { icon: 'icon-music', title: 'DJ' },
-  { icon: 'icon-camera', title: 'Photographers & Videographers' },
-  { icon: 'icon-glass', title: 'Entertainment' }
-]
+import { services } from '~/data/home'
 </script>
 
 <template>

@@ -1,0 +1,227 @@
+export interface HeroSlide {
+  src: string
+  alt: string
+}
+
+export interface ServiceItem {
+  icon: string
+  title: string
+}
+
+export interface EventItem {
+  title: string
+  image: string
+  description: string
+  to: string
+}
+
+export interface GalleryImage {
+  src: string
+  alt: string
+}
+
+export interface TestimonialItem {
+  name: string
+  quote: string
+  avatar: string
+}
+
+export interface SuccessStoryItem {
+  name: string
+  image: string
+  text: string
+}
+
+export interface NewsItem {
+  title: string
+  author: string
+  date: string
+  excerpt: string
+  image?: string
+  variant: 'featured' | 'text' | 'side'
+  to: string
+}
+
+export interface FooterUpdateItem {
+  image: string
+  text: string
+  to: string
+}
+
+export interface FooterLink {
+  label: string
+  to: string
+}
+
+export interface SocialLink {
+  icon: string
+  label: string
+  href: string
+}
+
+export const heroSlides: HeroSlide[] = [
+  {
+    src: '/images/banner/slider-img.jpg',
+    alt: 'Balaji Events celebration'
+  },
+  {
+    src: '/images/banner/slider-img2.jpg',
+    alt: 'Balaji Events wedding setup'
+  },
+  {
+    src: '/images/banner/slider-img3.jpg',
+    alt: 'Balaji Events party venue'
+  }
+]
+
+export const services: ServiceItem[] = [
+  { icon: 'icon-caterers', title: 'Caterers' },
+  { icon: 'icon-flower-pot', title: 'Decor & Florists' },
+  { icon: 'icon-calander', title: 'Event Planner' },
+  { icon: 'icon-beauty', title: 'Make-up and Hair' },
+  { icon: 'icon-wedding-card', title: 'Wedding Cards' },
+  { icon: 'icon-mehandi', title: 'Mehandi' },
+  { icon: 'icon-cake', title: 'Cakes' },
+  { icon: 'icon-music', title: 'DJ' },
+  { icon: 'icon-camera', title: 'Photographers & Videographers' },
+  { icon: 'icon-glass', title: 'Entertainment' }
+]
+
+export const overviewEvents: EventItem[] = [
+  {
+    title: 'Wedding Planning',
+    image: '/images/events/event-1.jpg',
+    description: 'Complete wedding planning with premium decoration, catering and entertainment.',
+    to: '/services'
+  },
+  {
+    title: 'Corporate Events',
+    image: '/images/events/event-2.jpg',
+    description: 'Professional conferences, seminars, product launches and business meetings.',
+    to: '/services'
+  },
+  {
+    title: 'Birthday Celebration',
+    image: '/images/events/event-3.jpg',
+    description: 'Creative birthday themes, games, photography and complete event management.',
+    to: '/services'
+  }
+]
+
+export const galleryImages: GalleryImage[] = [
+  { src: '/images/gallery/home3-galleryImg1.jpg', alt: 'Gallery image 1' },
+  { src: '/images/gallery/home3-galleryImg2.jpg', alt: 'Gallery image 2' },
+  { src: '/images/gallery/home3-galleryImg3.jpg', alt: 'Gallery image 3' },
+  { src: '/images/gallery/home3-galleryImg4.jpg', alt: 'Gallery image 4' },
+  { src: '/images/gallery/home3-galleryImg5.jpg', alt: 'Gallery image 5' },
+  { src: '/images/gallery/home3-galleryImg6.jpg', alt: 'Gallery image 6' },
+  { src: '/images/gallery/home3-galleryImg7.jpg', alt: 'Gallery image 7' },
+  { src: '/images/gallery/home3-galleryImg8.jpg', alt: 'Gallery image 8' },
+  { src: '/images/gallery/home3-galleryImg9.jpg', alt: 'Gallery image 9' },
+  { src: '/images/gallery/home3-galleryImg10.jpg', alt: 'Gallery image 10' }
+]
+
+export const testimonials: TestimonialItem[] = [
+  {
+    name: 'John Doe',
+    avatar: '/images/user/friend-img.png',
+    quote: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, an unknown printer took a galley of type and scrambled it type specimen book.'
+  },
+  {
+    name: 'John Doe',
+    avatar: '/images/user/friend-img.png',
+    quote: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, an unknown printer took a galley of type and scrambled it type specimen book.'
+  }
+]
+
+export const successStories: SuccessStoryItem[] = [
+  {
+    name: 'Larry Cook',
+    image: '/images/user/story-img1.png',
+    text: 'We have 20 years experience planning and organizing beautiful weddings and events. We have built up excellent relationships with the most professional suppliers on the coast to help with your every desire. From a small intimate gathering to a more luxurious wedding day we can help you make your Dream Wedding a reality.'
+  },
+  {
+    name: 'Stacy Benjamin',
+    image: '/images/user/story-img2.png',
+    text: 'We have 20 years experience planning and organizing beautiful weddings and events. We have built up excellent relationships with the most professional suppliers on the coast to help with your every desire. From a small intimate gathering to a more luxurious wedding day we can help you make your Dream Wedding a reality.'
+  }
+]
+
+export const latestNews: NewsItem[] = [
+  {
+    title: 'Post with Image Here',
+    author: 'Rashed kabir',
+    date: '24 Feb, 2014',
+    excerpt: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.',
+    image: '/images/news/news-img1.png',
+    variant: 'featured',
+    to: '/blog'
+  },
+  {
+    title: 'Post with Image Here',
+    author: 'Rashed kabir',
+    date: '24 Feb, 2014',
+    excerpt: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.',
+    variant: 'text',
+    to: '/blog'
+  },
+  {
+    title: 'Post with Image Here',
+    author: 'Rashed kabir',
+    date: '24 Feb, 2014',
+    excerpt: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.',
+    variant: 'text',
+    to: '/blog'
+  },
+  {
+    title: 'Post with Image Here',
+    author: 'Rashed kabir',
+    date: '24 Feb, 2014',
+    excerpt: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.',
+    image: '/images/news/news-img2.png',
+    variant: 'side',
+    to: '/blog'
+  }
+]
+
+export const footerUpdates: FooterUpdateItem[] = [
+  {
+    image: '/images/event/update-img1.png',
+    text: 'Lorem ipsum is a dummy text full service industrial design.',
+    to: '/blog'
+  },
+  {
+    image: '/images/event/update-img2.png',
+    text: 'Integrated Design Systems is a full-service industrial design.',
+    to: '/blog'
+  },
+  {
+    image: '/images/event/update-img3.png',
+    text: 'when an unknown printer took a galley of type and specimen book.',
+    to: '/blog'
+  }
+]
+
+export const footerCompanyLinks: FooterLink[] = [
+  { label: 'About Us', to: '/about' },
+  { label: 'Privacy Policy', to: '/privacy-policy' },
+  { label: 'Careers', to: '/careers' },
+  { label: 'Blogs', to: '/blog' },
+  { label: 'Contact Us', to: '/contact' }
+]
+
+export const footerSocialLinks: SocialLink[] = [
+  { icon: 'icon-facebook', label: 'Facebook', href: '#' },
+  { icon: 'icon-twitter', label: 'Twitter', href: '#' },
+  { icon: 'icon-linkedin', label: 'LinkedIn', href: '#' },
+  { icon: 'icon-skype', label: 'Skype', href: '#' },
+  { icon: 'icon-google-plus', label: 'Google Plus', href: '#' },
+  { icon: 'icon-play', label: 'YouTube', href: '#' }
+]
+
+export const siteContact = {
+  email: 'balajievents19@gmail.com',
+  phoneDisplay: '+91-94625-77065',
+  phoneHref: 'tel:+919462577065',
+  address: 'Golai Mode, Road No.3, Near : J.M Bajaj Bike Agency Jhunjhunu (Rajasthan)'
+} as const

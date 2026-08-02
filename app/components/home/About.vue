@@ -35,6 +35,7 @@
           alt="Balaji Events about us"
           class="block h-auto w-full object-cover md:absolute md:inset-0 md:h-full"
           loading="lazy"
+          decoding="async"
         >
       </div>
     </div>

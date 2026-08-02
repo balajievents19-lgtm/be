@@ -3,6 +3,7 @@ import { onMounted, onUnmounted, ref } from 'vue'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { A11y, Autoplay, EffectFade, Keyboard, Navigation } from 'swiper/modules'
 import HeroSearch from '~/components/home/HeroSearch.vue'
+import { heroSlides } from '~/data/home'
 
 import 'swiper/css'
 import 'swiper/css/effect-fade'
@@ -11,21 +12,6 @@ import 'swiper/css/navigation'
 const modules = [A11y, Autoplay, EffectFade, Keyboard, Navigation]
 const prefersReducedMotion = ref(false)
 const swiperRef = ref<{ slideNext: () => void, slidePrev: () => void } | null>(null)
-
-const slides = [
-  {
-    src: '/images/banner/slider-img.jpg',
-    alt: 'Balaji Events celebration'
-  },
-  {
-    src: '/images/banner/slider-img2.jpg',
-    alt: 'Balaji Events wedding setup'
-  },
-  {
-    src: '/images/banner/slider-img3.jpg',
-    alt: 'Balaji Events party venue'
-  }
-]
 
 let mediaQuery: MediaQueryList | undefined
 
@@ -84,7 +70,7 @@ onUnmounted(() => {
         @swiper="onSwiper"
       >
         <SwiperSlide
-          v-for="(slide, index) in slides"
+          v-for="(slide, index) in heroSlides"
           :key="slide.src"
         >
           <div class="relative h-full max-h-[850px] w-full">
@@ -93,6 +79,9 @@ onUnmounted(() => {
               :alt="slide.alt"
               :fetchpriority="index === 0 ? 'high' : 'auto'"
               :loading="index === 0 ? 'eager' : 'lazy'"
+              decoding="async"
+              width="1920"
+              height="850"
               class="h-full w-full object-cover"
             >
             <div

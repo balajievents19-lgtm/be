@@ -2,50 +2,13 @@
 import { reactive, ref } from 'vue'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { A11y, Keyboard, Navigation } from 'swiper/modules'
+import { successStories, testimonials } from '~/data/home'
 
 import 'swiper/css'
 import 'swiper/css/navigation'
 
-interface Testimonial {
-  name: string
-  quote: string
-  avatar: string
-}
-
-interface Story {
-  name: string
-  image: string
-  text: string
-}
-
 const modules = [A11y, Keyboard, Navigation]
 const swiperRef = ref<{ slideNext: () => void, slidePrev: () => void } | null>(null)
-
-const testimonials: Testimonial[] = [
-  {
-    name: 'John Doe',
-    avatar: '/images/user/friend-img.png',
-    quote: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, an unknown printer took a galley of type and scrambled it type specimen book.'
-  },
-  {
-    name: 'John Doe',
-    avatar: '/images/user/friend-img.png',
-    quote: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, an unknown printer took a galley of type and scrambled it type specimen book.'
-  }
-]
-
-const stories: Story[] = [
-  {
-    name: 'Larry Cook',
-    image: '/images/user/story-img1.png',
-    text: 'We have 20 years experience planning and organizing beautiful weddings and events. We have built up excellent relationships with the most professional suppliers on the coast to help with your every desire. From a small intimate gathering to a more luxurious wedding day we can help you make your Dream Wedding a reality.'
-  },
-  {
-    name: 'Stacy Benjamin',
-    image: '/images/user/story-img2.png',
-    text: 'We have 20 years experience planning and organizing beautiful weddings and events. We have built up excellent relationships with the most professional suppliers on the coast to help with your every desire. From a small intimate gathering to a more luxurious wedding day we can help you make your Dream Wedding a reality.'
-  }
-]
 
 const shareForm = reactive({
   name: '',
@@ -108,7 +71,7 @@ const onShareSubmit = (event: Event) => {
 <template>
   <!-- Client Say’s -->
   <section
-    class="relative block w-full bg-[url('/images/parallax/friend-infoBg.jpg')] bg-cover bg-center bg-fixed py-[33px] pb-[63px]"
+    class="relative block w-full bg-[url('/images/parallax/friend-infoBg.jpg')] bg-cover bg-center bg-scroll py-[33px] pb-[63px] md:bg-fixed"
     aria-labelledby="client-says-heading"
   >
     <div
@@ -260,7 +223,7 @@ const onShareSubmit = (event: Event) => {
             </h2>
 
             <article
-              v-for="story in stories"
+              v-for="story in successStories"
               :key="story.name"
               class="relative mt-[27px] block p-0 pt-1.5 max-[479px]:p-0 md:pl-[100px]"
             >

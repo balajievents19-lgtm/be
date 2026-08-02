@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 
 const props = defineProps<{
   open: boolean
@@ -13,6 +13,7 @@ const emit = defineEmits<{
   'update:index': [value: number]
 }>()
 
+const closeButtonRef = ref<HTMLButtonElement | null>(null)
 const currentSrc = computed(() => props.images[props.index] ?? '')
 const currentAlt = computed(() => props.alt ?? `Gallery image ${props.index + 1}`)
 
@@ -52,11 +53,15 @@ const onKeydown = (event: KeyboardEvent) => {
 
 watch(
   () => props.open,
-  (isOpen) => {
+  async (isOpen) => {
     if (!import.meta.client) {
       return
     }
     document.body.style.overflow = isOpen ? 'hidden' : ''
+    if (isOpen) {
+      await nextTick()
+      closeButtonRef.value?.focus()
+    }
   }
 )
 
@@ -120,6 +125,7 @@ onUnmounted(() => {
         </button>
 
         <button
+          ref="closeButtonRef"
           type="button"
           class="absolute -top-2 right-2 z-20 flex size-10 items-center justify-center rounded-full bg-black/50 text-2xl leading-none text-white transition-colors hover:bg-black/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:right-4"
           aria-label="Close lightbox"

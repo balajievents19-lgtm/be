@@ -1,48 +1,11 @@
 <script setup lang="ts">
 import { reactive } from 'vue'
-
-interface UpdateItem {
-  image: string
-  text: string
-}
-
-interface SocialLink {
-  icon: string
-  label: string
-  href: string
-}
-
-const updates: UpdateItem[] = [
-  {
-    image: '/images/event/update-img1.png',
-    text: 'Lorem ipsum is a dummy text full service industrial design.'
-  },
-  {
-    image: '/images/event/update-img2.png',
-    text: 'Integrated Design Systems is a full-service industrial design.'
-  },
-  {
-    image: '/images/event/update-img3.png',
-    text: 'when an unknown printer took a galley of type and specimen book.'
-  }
-]
-
-const companyLinks = [
-  { label: 'About Us', to: '/about' },
-  { label: 'Privacy Policy', to: '/faq' },
-  { label: 'Careers', to: '/vendor' },
-  { label: 'Blogs', to: '/blog' },
-  { label: 'Contact Us', to: '/contact' }
-]
-
-const socialLinks: SocialLink[] = [
-  { icon: 'icon-facebook', label: 'Facebook', href: '#' },
-  { icon: 'icon-twitter', label: 'Twitter', href: '#' },
-  { icon: 'icon-linkedin', label: 'LinkedIn', href: '#' },
-  { icon: 'icon-skype', label: 'Skype', href: '#' },
-  { icon: 'icon-google-plus', label: 'Google Plus', href: '#' },
-  { icon: 'icon-play', label: 'YouTube', href: '#' }
-]
+import {
+  footerCompanyLinks,
+  footerSocialLinks,
+  footerUpdates,
+  siteContact
+} from '~/data/home'
 
 const newsletter = reactive({
   firstName: '',
@@ -68,7 +31,6 @@ const onNewsletterSubmit = (event: Event) => {
     <div class="py-9 pb-[34px] max-[767px]:pb-2.5">
       <UContainer class="mx-auto max-w-[1170px]">
         <div class="-mx-[15px] flex flex-wrap">
-          <!-- Latest Updates -->
           <div class="mb-6 w-full px-[15px] sm:w-1/2 lg:mb-0 lg:w-1/4">
             <h5
               class="mb-[23px] font-['Domine',Georgia,'Times_New_Roman',serif] text-lg font-bold leading-[22px] text-white max-[767px]:my-5"
@@ -77,7 +39,7 @@ const onNewsletterSubmit = (event: Event) => {
             </h5>
 
             <div
-              v-for="(item, index) in updates"
+              v-for="(item, index) in footerUpdates"
               :key="`update-${index}`"
               class="relative my-[3px] mb-[7px] inline-block min-h-14 w-full pl-[70px]"
             >
@@ -87,6 +49,7 @@ const onNewsletterSubmit = (event: Event) => {
                   alt=""
                   class="block h-auto w-full"
                   loading="lazy"
+                  decoding="async"
                 >
               </div>
               <div>
@@ -94,7 +57,7 @@ const onNewsletterSubmit = (event: Event) => {
                   {{ item.text }}
                 </p>
                 <NuxtLink
-                  to="/blog"
+                  :to="item.to"
                   class="text-[13px] leading-[18px] text-[#e7480b] no-underline transition-colors hover:text-[#fffffe] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f15b22]"
                 >
                   Read More
@@ -103,7 +66,6 @@ const onNewsletterSubmit = (event: Event) => {
             </div>
           </div>
 
-          <!-- Company -->
           <div class="mb-6 w-full px-[15px] text-left sm:w-1/2 lg:mb-0 lg:w-1/4">
             <div class="inline-block min-h-0 w-full max-w-[157px] text-left md:min-h-[260px] max-[639px]:min-h-0">
               <h5
@@ -113,7 +75,7 @@ const onNewsletterSubmit = (event: Event) => {
               </h5>
               <ul class="m-0 list-none p-0">
                 <li
-                  v-for="link in companyLinks"
+                  v-for="link in footerCompanyLinks"
                   :key="link.label"
                   class="group"
                 >
@@ -128,7 +90,6 @@ const onNewsletterSubmit = (event: Event) => {
             </div>
           </div>
 
-          <!-- Contact us -->
           <div class="mb-6 w-full px-[15px] sm:w-1/2 lg:mb-0 lg:w-1/4">
             <div>
               <h5
@@ -143,7 +104,7 @@ const onNewsletterSubmit = (event: Event) => {
                   aria-hidden="true"
                 />
                 <p class="m-0 w-full max-w-[195px] text-[13px] leading-6 text-[#85889b]">
-                  Golai Mode, Road No.3, Near : J.M Bajaj Bike Agency Jhunjhunu (Rajasthan)
+                  {{ siteContact.address }}
                 </p>
               </div>
 
@@ -154,9 +115,9 @@ const onNewsletterSubmit = (event: Event) => {
                 />
                 <p class="m-0 w-full max-w-[195px] text-[13px] leading-6 text-[#85889b]">
                   <a
-                    href="tel:+919462577065"
-                    class="text-[13px] leading-6 text-[#85889b] transition-colors hover:text-white"
-                  >+91-94625-77065</a>
+                    :href="siteContact.phoneHref"
+                    class="text-[13px] leading-6 text-[#85889b] transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f15b22]"
+                  >{{ siteContact.phoneDisplay }}</a>
                 </p>
               </div>
 
@@ -166,16 +127,15 @@ const onNewsletterSubmit = (event: Event) => {
                   aria-hidden="true"
                 />
                 <a
-                  href="mailto:balajievents19@gmail.com"
+                  :href="`mailto:${siteContact.email}`"
                   class="text-[13px] leading-6 text-[#85889b] transition-colors group-hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f15b22]"
                 >
-                  balajievents19@gmail.com
+                  {{ siteContact.email }}
                 </a>
               </div>
             </div>
           </div>
 
-          <!-- Newsletter -->
           <div class="mb-6 w-full px-[15px] sm:w-1/2 lg:mb-0 lg:w-1/4">
             <div class="inline-block w-full">
               <h5
@@ -251,7 +211,7 @@ const onNewsletterSubmit = (event: Event) => {
               <div class="inline-block w-full pt-[13px]">
                 <ul class="m-0 list-none p-0">
                   <li
-                    v-for="social in socialLinks"
+                    v-for="social in footerSocialLinks"
                     :key="social.label"
                     class="mr-1.5 inline-block align-top"
                   >
@@ -259,6 +219,7 @@ const onNewsletterSubmit = (event: Event) => {
                       :href="social.href"
                       :aria-label="social.label"
                       class="block h-[26px] w-[26px] rounded-full bg-[#26293b] text-center transition-colors hover:bg-[#f15b22] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f15b22]"
+                      @click.prevent
                     >
                       <span
                         :class="['icon', social.icon, 'mt-0.5 inline-block w-full text-center leading-[26px] text-white']"
