@@ -8,11 +8,11 @@ const sideCard = latestNews.find(item => item.variant === 'side')!
 
 <template>
   <section
-    class="bg-[#f5f5f6] py-10 pb-[30px]"
+    class="news-view bg-[#f5f5f6] py-10 pb-[30px]"
     aria-labelledby="latest-news-heading"
   >
     <UContainer class="mx-auto max-w-[1170px]">
-      <div class="mb-[90px] w-full text-center">
+      <div class="mb-0 w-full pb-[90px] text-center">
         <div class="block w-full">
           <em
             class="icon icon-heading-icon inline-block h-10 align-top text-[56px] leading-none text-[#f15b22]"
@@ -39,8 +39,8 @@ const sideCard = latestNews.find(item => item.variant === 'side')!
       </div>
 
       <div class="-mx-[15px] flex flex-wrap">
-        <div class="w-full px-[15px] md:w-2/3">
-          <article class="mb-[30px] bg-white">
+        <div class="w-full px-[15px] min-[992px]:w-2/3">
+          <article class="news-box mb-[30px] bg-white">
             <div class="-mx-[15px] flex flex-wrap">
               <div class="w-full px-[15px] min-[768px]:w-1/2">
                 <img
@@ -85,7 +85,7 @@ const sideCard = latestNews.find(item => item.variant === 'side')!
               :key="`news-text-${index}`"
               class="w-full px-[15px] min-[768px]:w-1/2"
             >
-              <article class="mb-[30px] bg-white">
+              <article class="news-box style2 mb-[30px] bg-white">
                 <div class="p-10 max-[767px]:p-[30px]">
                   <div class="relative mb-[34px] pb-[15px] max-[1199px]:mb-2.5">
                     <h3 class="m-0 block font-['Domine',Georgia,'Times_New_Roman',serif] text-2xl font-bold leading-9 text-[#333333]">
@@ -114,18 +114,18 @@ const sideCard = latestNews.find(item => item.variant === 'side')!
           </div>
         </div>
 
-        <div class="w-full px-[15px] md:w-1/3">
-          <article class="mb-[30px] overflow-hidden bg-white max-[991px]:overflow-hidden">
-            <div class="max-[991px]:flex max-[991px]:flex-wrap max-[767px]:block">
+        <div class="w-full px-[15px] min-[992px]:w-1/3">
+          <article class="news-box style3 mb-[30px] overflow-hidden bg-white">
+            <div class="max-[991px]:overflow-hidden max-[767px]:block">
               <img
                 :src="sideCard.image"
                 :alt="sideCard.title"
-                class="block h-auto w-full max-[991px]:w-1/2 max-[991px]:pr-[15px] max-[767px]:w-full max-[767px]:pr-0"
+                class="block h-auto w-full max-[991px]:float-left max-[991px]:w-1/2 max-[991px]:pr-[15px] max-[767px]:float-none max-[767px]:w-full max-[767px]:pr-0"
                 loading="lazy"
                 decoding="async"
               >
               <div
-                class="px-[50px] pt-[50px] pb-[60px] max-[991px]:w-1/2 max-[991px]:float-left max-[991px]:pt-[30px] max-[767px]:float-none max-[767px]:w-full max-[767px]:p-[30px]"
+                class="px-[50px] pt-[50px] pb-[60px] max-[991px]:float-left max-[991px]:w-1/2 max-[991px]:pt-[30px] max-[767px]:float-none max-[767px]:w-full max-[767px]:p-[30px]"
               >
                 <div class="relative mb-[34px] pb-[15px] max-[1199px]:mb-2.5">
                   <h3 class="m-0 block font-['Domine',Georgia,'Times_New_Roman',serif] text-2xl font-bold leading-9 text-[#333333]">

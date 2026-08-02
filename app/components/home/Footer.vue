@@ -28,10 +28,10 @@ const onNewsletterSubmit = (event: Event) => {
     id="footer"
     class="bg-[#0e1123]"
   >
-    <div class="pt-9 pb-[34px] max-[767px]:pb-2.5">
+    <div class="footer-top pt-9 pb-[34px] max-[767px]:pb-2.5">
       <UContainer class="mx-auto max-w-[1170px]">
         <div class="-mx-[15px] flex flex-wrap">
-          <div class="mb-6 w-full px-[15px] sm:w-1/2 lg:mb-0 lg:w-1/4">
+          <div class="mb-0 w-full px-[15px] max-[991px]:mb-6 sm:w-1/2 lg:w-1/4">
             <h5
               class="mb-[23px] font-['Domine',Georgia,'Times_New_Roman',serif] text-lg font-bold leading-[22px] text-white max-[767px]:my-5"
             >
@@ -66,7 +66,7 @@ const onNewsletterSubmit = (event: Event) => {
             </div>
           </div>
 
-          <div class="mb-6 w-full px-[15px] text-left sm:w-1/2 lg:mb-0 lg:w-1/4">
+          <div class="mb-0 w-full px-[15px] max-[991px]:mb-6 sm:w-1/2 lg:w-1/4">
             <div class="inline-block min-h-0 w-full max-w-[157px] text-left md:min-h-[260px] max-[639px]:min-h-0">
               <h5
                 class="mb-[23px] font-['Domine',Georgia,'Times_New_Roman',serif] text-lg font-bold leading-[22px] text-white max-[767px]:my-5"
@@ -90,7 +90,7 @@ const onNewsletterSubmit = (event: Event) => {
             </div>
           </div>
 
-          <div class="mb-6 w-full px-[15px] sm:w-1/2 lg:mb-0 lg:w-1/4">
+          <div class="mb-0 w-full px-[15px] max-[991px]:mb-6 sm:w-1/2 lg:w-1/4">
             <div>
               <h5
                 class="mb-[23px] font-['Domine',Georgia,'Times_New_Roman',serif] text-lg font-bold leading-[22px] text-white max-[767px]:my-5"
@@ -136,8 +136,8 @@ const onNewsletterSubmit = (event: Event) => {
             </div>
           </div>
 
-          <div class="mb-6 w-full px-[15px] sm:w-1/2 lg:mb-0 lg:w-1/4">
-            <div class="inline-block w-full">
+          <div class="mb-0 w-full px-[15px] max-[991px]:mb-6 sm:w-1/2 lg:w-1/4">
+            <div class="contact-form inline-block w-full">
               <h5
                 class="mb-[23px] font-['Domine',Georgia,'Times_New_Roman',serif] text-lg font-bold leading-[22px] text-white max-[767px]:my-5"
               >
@@ -213,7 +213,7 @@ const onNewsletterSubmit = (event: Event) => {
                   <li
                     v-for="social in footerSocialLinks"
                     :key="social.label"
-                    class="mr-1.5 inline-block align-top"
+                    class="mr-[6px] inline-block align-top last:mr-0"
                   >
                     <a
                       :href="social.href"

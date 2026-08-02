@@ -69,18 +69,17 @@ const onShareSubmit = (event: Event) => {
 </script>
 
 <template>
-  <!-- Client Say’s -->
   <section
-    class="relative block w-full bg-[url('/images/parallax/friend-infoBg.jpg')] bg-cover bg-center bg-scroll py-[33px] pb-[63px] md:bg-fixed"
+    class="friends-block relative block w-full bg-[url('/images/parallax/friend-infoBg.jpg')] bg-[length:cover] bg-[position:50%_50%] bg-fixed py-[33px] pb-[63px] max-md:bg-scroll"
     aria-labelledby="client-says-heading"
   >
     <div
-      class="pointer-events-none absolute inset-0 bg-[rgba(241,91,34,0.9)]"
+      class="pointer-events-none absolute inset-0 bg-[rgba(241,91,34,0.9)] content-['']"
       aria-hidden="true"
     />
 
     <UContainer class="relative z-[5] mx-auto max-w-[1170px]">
-      <div class="block w-full text-center">
+      <div class="sub-title block w-full text-center">
         <div class="block w-full text-center">
           <em
             class="icon icon-heading-icon mb-5 inline-block h-10 align-top text-[56px] leading-none text-white"
@@ -120,19 +119,21 @@ const onShareSubmit = (event: Event) => {
             :key="`testimonial-${index}`"
           >
             <div
-              class="relative mt-0 block min-h-0 p-0 min-[768px]:min-h-[315px] min-[768px]:pl-[315px]"
+              class="friends-info relative mt-0 block min-h-0 p-0 min-[768px]:min-h-[315px] min-[768px]:pl-[315px]"
             >
-              <div class="relative w-full text-center min-[768px]:absolute min-[768px]:top-0 min-[768px]:left-0 min-[768px]:w-auto min-[768px]:text-left">
+              <div class="friend-img relative w-full text-center min-[768px]:absolute min-[768px]:top-0 min-[768px]:left-0 min-[768px]:m-0 min-[768px]:w-auto">
                 <div class="relative inline-block w-[278px] overflow-hidden px-[50px] py-[55px]">
                   <img
                     :src="item.avatar"
                     :alt="item.name"
+                    width="178"
+                    height="178"
                     class="h-[178px] w-[178px] rounded-full object-cover"
                     loading="lazy"
                     decoding="async"
                   >
                 </div>
-                <div class="pointer-events-none absolute top-0 left-0 w-full text-center">
+                <div class="img-fream pointer-events-none absolute top-0 left-0 w-full text-center">
                   <img
                     src="/images/img-fream.png"
                     alt=""
@@ -141,27 +142,27 @@ const onShareSubmit = (event: Event) => {
                   >
                 </div>
                 <div
-                  class="pt-[11px] text-center font-['Domine',Georgia,'Times_New_Roman',serif] text-lg leading-[26px] text-white min-[768px]:pt-[5px]"
+                  class="name pt-[11px] text-center font-['Domine',Georgia,'Times_New_Roman',serif] text-lg leading-[26px] text-white min-[768px]:pt-[5px]"
                 >
                   {{ item.name }}
                 </div>
               </div>
 
-              <div class="pt-[30px] min-[768px]:pt-[68px]">
+              <div class="text pt-[30px] min-[768px]:pt-[68px]">
                 <p
                   class="m-0 text-center font-['Domine',Georgia,'Times_New_Roman',serif] text-lg leading-8 text-white min-[992px]:text-xl min-[992px]:leading-[42px]"
                 >
                   <img
                     src="/images/starting-point.png"
                     alt=""
-                    class="start-img mr-2.5 inline-block w-auto align-middle"
+                    class="start-img mr-0 inline-block w-auto pr-2.5 align-middle"
                     aria-hidden="true"
                   >
                   {{ item.quote }}
                   <img
                     src="/images/ending-point.png"
                     alt=""
-                    class="end-img ml-2.5 inline-block w-auto align-middle"
+                    class="end-img ml-0 inline-block w-auto pl-2.5 align-middle"
                     aria-hidden="true"
                   >
                 </p>
@@ -172,7 +173,7 @@ const onShareSubmit = (event: Event) => {
 
         <button
           type="button"
-          class="absolute top-1/2 left-[-10px] z-[9] mt-[-13px] flex h-[27px] w-[27px] -translate-y-0 items-center justify-center rounded-full text-white transition-colors hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white max-[1399px]:left-[-20px] min-[992px]:left-[-6%] max-[991px]:left-[-10px]"
+          class="absolute top-1/2 left-[-6%] z-[9] mt-[-13px] h-[27px] w-[27px] rounded-full text-white transition-colors hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white max-[1399px]:left-[-20px] max-[991px]:left-[-10px]"
           aria-label="Previous testimonial"
           @click="goPrev"
         >
@@ -184,7 +185,7 @@ const onShareSubmit = (event: Event) => {
 
         <button
           type="button"
-          class="absolute top-1/2 right-[-10px] z-[9] mt-[-13px] flex h-[27px] w-[27px] items-center justify-center rounded-full text-white transition-colors hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white max-[1399px]:right-[-20px] min-[992px]:right-[-6%] max-[991px]:right-[-10px]"
+          class="absolute top-1/2 right-[-6%] z-[9] mt-[-13px] h-[27px] w-[27px] rounded-full text-white transition-colors hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white max-[1399px]:right-[-20px] max-[991px]:right-[-10px]"
           aria-label="Next testimonial"
           @click="goNext"
         >
@@ -199,7 +200,7 @@ const onShareSubmit = (event: Event) => {
 
   <!-- Success Story + Share Your Story -->
   <section
-    class="block py-[37px] pb-[76px]"
+    class="story-block block py-[37px] pb-[76px]"
     aria-labelledby="success-story-heading"
   >
     <UContainer class="mx-auto max-w-[1170px]">
@@ -340,7 +341,7 @@ const onShareSubmit = (event: Event) => {
                   id="share-story"
                   v-model="shareForm.story"
                   placeholder="Your Story"
-                  class="min-h-24 w-full resize-none rounded-[5px] border border-solid border-[#cacbcb] bg-white px-2.5 py-2.5 text-sm leading-[18px] text-[#333] italic outline-none"
+                  class="min-h-[96px] w-full resize-none rounded-[5px] border border-solid border-[#cacbcb] bg-white px-2.5 py-2.5 text-sm leading-[18px] text-[#333] italic outline-none"
                   rows="4"
                 />
                 <p
