@@ -1,91 +1,79 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { reactive } from 'vue'
+import { navigateTo } from '#imports'
 
-const eventType = ref('')
-const location = ref('')
-const date = ref('')
+interface SearchForm {
+  eventType: string
+  location: string
+  date: string
+}
+
+const form = reactive<SearchForm>({
+  eventType: '',
+  location: '',
+  date: ''
+})
+
+const search = async () => {
+  await navigateTo({
+    path: '/services',
+    query: {
+      ...(form.eventType ? { event_type: form.eventType } : {}),
+      ...(form.location ? { location: form.location } : {}),
+      ...(form.date ? { date: form.date } : {})
+    }
+  })
+}
 </script>
 
 <template>
-  <div
-    class="mx-auto w-full max-w-[560px] rounded bg-white p-6 shadow-2xl"
+  <form
+    class="mx-auto mb-5 mt-[30px] w-full max-w-[570px] rounded-[3px] bg-white/80 px-0 py-[23px] min-[992px]:mt-[35px] min-[992px]:px-[30px] min-[992px]:pt-[30px] min-[1400px]:mt-[67px]"
+    @submit.prevent="search"
   >
-
-    <!-- Event Type -->
-
-    <div class="mb-4">
-
-      <div
-        class="flex h-14 items-center rounded border border-gray-300 px-4"
-      >
-
-        <UIcon
-          name="i-lucide-briefcase"
-          class="mr-3 h-5 w-5 text-gray-500"
-        />
-
-        <input
-          v-model="eventType"
-          type="text"
-          placeholder="Event Type"
-          class="w-full border-0 outline-none"
-        >
-
-      </div>
-
+    <div class="relative mb-[10px]">
+      <span class="icon icon-grid-view pointer-events-none absolute left-0 top-0 z-10 flex h-[50px] w-[37px] items-center justify-center text-lg text-[#464e7b]" />
+      <UInput
+        v-model="form.eventType"
+        placeholder="Event Type"
+        aria-label="Event type"
+        :ui="{ base: 'h-[50px] rounded border border-[#b8b8b8] bg-white py-[15px] pl-[38px] pr-[10px] text-base text-[#333]' }"
+      />
     </div>
 
-    <!-- Location + Date -->
-
-    <div class="mb-4 grid grid-cols-2 gap-3">
-
-      <div
-        class="flex h-14 items-center rounded border border-gray-300 px-4"
-      >
-
-        <UIcon
-          name="i-lucide-map-pin"
-          class="mr-3 h-5 w-5 text-gray-500"
-        />
-
-        <input
-          v-model="location"
+    <div class="flex flex-col gap-[10px] min-[992px]:flex-row min-[992px]:gap-0">
+      <div class="relative min-[992px]:mr-[1.17%] min-[992px]:w-[67.64%]">
+        <span class="icon icon-location-1 pointer-events-none absolute left-0 top-0 z-10 flex h-[50px] w-[37px] items-center justify-center text-lg text-[#464e7b]" />
+        <UInput
+          v-model="form.location"
           placeholder="Event Location"
-          class="w-full border-0 outline-none"
-        >
-
-      </div>
-
-      <div
-        class="flex h-14 items-center rounded border border-gray-300 px-4"
-      >
-
-        <UIcon
-          name="i-lucide-calendar"
-          class="mr-3 h-5 w-5 text-gray-500"
+          aria-label="Event location"
+          :ui="{ base: 'h-[50px] rounded border border-[#b8b8b8] bg-white py-[15px] pl-[38px] pr-[10px] text-base text-[#333]' }"
         />
-
-        <input
-          v-model="date"
-          type="date"
-          class="w-full border-0 outline-none"
-        >
-
       </div>
 
+      <div class="relative min-[992px]:w-[30.39%]">
+        <span class="icon icon-calander-month pointer-events-none absolute left-0 top-0 z-10 flex h-[50px] w-[37px] items-center justify-center text-lg text-[#464e7b]" />
+        <UInput
+          v-model="form.date"
+          type="date"
+          aria-label="Select date"
+          :ui="{ base: 'h-[50px] rounded border border-[#b8b8b8] bg-white py-[15px] pl-[38px] pr-[10px] text-base text-[#333]' }"
+        />
+      </div>
     </div>
 
-    <!-- Button -->
-
-    <button
-      class="h-14 w-full bg-[#f85a1f] text-lg font-semibold text-white transition hover:bg-[#df4c15]"
+    <UButton
+      type="submit"
+      block
+      color="neutral"
+      class="mb-[15px] mt-[10px] h-[41px] rounded-[3px] bg-[#f15b22] text-base font-normal text-white hover:bg-[#e7480b]"
     >
       Search Now
-    </button>
+    </UButton>
 
-    <p class="mt-5 text-center text-gray-500">
+    <p class="m-0 text-center text-sm leading-[21px] text-[#5e5d5d]">
       Create the Perfect Event
     </p>
-
-  </div>
+  </form>
 </template>

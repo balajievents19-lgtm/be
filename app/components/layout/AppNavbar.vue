@@ -1,199 +1,235 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from '#imports'
-import AppMegaMenu from './AppMegaMenu.vue'
+import AppMegaMenu from '~/components/layout/AppMegaMenu.vue'
+import AppMobileMenu from '~/components/layout/AppMobileMenu.vue'
+import AppSearchPopup from '~/components/layout/AppSearchPopup.vue'
 
-
-const route = useRoute()
-
-const mobileMenuOpen = ref(false)
-const servicesOpen = ref(false)
-const isScrolled = ref(false)
-
-const menu = [
-  {
-    label: 'Home',
-    to: '/'
-  },
-  {
-    label: 'About',
-    to: '/about'
-  },
-  {
-    label: 'Services',
-    children: true
-  },
-  {
-    label: 'Gallery',
-    to: '/gallery'
-  },
-  {
-    label: 'FAQ',
-    to: '/faq'
-  },
-  {
-    label: 'Contact',
-    to: '/contact'
-  }
-]
-
-const handleScroll = () => {
-  isScrolled.value = window.scrollY > 40
+export interface NavigationItem {
+  label: string
+  to?: string
+  children?: boolean
 }
 
-onMounted(() => {
-  handleScroll()
-  window.addEventListener('scroll', handleScroll)
-})
+const props = defineProps<{
+  isScrolled: boolean
+}>()
 
-onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll)
-})
+const route = useRoute()
+const isMegaMenuOpen = ref(false)
+const isMobileMenuOpen = ref(false)
+const isSearchOpen = ref(false)
+const servicesMenuRef = ref<HTMLElement | null>(null)
+
+const setServicesMenuRef = (el: Element | null) => {
+  servicesMenuRef.value = el as HTMLElement | null
+}
+
+const menu: NavigationItem[] = [
+  { label: 'Home', to: '/' },
+  { label: 'About Us', to: '/about' },
+  { label: 'Services', to: '/services', children: true },
+  { label: 'FAQ’s', to: '/faq' },
+  { label: 'Contact us', to: '/contact' }
+]
+
+const isActive = (item: NavigationItem) => {
+  if (!item.to) {
+    return false
+  }
+
+  if (item.to === '/') {
+    return route.path === '/'
+  }
+
+  return route.path === item.to || route.path.startsWith(`${item.to}/`)
+}
+
+const navLinkClass = (item: NavigationItem, open = false) => [
+  'relative flex items-center border-t-4 px-[18px] text-lg font-normal uppercase transition-all duration-1000 ease-in-out',
+  'after:absolute after:left-1/2 after:top-0 after:hidden after:-translate-x-1/2 after:border-x-[6px] after:border-b-0 after:border-t-[6px] after:border-x-transparent after:border-t-[#f15b22] after:content-[\'\']',
+  'hover:text-[#f15b22] hover:after:block',
+  props.isScrolled ? 'py-5' : 'py-[30px]',
+  isActive(item) || open
+    ? 'border-[#f15b22] text-[#f15b22] after:block'
+    : 'border-white text-[#202020]'
+]
+
+const closeMenus = () => {
+  isMegaMenuOpen.value = false
+  isSearchOpen.value = false
+}
+
+const closeAll = () => {
+  closeMenus()
+  isMobileMenuOpen.value = false
+}
+
+const openSearch = () => {
+  isMegaMenuOpen.value = false
+  isSearchOpen.value = true
+}
+
+const onDocumentClick = (event: MouseEvent) => {
+  const target = event.target as Node | null
+  if (!target) {
+    return
+  }
+
+  if (servicesMenuRef.value?.contains(target)) {
+    return
+  }
+
+  isMegaMenuOpen.value = false
+}
+
+const onKeydown = (event: KeyboardEvent) => {
+  if (event.key === 'Escape') {
+    closeMenus()
+  }
+}
 
 watch(
   () => route.fullPath,
-  () => {
-    mobileMenuOpen.value = false
-    servicesOpen.value = false
-  }
+  closeAll
 )
+
+onMounted(() => {
+  document.addEventListener('click', onDocumentClick)
+  document.addEventListener('keydown', onKeydown)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', onDocumentClick)
+  document.removeEventListener('keydown', onKeydown)
+})
 </script>
 
 <template>
-  <header
-    class="fixed inset-x-0 top-0 z-50 transition-all duration-300"
-    :class="[
-      isScrolled
-        ? 'bg-white shadow-xl'
-        : 'bg-white/95 backdrop-blur'
-    ]"
+  <nav
+    id="nav-main"
+    class="relative z-50 bg-white shadow-[0_3px_5px_rgba(16,15,15,0.16)]"
+    aria-label="Main navigation"
   >
-    <UContainer class="max-w-7xl">
-
-      <div
-        class="flex h-20 items-center justify-between"
-      >
-
-        <!-- Logo -->
+    <UContainer class="mx-auto max-w-[1170px]">
+      <div class="relative flex items-center justify-between">
         <NuxtLink
           to="/"
-          class="flex items-center shrink-0"
+          class="shrink-0 transition-all duration-1000 ease-in-out"
+          :class="props.isScrolled ? 'my-[10px]' : 'my-3 md:mt-3 md:mb-0'"
+          aria-label="Balaji Events home"
         >
           <img
             src="/images/logo.png"
             alt="Balaji Events"
-            class="h-14 w-auto lg:h-16"
-          />
+            class="w-auto transition-all duration-1000 ease-in-out"
+            :class="props.isScrolled ? 'h-[50px]' : 'h-14 md:h-16'"
+          >
         </NuxtLink>
 
-        <!-- Desktop Menu -->
-        <ul
-          class="hidden lg:flex items-center gap-10"
-        >
+        <ul class="m-0 hidden list-none items-stretch p-0 md:flex">
           <li
             v-for="item in menu"
             :key="item.label"
-            class="relative"
+            class="relative flex items-stretch"
           >
+            <div
+              v-if="item.children"
+              :ref="setServicesMenuRef"
+              class="relative flex items-stretch"
+              @mouseenter="isMegaMenuOpen = true"
+              @mouseleave="isMegaMenuOpen = false"
+            >
+              <NuxtLink
+                :to="item.to"
+                class="gap-[5px]"
+                :class="navLinkClass(item, isMegaMenuOpen)"
+                :aria-expanded="isMegaMenuOpen"
+                aria-controls="services-menu"
+                aria-haspopup="true"
+                @focus="isMegaMenuOpen = true"
+              >
+                {{ item.label }}
+                <span
+                  class="icon icon-arrow-down text-xs"
+                  aria-hidden="true"
+                />
+              </NuxtLink>
+
+              <Transition
+                enter-active-class="transition duration-200 ease-out"
+                enter-from-class="translate-y-1 opacity-0"
+                enter-to-class="translate-y-0 opacity-100"
+                leave-active-class="transition duration-150 ease-in"
+                leave-from-class="translate-y-0 opacity-100"
+                leave-to-class="translate-y-1 opacity-0"
+              >
+                <AppMegaMenu
+                  v-if="isMegaMenuOpen"
+                  id="services-menu"
+                />
+              </Transition>
+            </div>
 
             <NuxtLink
-              v-if="!item.children"
+              v-else-if="item.to"
               :to="item.to"
-              class="font-semibold uppercase tracking-wide transition-colors duration-300"
-              :class="
-                route.path === item.to
-                  ? 'text-primary'
-                  : 'text-gray-800 hover:text-primary'
-              "
+              :class="navLinkClass(item)"
             >
               {{ item.label }}
             </NuxtLink>
-
-            <div
-              v-else
-              class="relative"
-              @mouseenter="servicesOpen = true"
-              @mouseleave="servicesOpen = false"
-            >
-              <button
-                class="flex items-center gap-1 font-semibold uppercase text-gray-800 hover:text-primary transition"
-              >
-                Services
-
-                <UIcon
-                  name="i-lucide-chevron-down"
-                  class="size-4"
-                />
-              </button>
-                            <!-- Mega Menu -->
-              <Transition
-                enter-active-class="transition duration-300 ease-out"
-                enter-from-class="opacity-0 translate-y-2"
-                enter-to-class="opacity-100 translate-y-0"
-                leave-active-class="transition duration-200 ease-in"
-                leave-from-class="opacity-100 translate-y-0"
-                leave-to-class="opacity-0 translate-y-2"
-              >
-                <AppMegaMenu
-                 v-if="servicesOpen"
-  @mouseenter="servicesOpen = true"
-  @mouseleave="servicesOpen = false"
-                />
-              </Transition>
-
-            </div>
-
           </li>
-
         </ul>
 
-        <!-- Right Side -->
-        <div
-          class="hidden lg:flex items-center gap-3"
-        >
-
-          <UButton
-            icon="i-lucide-search"
-            color="neutral"
-            variant="ghost"
-            square
-          />
-
-          <UButton
-            to="/contact"
-            color="primary"
-            size="lg"
-            class="font-semibold"
+        <div class="hidden items-center md:flex">
+          <button
+            type="button"
+            class="flex size-9 items-center justify-center text-black transition-colors hover:text-[#f15b22]"
+            :aria-expanded="isSearchOpen"
+            aria-controls="header-search"
+            aria-label="Open search"
+            @click.stop="openSearch"
           >
-            Book Now
-          </UButton>
-
+            <span
+              class="icon icon-search text-base"
+              aria-hidden="true"
+            />
+          </button>
         </div>
 
-        <!-- Mobile Toggle -->
-        <UButton
-          class="lg:hidden"
-          color="neutral"
-          variant="ghost"
-          square
-          :icon="
-            mobileMenuOpen
-              ? 'i-lucide-x'
-              : 'i-lucide-menu'
-          "
-          @click="mobileMenuOpen = !mobileMenuOpen"
-        />
-
+        <button
+          type="button"
+          class="flex flex-col justify-center gap-1 px-[10px] py-[9px] md:hidden"
+          :aria-expanded="isMobileMenuOpen"
+          aria-controls="mobile-navigation"
+          :aria-label="isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'"
+          @click="isMobileMenuOpen = !isMobileMenuOpen"
+        >
+          <span
+            class="block h-1 w-[35px] rounded-sm bg-[#f15b22]"
+            aria-hidden="true"
+          />
+          <span
+            class="block h-1 w-[35px] rounded-sm bg-[#f15b22]"
+            aria-hidden="true"
+          />
+          <span
+            class="block h-1 w-[35px] rounded-sm bg-[#f15b22]"
+            aria-hidden="true"
+          />
+        </button>
       </div>
-
     </UContainer>
 
-      </header>
+    <AppSearchPopup
+      id="header-search"
+      v-model:open="isSearchOpen"
+    />
+  </nav>
 
-  <!-- Mobile Menu 
   <AppMobileMenu
-    :open="mobileMenuOpen"
-    :menu="menu"
-    @close="mobileMenuOpen = false"
-  />-->
+    id="mobile-navigation"
+    v-model:open="isMobileMenuOpen"
+    :items="menu"
+  />
 </template>

@@ -1,11 +1,44 @@
 <script setup lang="ts">
-import AppTopbar from '~/components/layout/AppTopbar.vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import AppNavbar from '~/components/layout/AppNavbar.vue'
+import AppTopBar from '~/components/layout/AppTopBar.vue'
+
+const isScrolled = ref(false)
+const isDesktop = ref(false)
+
+const updateScrollState = () => {
+  if (!isDesktop.value) {
+    isScrolled.value = false
+    return
+  }
+
+  isScrolled.value = window.scrollY > 0
+}
+
+const updateViewport = () => {
+  isDesktop.value = window.matchMedia('(min-width: 768px)').matches
+  updateScrollState()
+}
+
+onMounted(() => {
+  updateViewport()
+  window.addEventListener('scroll', updateScrollState, { passive: true })
+  window.addEventListener('resize', updateViewport, { passive: true })
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', updateScrollState)
+  window.removeEventListener('resize', updateViewport)
+})
 </script>
 
 <template>
-  <header>
-    <AppTopbar />
-    <AppNavbar />
+  <header
+    id="header"
+    class="relative z-50 w-full md:absolute md:left-0 md:top-0"
+    :class="{ 'md:fixed': isScrolled }"
+  >
+    <AppTopBar />
+    <AppNavbar :is-scrolled="isScrolled" />
   </header>
 </template>

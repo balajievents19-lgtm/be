@@ -1,77 +1,56 @@
 <script setup lang="ts">
-const rightLinks = [
-  {
-    label: 'Become a Vendor',
-    to: '/vendor'
-  },
-  {
-    label: 'Invite Friends',
-    to: '/invite'
-  },
-  {
-    label: 'Registration',
-    to: '/register'
-  },
-  {
-    label: 'Login',
-    to: '/login'
-  }
+interface TopBarLink {
+  label: string
+  icon?: string
+  to: string
+}
+
+const links: TopBarLink[] = [
+  { label: 'Become a Vendor', icon: 'icon-multi-user', to: '/vendor' },
+  { label: 'Invite Friends', icon: 'icon-invite-friend', to: '/invite' },
+  { label: 'Registration', to: '/register' },
+  { label: 'Login', to: '/login' }
 ]
 </script>
 
 <template>
-  <div class="bg-[#161b2d] text-white">
-    <UContainer class="mx-auto max-w-[1170px]">
-      <div class="flex h-10 items-center justify-between">
+  <div class="quck-link bg-[#0e1123] py-[3px]">
+    <UContainer class="mx-auto flex max-w-[1170px] flex-col items-center gap-1 md:h-5 md:flex-row md:justify-between md:gap-0">
+      <a
+        href="mailto:balajievents19@gmail.com"
+        class="inline-flex items-center text-[13px] leading-[14px] text-[#d6d8e4] transition-colors hover:text-white"
+      >
+        <span
+          class="icon icon-message-1 mr-[5px] text-sm"
+          aria-hidden="true"
+        />
+        balajievents19@gmail.com
+      </a>
 
-        <!-- Left -->
-
-        <a
-          href="mailto:balajievents19@gmail.com"
-          class="flex items-center gap-2 text-[13px] transition hover:text-[#f15b25]"
+      <ul class="m-0 flex list-none items-center p-0">
+        <li
+          v-for="(item, index) in links"
+          :key="item.label"
+          class="relative"
+          :class="{ 'border-l border-[#6d7083]': index > 0 }"
         >
-          <UIcon
-            name="i-lucide-mail"
-            class="size-4"
-          />
-
-          <span>balajievents19@gmail.com</span>
-        </a>
-
-        <!-- Right -->
-
-        <div class="hidden items-center lg:flex">
-
-          <template
-            v-for="(item,index) in rightLinks"
-            :key="item.label"
+          <NuxtLink
+            :to="item.to"
+            class="flex items-center px-[11px] text-[13px] leading-[14px] text-[#d6d8e4] transition-colors hover:text-white sm:px-[15px]"
+            :class="{
+              'pl-0': index === 0,
+              'pr-0': index === links.length - 1
+            }"
           >
-
-            <NuxtLink
-              :to="item.to"
-              class="px-4 text-[13px] transition hover:text-[#f15b25]"
-            >
-              <UIcon
-                v-if="item.label==='Invite Friends'"
-                name="i-lucide-user-plus"
-                class="mr-1 size-4"
-              />
-
-              {{ item.label }}
-            </NuxtLink>
-
             <span
-              v-if="index!==rightLinks.length-1"
-              class="text-white/30"
-            >
-              |
-            </span>
-
-          </template>
-
-        </div>
-
-      </div>
+              v-if="item.icon"
+              :class="['icon', item.icon, 'mr-[5px] text-sm']"
+              aria-hidden="true"
+            />
+            {{ item.label }}
+          </NuxtLink>
+        </li>
+      </ul>
     </UContainer>
   </div>
 </template>
