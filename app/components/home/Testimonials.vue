@@ -120,15 +120,16 @@ const onShareSubmit = (event: Event) => {
             :key="`testimonial-${index}`"
           >
             <div
-              class="relative mt-0 block min-h-0 p-0 md:min-h-[315px] md:pl-[315px]"
+              class="relative mt-0 block min-h-0 p-0 min-[768px]:min-h-[315px] min-[768px]:pl-[315px]"
             >
-              <div class="relative w-full text-center md:absolute md:top-0 md:left-0 md:w-auto md:text-left">
+              <div class="relative w-full text-center min-[768px]:absolute min-[768px]:top-0 min-[768px]:left-0 min-[768px]:w-auto min-[768px]:text-left">
                 <div class="relative inline-block w-[278px] overflow-hidden px-[50px] py-[55px]">
                   <img
                     :src="item.avatar"
                     :alt="item.name"
                     class="h-[178px] w-[178px] rounded-full object-cover"
                     loading="lazy"
+                    decoding="async"
                   >
                 </div>
                 <div class="pointer-events-none absolute top-0 left-0 w-full text-center">
@@ -140,27 +141,27 @@ const onShareSubmit = (event: Event) => {
                   >
                 </div>
                 <div
-                  class="pt-[11px] text-center font-['Domine',Georgia,'Times_New_Roman',serif] text-lg leading-[26px] text-white md:pt-[5px]"
+                  class="pt-[11px] text-center font-['Domine',Georgia,'Times_New_Roman',serif] text-lg leading-[26px] text-white min-[768px]:pt-[5px]"
                 >
                   {{ item.name }}
                 </div>
               </div>
 
-              <div class="pt-[30px] md:pt-[68px]">
+              <div class="pt-[30px] min-[768px]:pt-[68px]">
                 <p
                   class="m-0 text-center font-['Domine',Georgia,'Times_New_Roman',serif] text-lg leading-8 text-white min-[992px]:text-xl min-[992px]:leading-[42px]"
                 >
                   <img
                     src="/images/starting-point.png"
                     alt=""
-                    class="mr-2.5 inline-block w-auto align-middle"
+                    class="start-img mr-2.5 inline-block w-auto align-middle"
                     aria-hidden="true"
                   >
                   {{ item.quote }}
                   <img
                     src="/images/ending-point.png"
                     alt=""
-                    class="ml-2.5 inline-block w-auto align-middle"
+                    class="end-img ml-2.5 inline-block w-auto align-middle"
                     aria-hidden="true"
                   >
                 </p>
@@ -203,11 +204,11 @@ const onShareSubmit = (event: Event) => {
   >
     <UContainer class="mx-auto max-w-[1170px]">
       <div class="-mx-[15px] flex flex-wrap">
-        <div class="mb-8 w-full px-[15px] md:mb-0 md:w-2/3">
+        <div class="mb-8 w-full px-[15px] min-[768px]:mb-0 min-[768px]:w-2/3">
           <div>
             <h2
               id="success-story-heading"
-              class="mb-[5px] border-b border-solid border-[#d9d9d9] text-lg leading-[38px] font-bold text-[#333333] font-['Domine',Georgia,'Times_New_Roman',serif]"
+              class="mb-[5px] overflow-hidden border-b border-solid border-[#d9d9d9] text-lg leading-[38px] font-bold text-[#333333] font-['Domine',Georgia,'Times_New_Roman',serif]"
             >
               Success Story
               <NuxtLink
@@ -225,10 +226,10 @@ const onShareSubmit = (event: Event) => {
             <article
               v-for="story in successStories"
               :key="story.name"
-              class="relative mt-[27px] block p-0 pt-1.5 max-[479px]:p-0 md:pl-[100px]"
+              class="relative mt-[27px] block p-0 pt-1.5 min-[768px]:pl-[100px] max-[479px]:p-0"
             >
               <div
-                class="mx-auto mb-2.5 w-[74px] overflow-hidden rounded-full border-2 border-solid border-[#c6c6c6] max-[479px]:static md:absolute md:top-0 md:left-[7px] md:mx-0 md:mb-0"
+                class="absolute top-0 left-[7px] w-[74px] overflow-hidden rounded-full border-2 border-solid border-[#c6c6c6] max-[479px]:static max-[479px]:mx-auto max-[479px]:mb-2.5"
               >
                 <img
                   :src="story.image"
@@ -250,7 +251,7 @@ const onShareSubmit = (event: Event) => {
           </div>
         </div>
 
-        <div class="w-full px-[15px] md:w-1/3">
+        <div class="w-full px-[15px] min-[768px]:w-1/3">
           <div>
             <h2
               class="mb-2 text-lg leading-[38px] font-bold text-[#333333] font-['Domine',Georgia,'Times_New_Roman',serif]"

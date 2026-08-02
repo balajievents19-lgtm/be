@@ -46,8 +46,8 @@ const isActive = (item: NavigationItem) => {
 }
 
 const navLinkClass = (item: NavigationItem, open = false) => [
-  'relative flex items-center border-t-4 px-[18px] text-lg font-normal uppercase transition-all duration-1000 ease-in-out',
-  'after:absolute after:left-1/2 after:top-0 after:hidden after:-translate-x-1/2 after:border-x-[6px] after:border-b-0 after:border-t-[6px] after:border-x-transparent after:border-t-[#f15b22] after:content-[\'\']',
+  'relative flex items-center border-t-4 px-[18px] text-lg font-normal uppercase transition-all duration-1000 ease-in-out max-[991px]:px-3 max-[991px]:text-sm',
+  'after:absolute after:top-0 after:left-1/2 after:ml-[-6px] after:hidden after:border-x-[6px] after:border-t-[6px] after:border-b-0 after:border-x-transparent after:border-t-[#f15b22] after:content-[\'\']',
   'hover:text-[#f15b22] hover:after:block',
   props.isScrolled ? 'py-5' : 'py-[30px]',
   isActive(item) || open
@@ -116,14 +116,14 @@ onUnmounted(() => {
         <NuxtLink
           to="/"
           class="shrink-0 transition-all duration-1000 ease-in-out"
-          :class="props.isScrolled ? 'my-[10px]' : 'my-3 md:mt-3 md:mb-0'"
+          :class="props.isScrolled ? 'my-[10px]' : 'my-[15px] md:mt-[15px] md:mb-0'"
           aria-label="Balaji Events home"
         >
           <img
             src="/images/logo.png"
             alt="Balaji Events"
-            class="w-auto transition-all duration-1000 ease-in-out"
-            :class="props.isScrolled ? 'h-[50px]' : 'h-14 md:h-16'"
+            class="h-auto w-auto max-h-[70px] transition-all duration-1000 ease-in-out"
+            :class="props.isScrolled ? '!h-[50px] max-h-[50px]' : ''"
           >
         </NuxtLink>
 

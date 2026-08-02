@@ -28,7 +28,7 @@ const onNewsletterSubmit = (event: Event) => {
     id="footer"
     class="bg-[#0e1123]"
   >
-    <div class="py-9 pb-[34px] max-[767px]:pb-2.5">
+    <div class="pt-9 pb-[34px] max-[767px]:pb-2.5">
       <UContainer class="mx-auto max-w-[1170px]">
         <div class="-mx-[15px] flex flex-wrap">
           <div class="mb-6 w-full px-[15px] sm:w-1/2 lg:mb-0 lg:w-1/4">
@@ -235,7 +235,7 @@ const onNewsletterSubmit = (event: Event) => {
       </UContainer>
     </div>
 
-    <div class="bg-[#070811] py-4 pb-[13px]">
+    <div class="bg-[#070811] pt-4 pb-[13px]">
       <UContainer class="mx-auto max-w-[1170px]">
         <p class="m-0 text-center text-[13px] leading-[30px] text-[#85889b]">
           Copyright &copy; <span>{{ copyrightYear }}</span> - BalajiEvents | All Rights Reserved

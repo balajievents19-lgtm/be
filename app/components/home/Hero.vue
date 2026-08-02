@@ -121,10 +121,10 @@ onUnmounted(() => {
     >
       <UContainer class="mx-auto max-w-[1170px]">
         <div
-          class="text-center min-[992px]:bg-[url('/images/heading-blackBgimg.png')] min-[992px]:bg-bottom min-[992px]:bg-no-repeat min-[992px]:pb-[20px] min-[992px]:pt-[15px] min-[1400px]:pb-[46px] min-[1400px]:pt-[66px]"
+          class="text-center max-[991px]:bg-none max-[991px]:p-0 min-[992px]:bg-[url('/images/heading-blackBgimg.png')] min-[992px]:bg-bottom min-[992px]:bg-no-repeat min-[992px]:pb-5 min-[992px]:pt-[15px] min-[1400px]:pb-[46px] min-[1400px]:pt-[66px]"
         >
           <h1
-            class="m-0 text-[36px] font-light leading-[46px] text-black min-[992px]:text-[40px] min-[992px]:leading-[56px] min-[992px]:text-white min-[1400px]:text-[48px] min-[1400px]:leading-[70px]"
+            class="m-0 text-[36px] font-light leading-[46px] text-black max-[639px]:text-[30px] max-[639px]:leading-10 min-[768px]:text-[36px] min-[768px]:leading-[46px] min-[992px]:text-[40px] min-[992px]:leading-[56px] min-[992px]:text-white min-[1400px]:text-[48px] min-[1400px]:leading-[70px]"
           >
             Every Event Should be
             <span class="font-bold font-['Domine',Georgia,'Times_New_Roman',serif]">Perfect</span>

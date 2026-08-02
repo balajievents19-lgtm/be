@@ -10,6 +10,7 @@ export interface ServiceItem {
 
 export interface EventItem {
   title: string
+  caption: string
   image: string
   description: string
   to: string
@@ -89,21 +90,45 @@ export const services: ServiceItem[] = [
 
 export const overviewEvents: EventItem[] = [
   {
-    title: 'Wedding Planning',
-    image: '/images/events/event-1.jpg',
-    description: 'Complete wedding planning with premium decoration, catering and entertainment.',
+    title: 'Event Planner',
+    caption: 'Event Planner',
+    image: '/images/event/event-img1.jpg',
+    description: 'Balaji Events is trusted wedding management company in india.We were Provide many differnt service in Rajasthan. We promise to set the perfect pitch for to-be and groom to celebrate their special day in grand way.',
     to: '/services'
   },
   {
     title: 'Corporate Events',
-    image: '/images/events/event-2.jpg',
-    description: 'Professional conferences, seminars, product launches and business meetings.',
+    caption: 'Corporate Events',
+    image: '/images/event/event-img2.jpg',
+    description: 'The corporate events includes planning and organizing different types of nts can be for a variety of reasons. Some of these include – conferences, team dinners, orientation for new joinees, farewell parties, trade shows, exhibitions, awards and incentive programs etc.',
     to: '/services'
   },
   {
-    title: 'Birthday Celebration',
-    image: '/images/events/event-3.jpg',
-    description: 'Creative birthday themes, games, photography and complete event management.',
+    title: 'Birthday Party',
+    caption: 'Birthday Party',
+    image: '/images/event/event-img3.jpg',
+    description: 'In This birthday party balji events provide Special Movement, Ballon Decsheets, Dinner, Special Cake, mmusical instruments, and much more variety.',
+    to: '/services'
+  },
+  {
+    title: 'Event Planner',
+    caption: 'Event Planner',
+    image: '/images/event/event-img1.jpg',
+    description: 'Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s ype specimen book. It has survived not only five centuries,',
+    to: '/services'
+  },
+  {
+    title: 'Corporate Events',
+    caption: 'Corporate Events',
+    image: '/images/event/event-img2.jpg',
+    description: 'Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s ype specimen book. It has survived not only five centuries,',
+    to: '/services'
+  },
+  {
+    title: 'Birthday Party',
+    caption: 'Birthday Party',
+    image: '/images/event/event-img3.jpg',
+    description: 'Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s ype specimen book. It has survived not only five centuries,',
     to: '/services'
   }
 ]

@@ -65,7 +65,7 @@ const sideCard = latestNews.find(item => item.variant === 'side')!
                       aria-hidden="true"
                     />
                   </div>
-                  <p class="m-0 mb-0 w-full max-w-[280px] pb-6 text-sm leading-6 text-[#666]">
+                  <p class="m-0 w-full max-w-[280px] pb-6 text-sm leading-6 text-[#666]">
                     {{ featured.excerpt }}
                   </p>
                   <NuxtLink
