@@ -6,11 +6,13 @@ import LayoutAppHeader from '~/components/layout/AppHeader.vue'
 </script>
 
 <template>
-  <LayoutAppHeader />
+  <div>
+    <LayoutAppHeader />
 
-  <Hero />
+    <Hero />
 
-  <Services />
+    <Services />
 
-  <EventsOverview />
+    <EventsOverview />
+  </div>
 </template>

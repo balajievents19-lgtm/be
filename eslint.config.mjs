@@ -2,5 +2,14 @@
 import withNuxt from './.nuxt/eslint.config.mjs'
 
 export default withNuxt(
-  // Your custom configs here
+  {
+    name: 'app/ignores',
+    ignores: [
+      'reference/**',
+      'reference/bootstrap-master/**',
+      'docs/**',
+      '.output/**',
+      'public/**'
+    ]
+  }
 )

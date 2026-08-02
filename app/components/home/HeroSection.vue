@@ -27,83 +27,74 @@ const slides = [
 </script>
 
 <template>
-<section class="relative h-screen overflow-hidden">
+  <section class="relative h-screen overflow-hidden">
+    <Swiper
+      :modules="modules"
+      :slides-per-view="1"
+      :loop="true"
+      effect="fade"
+      :autoplay="{
+        delay: 5000,
+        disableOnInteraction: false
+      }"
+      class="h-full"
+    >
+      <SwiperSlide
+        v-for="slide in slides"
+        :key="slide.image"
+      >
+        <div class="relative h-screen">
+          <img
+            :src="slide.image"
+            :alt="slide.title"
+            class="absolute inset-0 h-full w-full object-cover"
+          >
 
-<Swiper
-:modules="modules"
-:slides-per-view="1"
-:loop="true"
-effect="fade"
-:autoplay="{
-delay:5000,
-disableOnInteraction:false
-}"
-class="h-full"
->
+          <div class="absolute inset-0 bg-black/60" />
 
-<SwiperSlide
-v-for="slide in slides"
-:key="slide.image"
->
+          <div
+            class="relative z-10 mx-auto flex h-full max-w-7xl items-center px-6"
+          >
+            <div class="max-w-3xl">
+              <span
+                class="mb-4 inline-flex rounded-full bg-orange-500 px-4 py-2 text-sm font-semibold text-white"
+              >
+                Balaji Events
+              </span>
 
-<div class="relative h-screen">
+              <h1
+                class="text-5xl font-extrabold leading-tight text-white md:text-7xl"
+              >
+                {{ slide.title }}
+              </h1>
 
-<img
-:src="slide.image"
-:alt="slide.title"
-class="absolute inset-0 h-full w-full object-cover"
-/>
+              <p
+                class="mt-6 max-w-xl text-lg text-gray-200 md:text-xl"
+              >
+                {{ slide.subtitle }}
+              </p>
 
-<div class="absolute inset-0 bg-black/60"/>
+              <div class="mt-10 flex flex-wrap gap-4">
+                <UButton
+                  size="xl"
+                  color="primary"
+                  to="/contact"
+                >
+                  Book Event
+                </UButton>
 
-<div
-class="relative z-10 mx-auto flex h-full max-w-7xl items-center px-6"
->
-
-<div class="max-w-3xl">
-
-<span
-class="mb-4 inline-flex rounded-full bg-orange-500 px-4 py-2 text-sm font-semibold text-white"
->
-Balaji Events
-</span>
-
-<h1
-class="text-5xl font-extrabold leading-tight text-white md:text-7xl"
->
-{{ slide.title }}
-</h1>
-
-<p
-class="mt-6 max-w-xl text-lg text-gray-200 md:text-xl"
->
-{{ slide.subtitle }}
-</p>
-
-<div class="mt-10 flex flex-wrap gap-4">
-
-<UButton
-size="xl"
-color="primary"
-to="/contact"
->
-Book Event
-</UButton>
-
-<UButton
-  size="xl"
-  variant="outline"
-  color="neutral"
-  to="/services"
-  class="border-white text-white hover:bg-white hover:text-black"
->
-  Our Services
-</UButton>
-
-</div>
+                <UButton
+                  size="xl"
+                  variant="outline"
+                  color="neutral"
+                  to="/services"
+                  class="border-white text-white hover:bg-white hover:text-black"
+                >
+                  Our Services
+                </UButton>
+              </div>
               <!-- Statistics -->
               <div class="mt-14 grid grid-cols-2 gap-6 md:grid-cols-4">
-
                 <div>
                   <h3 class="text-4xl font-bold text-orange-400">
                     15+
@@ -143,17 +134,11 @@ Book Event
                     Team Members
                   </p>
                 </div>
-
               </div>
-
             </div>
-
           </div>
-
         </div>
-
       </SwiperSlide>
-
     </Swiper>
 
     <!-- Scroll Indicator -->
@@ -165,6 +150,5 @@ Book Event
         class="size-8 text-white"
       />
     </div>
-
   </section>
 </template>

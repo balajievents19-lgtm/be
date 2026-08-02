@@ -21,7 +21,6 @@ const events = [
 <template>
   <section class="bg-[#f8f8f8] py-20">
     <div class="mx-auto max-w-7xl px-5">
-
       <div class="mb-14 text-center">
         <p class="mb-2 uppercase tracking-[5px] text-[#F85A1F]">
           Latest Events
@@ -35,13 +34,11 @@ const events = [
       </div>
 
       <div class="grid gap-8 lg:grid-cols-3">
-
         <article
           v-for="event in events"
           :key="event.title"
           class="overflow-hidden rounded bg-white shadow transition duration-300 hover:-translate-y-2 hover:shadow-xl"
         >
-
           <img
             :src="event.image"
             :alt="event.title"
@@ -49,7 +46,6 @@ const events = [
           >
 
           <div class="p-7">
-
             <h3
               class="mb-3 text-2xl font-semibold text-[#222]"
             >
@@ -67,13 +63,9 @@ const events = [
             >
               Read More
             </button>
-
           </div>
-
         </article>
-
       </div>
-
     </div>
   </section>
 </template>
