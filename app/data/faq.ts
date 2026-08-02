@@ -1,5 +1,3 @@
-import { services } from '~/data/home'
-
 export interface FaqItem {
   id: string
   question: string
@@ -20,11 +18,9 @@ export const faqBreadcrumbs: BreadcrumbItem[] = [
   { label: 'FAQ’s' }
 ]
 
-const serviceNames = services.map(item => item.title).join(', ')
-
 /**
- * FAQ copy is assembled only from master contact / services facts.
- * Layout matches master `.faq-list` / `.faq-slide` CSS (no faq.html in ZIP).
+ * FAQ copy is assembled only from master contact facts.
+ * Services answer is filled from the API at render time.
  */
 export const faqItems: FaqItem[] = [
   {
@@ -40,7 +36,7 @@ export const faqItems: FaqItem[] = [
   {
     id: 'faq-3',
     question: 'What services do you provide?',
-    answer: `Our services include ${serviceNames}.`
+    answer: 'Our services include a full range of wedding and event offerings.'
   },
   {
     id: 'faq-4',

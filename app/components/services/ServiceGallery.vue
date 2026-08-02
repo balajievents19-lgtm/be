@@ -1,18 +1,26 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { A11y, Keyboard, Navigation } from 'swiper/modules'
-import type { ServiceDetail } from '~/data/services'
+import type { Service } from '~/types/service'
 
 import 'swiper/css'
 import 'swiper/css/navigation'
 
-defineProps<{
-  service: ServiceDetail
+const props = defineProps<{
+  service: Service
 }>()
 
 const modules = [A11y, Keyboard, Navigation]
 const swiperRef = ref<{ slideNext: () => void, slidePrev: () => void } | null>(null)
+
+const gallery = computed(() => {
+  const images = props.service.gallery_images?.filter(Boolean) ?? []
+  if (images.length) {
+    return images
+  }
+  return [props.service.featured_image, props.service.banner_image].filter(Boolean) as string[]
+})
 
 const onSwiper = (swiper: { slideNext: () => void, slidePrev: () => void }) => {
   swiperRef.value = swiper
@@ -20,7 +28,10 @@ const onSwiper = (swiper: { slideNext: () => void, slidePrev: () => void }) => {
 </script>
 
 <template>
-  <div class="event-galler mt-[30px] bg-white pt-4">
+  <div
+    v-if="gallery.length"
+    class="event-galler mt-[30px] bg-white pt-4"
+  >
     <h2 class="mb-[15px] block border-b border-solid border-[#e0e0e0] px-5 pb-1.5 text-2xl leading-9 font-bold text-[#333333] font-['Domine',Georgia,'Times_New_Roman',serif]">
       Gallery
     </h2>
@@ -35,12 +46,12 @@ const onSwiper = (swiper: { slideNext: () => void, slidePrev: () => void }) => {
         @swiper="onSwiper"
       >
         <SwiperSlide
-          v-for="(src, index) in service.gallery"
+          v-for="(src, index) in gallery"
           :key="`${src}-${index}`"
         >
           <img
             :src="src"
-            :alt="`${service.title} gallery ${index + 1}`"
+            :alt="`${service.name} gallery ${index + 1}`"
             class="block h-auto w-full"
             loading="lazy"
             decoding="async"

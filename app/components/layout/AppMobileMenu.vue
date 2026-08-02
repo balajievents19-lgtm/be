@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useRoute, useRouter } from '#imports'
+import { useServices } from '~/composables/useServices'
 
 interface NavigationItem {
   label: string
@@ -18,20 +19,7 @@ const servicesOpen = ref(false)
 const searchQuery = ref('')
 const route = useRoute()
 const router = useRouter()
-
-const services = [
-  'Caterers',
-  'Mehndi',
-  'Decor & Florists',
-  'Cakes',
-  'Wedding Planner',
-  'Gifts and Flowers',
-  'Make-up and Hair',
-  'Entertainment',
-  'Photographers/ Videographers',
-  'DJ',
-  'Wedding Cards'
-]
+const { data: services } = await useServices()
 
 const isActive = (item: NavigationItem) => {
   if (!item.to) {
@@ -165,12 +153,12 @@ const submitSearch = async () => {
               >
                 <NuxtLink
                   v-for="service in services"
-                  :key="service"
-                  to="/services"
+                  :key="service.id"
+                  :to="`/services/${service.slug}`"
                   class="block px-4 py-3 text-base text-[#202020] transition-colors hover:text-brand-500"
                   @click="close"
                 >
-                  {{ service }}
+                  {{ service.name }}
                 </NuxtLink>
               </div>
             </div>

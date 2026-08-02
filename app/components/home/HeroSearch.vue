@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { reactive } from 'vue'
 import { navigateTo } from '#imports'
+import { useServices } from '~/composables/useServices'
 
 interface SearchForm {
   eventType: string
   location: string
   date: string
 }
+
+const { data: services } = await useServices()
 
 const form = reactive<SearchForm>({
   eventType: '',
@@ -15,6 +18,19 @@ const form = reactive<SearchForm>({
 })
 
 const search = async () => {
+  const selected = (services.value ?? []).find(item => item.slug === form.eventType)
+
+  if (selected) {
+    await navigateTo({
+      path: `/services/${selected.slug}`,
+      query: {
+        ...(form.location.trim() ? { location: form.location.trim() } : {}),
+        ...(form.date.trim() ? { date: form.date.trim() } : {})
+      }
+    })
+    return
+  }
+
   await navigateTo({
     path: '/services',
     query: {
@@ -38,15 +54,23 @@ const search = async () => {
         class="icon icon-grid-view pointer-events-none absolute top-0 left-0 z-10 mt-1 h-10 w-[37px] text-center text-lg leading-[48px] text-[#464e7b]"
         aria-hidden="true"
       />
-      <input
+      <select
         v-model="form.eventType"
-        type="text"
         name="event_type"
-        placeholder="Event Type"
         aria-label="Event type"
-        autocomplete="off"
-        class="box-border h-[50px] w-full rounded border border-solid border-[#b8b8b8] bg-white py-[15px] pr-2.5 pl-[38px] text-base leading-5 text-[#333] outline-none"
+        class="box-border h-[50px] w-full appearance-none rounded border border-solid border-[#b8b8b8] bg-white py-[15px] pr-2.5 pl-[38px] text-base leading-5 text-[#333] outline-none"
       >
+        <option value="">
+          Event Type
+        </option>
+        <option
+          v-for="service in services"
+          :key="service.id"
+          :value="service.slug"
+        >
+          {{ service.name }}
+        </option>
+      </select>
     </div>
 
     <!-- Location 67.64% + Date 30.39% (master .location / .date) -->

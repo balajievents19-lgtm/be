@@ -1,6 +1,37 @@
 <script setup lang="ts">
-import { services } from '~/data/home'
+import { computed } from 'vue'
 import ServiceCard from '~/components/services/ServiceCard.vue'
+import type { Service } from '~/types/service'
+import { useServices } from '~/composables/useServices'
+
+const props = withDefaults(defineProps<{
+  homepageOnly?: boolean
+  filterQuery?: string
+}>(), {
+  homepageOnly: false,
+  filterQuery: ''
+})
+
+const { data: services } = await useServices()
+
+const visibleServices = computed(() => {
+  let list: Service[] = services.value ?? []
+
+  if (props.homepageOnly) {
+    list = list.filter(item => item.show_on_homepage)
+  }
+
+  const q = props.filterQuery.trim().toLowerCase()
+  if (q) {
+    list = list.filter(item =>
+      item.name.toLowerCase().includes(q)
+      || item.slug.toLowerCase().includes(q)
+      || (item.short_description?.toLowerCase().includes(q) ?? false)
+    )
+  }
+
+  return list
+})
 </script>
 
 <template>
@@ -31,13 +62,21 @@ import ServiceCard from '~/components/services/ServiceCard.vue'
         </div>
       </div>
 
+      <p
+        v-if="!visibleServices.length"
+        class="pb-10 text-center text-sm text-[#666]"
+      >
+        No services available right now.
+      </p>
+
       <ul
+        v-else
         class="service-catagari -mx-[15px] m-0 flex list-none flex-wrap p-0"
         role="list"
       >
         <li
-          v-for="item in services"
-          :key="item.title"
+          v-for="item in visibleServices"
+          :key="item.id"
           class="w-1/2 px-[15px] pb-[30px] min-[768px]:w-1/5"
         >
           <ServiceCard :item="item" />

@@ -1,6 +1,25 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { faqCta, faqItems } from '~/data/faq'
+import { useServices } from '~/composables/useServices'
+
+const { data: services } = await useServices()
+
+const items = computed(() =>
+  faqItems.map((item) => {
+    if (item.id !== 'faq-3') {
+      return item
+    }
+
+    const names = (services.value ?? []).map(service => service.name).join(', ')
+    return {
+      ...item,
+      answer: names
+        ? `Our services include ${names}.`
+        : item.answer
+    }
+  })
+)
 
 /** Accordion: first item open by default (Vue interaction; no Bootstrap JS). */
 const openId = ref<string | null>(faqItems[0]?.id ?? null)
@@ -24,7 +43,7 @@ const scrollTop = () => {
   >
     <UContainer class="mx-auto max-w-[1170px]">
       <div
-        v-for="item in faqItems"
+        v-for="item in items"
         :id="item.id"
         :key="item.id"
         class="faq-slide pb-[60px] max-[767px]:pb-[30px]"

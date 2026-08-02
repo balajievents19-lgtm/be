@@ -3,11 +3,6 @@ export interface HeroSlide {
   alt: string
 }
 
-export interface ServiceItem {
-  icon: string
-  title: string
-}
-
 export interface EventItem {
   title: string
   caption: string
@@ -73,19 +68,6 @@ export const heroSlides: HeroSlide[] = [
     src: '/images/banner/slider-img3.jpg',
     alt: 'Balaji Events party venue'
   }
-]
-
-export const services: ServiceItem[] = [
-  { icon: 'icon-caterers', title: 'Caterers' },
-  { icon: 'icon-flower-pot', title: 'Decor & Florists' },
-  { icon: 'icon-calander', title: 'Event Planner' },
-  { icon: 'icon-beauty', title: 'Make-up and Hair' },
-  { icon: 'icon-wedding-card', title: 'Wedding Cards' },
-  { icon: 'icon-mehandi', title: 'Mehandi' },
-  { icon: 'icon-cake', title: 'Cakes' },
-  { icon: 'icon-music', title: 'DJ' },
-  { icon: 'icon-camera', title: 'Photographers & Videographers' },
-  { icon: 'icon-glass', title: 'Entertainment' }
 ]
 
 export const overviewEvents: EventItem[] = [

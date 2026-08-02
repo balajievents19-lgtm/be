@@ -1,5 +1,12 @@
 <script setup lang="ts">
-import { servicesBreadcrumbs, servicesPageHeader } from '~/data/services'
+import { computed } from 'vue'
+import { useServices } from '~/composables/useServices'
+
+const route = useRoute()
+
+const filterQuery = computed(() =>
+  String(route.query.search ?? route.query.event_type ?? '')
+)
 
 useSeoMeta({
   title: 'Services | Balaji Events',
@@ -8,6 +15,14 @@ useSeoMeta({
   ogDescription: 'Wedding and event services by Balaji Events.',
   twitterCard: 'summary_large_image'
 })
+
+const breadcrumbs = [
+  { label: 'Home', to: '/' },
+  { label: 'Services' }
+]
+
+// Warm shared cache for header menus
+await useServices()
 </script>
 
 <template>
@@ -23,11 +38,11 @@ useSeoMeta({
 
     <main id="main-content">
       <SharedPageHeader
-        :title="servicesPageHeader.title"
-        :breadcrumbs="servicesBreadcrumbs"
+        title="Services"
+        :breadcrumbs="breadcrumbs"
       />
 
-      <ServicesServicesGrid />
+      <ServicesServicesGrid :filter-query="filterQuery" />
       <ServicesServicesCta />
     </main>
 

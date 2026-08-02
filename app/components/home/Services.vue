@@ -3,5 +3,5 @@ import ServicesGrid from '~/components/services/ServicesGrid.vue'
 </script>
 
 <template>
-  <ServicesGrid />
+  <ServicesGrid homepage-only />
 </template>

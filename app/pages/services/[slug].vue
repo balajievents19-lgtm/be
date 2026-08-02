@@ -1,14 +1,19 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import {
-  getServiceBySlug,
-  serviceDetailBreadcrumbs,
-  servicesPageHeader
-} from '~/data/services'
+import { useService, useServices } from '~/composables/useServices'
 
 const route = useRoute()
 const slug = computed(() => String(route.params.slug ?? ''))
-const service = computed(() => getServiceBySlug(slug.value))
+
+const { data: service } = await useService(slug)
+const { data: allServices } = await useServices()
+
+const relatedNames = computed(() =>
+  (allServices.value ?? [])
+    .filter(item => item.slug !== slug.value)
+    .slice(0, 5)
+    .map(item => item.name)
+)
 
 const inquiryRef = ref<HTMLElement | null>(null)
 
@@ -17,9 +22,19 @@ const scrollToInquiry = () => {
 }
 
 useSeoMeta({
-  title: () => service.value ? `${service.value.title} | Balaji Events` : 'Service | Balaji Events',
-  description: () => service.value?.description ?? 'Balaji Events service details.',
-  ogTitle: () => service.value ? `${service.value.title} | Balaji Events` : 'Service | Balaji Events',
+  title: () => {
+    const seoTitle = service.value?.seo?.title
+    if (seoTitle) {
+      return seoTitle
+    }
+    return service.value ? `${service.value.name} | Balaji Events` : 'Service | Balaji Events'
+  },
+  description: () =>
+    service.value?.seo?.description
+    || service.value?.short_description
+    || 'Balaji Events service details.',
+  ogTitle: () => service.value ? `${service.value.name} | Balaji Events` : 'Service | Balaji Events',
+  ogImage: () => service.value?.seo?.opengraph_image || service.value?.featured_image || undefined,
   twitterCard: 'summary_large_image'
 })
 </script>
@@ -33,8 +48,12 @@ useSeoMeta({
       id="main-content"
     >
       <SharedPageHeader
-        :title="service.title"
-        :breadcrumbs="serviceDetailBreadcrumbs(service.title)"
+        :title="service.name"
+        :breadcrumbs="[
+          { label: 'Home', to: '/' },
+          { label: 'Services', to: '/services' },
+          { label: service.name }
+        ]"
       />
 
       <section class="service-view py-[58px] pb-[100px]">
@@ -45,14 +64,14 @@ useSeoMeta({
               class="left-side mb-8 w-full px-[15px] min-[992px]:mb-0 min-[992px]:w-1/3"
             >
               <div class="filter-view mt-0 block w-full bg-white pt-2.5">
-                <ServicesServiceInquiryForm :service-title="service.title" />
+                <ServicesServiceInquiryForm :service-title="service.name" />
               </div>
               <div class="mt-5 px-[15px]">
                 <NuxtLink
                   to="/services"
                   class="text-sm text-brand-500 underline hover:text-brand-600"
                 >
-                  ← Back to {{ servicesPageHeader.title }}
+                  ← Back to Services
                 </NuxtLink>
               </div>
             </aside>
@@ -60,6 +79,7 @@ useSeoMeta({
             <div class="w-full px-[15px] min-[992px]:w-2/3 min-[992px]:mt-0 max-[991px]:mt-[30px]">
               <ServicesServiceDetailContent
                 :service="service"
+                :related-names="relatedNames"
                 @inquire="scrollToInquiry"
               />
               <ServicesServiceGallery :service="service" />
