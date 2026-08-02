@@ -22,7 +22,7 @@ const openLightbox = (index: number) => {
       <div class="w-full text-center">
         <div class="block w-full">
           <em
-            class="icon icon-heading-icon inline-block h-10 align-top text-[56px] leading-none text-[#f15b22]"
+            class="icon icon-heading-icon inline-block h-10 align-top text-[56px] leading-none text-brand-500"
             aria-hidden="true"
           />
         </div>

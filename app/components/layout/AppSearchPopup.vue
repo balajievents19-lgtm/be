@@ -62,7 +62,7 @@ const submit = async () => {
 
       <UContainer class="relative z-10 mx-auto flex h-full max-w-[1170px] items-center pt-[25px]">
         <form
-          class="ml-auto w-full max-w-[790px] bg-[#f15b22] p-px"
+          class="ml-auto w-full max-w-[790px] bg-brand-500 p-px"
           @submit.prevent="submit"
           @click.stop
         >

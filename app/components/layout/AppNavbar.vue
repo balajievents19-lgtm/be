@@ -47,11 +47,11 @@ const isActive = (item: NavigationItem) => {
 
 const navLinkClass = (item: NavigationItem, open = false) => [
   'relative flex items-center border-t-4 px-[18px] text-lg font-normal uppercase transition-all duration-1000 ease-in-out max-[991px]:px-3 max-[991px]:text-sm',
-  'after:absolute after:top-0 after:left-1/2 after:ml-[-6px] after:hidden after:border-x-[6px] after:border-t-[6px] after:border-b-0 after:border-x-transparent after:border-t-[#f15b22] after:content-[\'\']',
-  'hover:text-[#f15b22] hover:after:block',
+  'after:absolute after:top-0 after:left-1/2 after:ml-[-6px] after:hidden after:border-x-[6px] after:border-t-[6px] after:border-b-0 after:border-x-transparent after:border-t-brand-500 after:content-[\'\']',
+  'hover:text-brand-500 hover:after:block',
   props.isScrolled ? 'py-5' : 'py-[30px]',
   isActive(item) || open
-    ? 'border-[#f15b22] text-[#f15b22] after:block'
+    ? 'border-brand-500 text-brand-500 after:block'
     : 'border-white text-[#202020]'
 ]
 
@@ -184,7 +184,7 @@ onUnmounted(() => {
         <div class="hidden items-center md:flex">
           <button
             type="button"
-            class="flex size-9 items-center justify-center text-black transition-colors hover:text-[#f15b22]"
+            class="flex size-9 items-center justify-center text-black transition-colors hover:text-brand-500"
             :aria-expanded="isSearchOpen"
             aria-controls="header-search"
             aria-label="Open search"
@@ -206,15 +206,15 @@ onUnmounted(() => {
           @click="isMobileMenuOpen = !isMobileMenuOpen"
         >
           <span
-            class="block h-1 w-[35px] rounded-sm bg-[#f15b22]"
+            class="block h-1 w-[35px] rounded-sm bg-brand-500"
             aria-hidden="true"
           />
           <span
-            class="block h-1 w-[35px] rounded-sm bg-[#f15b22]"
+            class="block h-1 w-[35px] rounded-sm bg-brand-500"
             aria-hidden="true"
           />
           <span
-            class="block h-1 w-[35px] rounded-sm bg-[#f15b22]"
+            class="block h-1 w-[35px] rounded-sm bg-brand-500"
             aria-hidden="true"
           />
         </button>

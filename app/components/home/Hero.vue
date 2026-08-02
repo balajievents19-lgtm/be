@@ -85,7 +85,7 @@ onUnmounted(() => {
               class="block h-auto max-h-[850px] w-full object-cover"
             >
             <div
-              class="pointer-events-none absolute inset-0 bg-[rgba(0,0,0,0.5)] max-[991px]:hidden"
+              class="pointer-events-none absolute inset-0 bg-[var(--color-hero-overlay)] max-[991px]:hidden"
               aria-hidden="true"
             />
           </div>

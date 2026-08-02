@@ -91,7 +91,7 @@ const submitSearch = async () => {
 
           <button
             type="button"
-            class="flex size-10 items-center justify-center text-[#202020] transition-colors hover:text-[#f15b22]"
+            class="flex size-10 items-center justify-center text-[#202020] transition-colors hover:text-brand-500"
             aria-label="Close navigation menu"
             @click="close"
           >
@@ -107,7 +107,7 @@ const submitSearch = async () => {
           aria-label="Mobile navigation"
         >
           <form
-            class="mb-5 bg-[#f15b22] p-px"
+            class="mb-5 bg-brand-500 p-px"
             role="search"
             @submit.prevent="submitSearch"
           >
@@ -145,7 +145,7 @@ const submitSearch = async () => {
               <button
                 type="button"
                 class="flex w-full items-center justify-between py-4 text-lg font-normal uppercase transition-colors"
-                :class="isActive(item) ? 'text-[#f15b22]' : 'text-[#202020] hover:text-[#f15b22]'"
+                :class="isActive(item) ? 'text-brand-500' : 'text-[#202020] hover:text-brand-500'"
                 :aria-expanded="servicesOpen"
                 aria-controls="mobile-services-menu"
                 @click="servicesOpen = !servicesOpen"
@@ -167,7 +167,7 @@ const submitSearch = async () => {
                   v-for="service in services"
                   :key="service"
                   to="/services"
-                  class="block px-4 py-3 text-base text-[#202020] transition-colors hover:text-[#f15b22]"
+                  class="block px-4 py-3 text-base text-[#202020] transition-colors hover:text-brand-500"
                   @click="close"
                 >
                   {{ service }}
@@ -179,7 +179,7 @@ const submitSearch = async () => {
               v-else-if="item.to"
               :to="item.to"
               class="block border-b border-[#f0f0f0] py-4 text-lg font-normal uppercase transition-colors"
-              :class="isActive(item) ? 'text-[#f15b22]' : 'text-[#202020] hover:text-[#f15b22]'"
+              :class="isActive(item) ? 'text-brand-500' : 'text-[#202020] hover:text-brand-500'"
               @click="close"
             >
               {{ item.label }}

@@ -74,7 +74,7 @@ const onShareSubmit = (event: Event) => {
     aria-labelledby="client-says-heading"
   >
     <div
-      class="pointer-events-none absolute inset-0 bg-[rgba(241,91,34,0.9)] content-['']"
+      class="pointer-events-none absolute inset-0 bg-[var(--color-primary-overlay)] content-['']"
       aria-hidden="true"
     />
 
@@ -200,7 +200,7 @@ const onShareSubmit = (event: Event) => {
 
   <!-- Success Story + Share Your Story -->
   <section
-    class="story-block block py-[37px] pb-[76px]"
+    class="story-block block bg-white py-[37px] pb-[76px]"
     aria-labelledby="success-story-heading"
   >
     <UContainer class="mx-auto max-w-[1170px]">
@@ -214,10 +214,10 @@ const onShareSubmit = (event: Event) => {
               Success Story
               <NuxtLink
                 to="/about"
-                class="float-right mt-2.5 text-xs leading-7 text-[#f15b22] transition-colors hover:text-black hover:[&_.icon]:text-black"
+                class="float-right mt-2.5 text-xs leading-7 text-brand-500 transition-colors hover:text-black hover:[&_.icon]:text-black"
               >
                 <span
-                  class="icon icon-eye mr-[5px] inline-block align-middle text-sm leading-7 text-[#f15b22]"
+                  class="icon icon-eye mr-[5px] inline-block align-middle text-sm leading-7 text-brand-500"
                   aria-hidden="true"
                 />
                 View All
@@ -279,7 +279,7 @@ const onShareSubmit = (event: Event) => {
                 >
                 <p
                   v-if="shareErrors.name"
-                  class="mt-1 text-xs text-[#e7480b]"
+                  class="mt-1 text-xs text-brand-600"
                 >
                   {{ shareErrors.name }}
                 </p>
@@ -300,7 +300,7 @@ const onShareSubmit = (event: Event) => {
                 >
                 <p
                   v-if="shareErrors.email"
-                  class="mt-1 text-xs text-[#e7480b]"
+                  class="mt-1 text-xs text-brand-600"
                 >
                   {{ shareErrors.email }}
                 </p>
@@ -346,7 +346,7 @@ const onShareSubmit = (event: Event) => {
                 />
                 <p
                   v-if="shareErrors.story"
-                  class="mt-1 text-xs text-[#e7480b]"
+                  class="mt-1 text-xs text-brand-600"
                 >
                   {{ shareErrors.story }}
                 </p>
@@ -355,7 +355,7 @@ const onShareSubmit = (event: Event) => {
               <div>
                 <button
                   type="submit"
-                  class="w-full rounded-[3px] border border-solid border-[#f15b22] bg-[#f15b22] py-[9px] text-center text-lg leading-5 text-white shadow-[inset_0_1px_0_#e0a97f] transition-colors duration-1000 hover:bg-[#e7480b] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f15b22]"
+                  class="w-full rounded-[3px] border border-solid border-brand-500 bg-brand-500 py-[9px] text-center text-lg leading-5 text-white shadow-[inset_0_1px_0_#e0a97f] transition-colors duration-1000 hover:bg-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
                 >
                   Share Your Story
                 </button>

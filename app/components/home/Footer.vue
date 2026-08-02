@@ -26,7 +26,7 @@ const onNewsletterSubmit = (event: Event) => {
 <template>
   <footer
     id="footer"
-    class="bg-[#0e1123]"
+    class="bg-navy-500"
   >
     <div class="footer-top pt-9 pb-[34px] max-[767px]:pb-2.5">
       <UContainer class="mx-auto max-w-[1170px]">
@@ -58,7 +58,7 @@ const onNewsletterSubmit = (event: Event) => {
                 </p>
                 <NuxtLink
                   :to="item.to"
-                  class="text-[13px] leading-[18px] text-[#e7480b] no-underline transition-colors hover:text-[#fffffe] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f15b22]"
+                  class="text-[13px] leading-[18px] text-brand-600 no-underline transition-colors hover:text-[#fffffe] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
                 >
                   Read More
                 </NuxtLink>
@@ -81,7 +81,7 @@ const onNewsletterSubmit = (event: Event) => {
                 >
                   <NuxtLink
                     :to="link.to"
-                    class="relative block py-0 pr-0 pl-[15px] text-[13px] leading-7 text-[#85889b] transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f15b22] before:absolute before:top-2.5 before:left-0 before:h-[9px] before:w-2 before:bg-[url('/images/footer-arrow.png')] before:bg-left before:bg-no-repeat before:content-[''] group-hover:before:bg-[url('/images/footer-arrowHover.png')]"
+                    class="relative block py-0 pr-0 pl-[15px] text-[13px] leading-7 text-[#85889b] transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 before:absolute before:top-2.5 before:left-0 before:h-[9px] before:w-2 before:bg-[url('/images/footer-arrow.png')] before:bg-left before:bg-no-repeat before:content-[''] group-hover:before:bg-[url('/images/footer-arrowHover.png')]"
                   >
                     {{ link.label }}
                   </NuxtLink>
@@ -116,7 +116,7 @@ const onNewsletterSubmit = (event: Event) => {
                 <p class="m-0 w-full max-w-[195px] text-[13px] leading-6 text-[#85889b]">
                   <a
                     :href="siteContact.phoneHref"
-                    class="text-[13px] leading-6 text-[#85889b] transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f15b22]"
+                    class="text-[13px] leading-6 text-[#85889b] transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
                   >{{ siteContact.phoneDisplay }}</a>
                 </p>
               </div>
@@ -128,7 +128,7 @@ const onNewsletterSubmit = (event: Event) => {
                 />
                 <a
                   :href="`mailto:${siteContact.email}`"
-                  class="text-[13px] leading-6 text-[#85889b] transition-colors group-hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f15b22]"
+                  class="text-[13px] leading-6 text-[#85889b] transition-colors group-hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
                 >
                   {{ siteContact.email }}
                 </a>
@@ -200,7 +200,7 @@ const onNewsletterSubmit = (event: Event) => {
                   <div class="absolute top-0 right-[5px] w-[72px]">
                     <button
                       type="submit"
-                      class="h-[29px] w-full border-none bg-[#f15b22] text-center text-xs text-white transition-colors duration-1000 hover:bg-[#e7480b] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                      class="h-[29px] w-full border-none bg-brand-500 text-center text-xs text-white transition-colors duration-1000 hover:bg-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                     >
                       Submit
                     </button>
@@ -218,7 +218,7 @@ const onNewsletterSubmit = (event: Event) => {
                     <a
                       :href="social.href"
                       :aria-label="social.label"
-                      class="block h-[26px] w-[26px] rounded-full bg-[#26293b] text-center transition-colors hover:bg-[#f15b22] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f15b22]"
+                      class="block h-[26px] w-[26px] rounded-full bg-navy-400 text-center transition-colors hover:bg-brand-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
                       @click.prevent
                     >
                       <span
@@ -235,7 +235,7 @@ const onNewsletterSubmit = (event: Event) => {
       </UContainer>
     </div>
 
-    <div class="bg-[#070811] pt-4 pb-[13px]">
+    <div class="bg-navy-600 pt-4 pb-[13px]">
       <UContainer class="mx-auto max-w-[1170px]">
         <p class="m-0 text-center text-[13px] leading-[30px] text-[#85889b]">
           Copyright &copy; <span>{{ copyrightYear }}</span> - BalajiEvents | All Rights Reserved

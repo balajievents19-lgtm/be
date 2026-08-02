@@ -8,14 +8,14 @@ const sideCard = latestNews.find(item => item.variant === 'side')!
 
 <template>
   <section
-    class="news-view bg-[#f5f5f6] py-10 pb-[30px]"
+    class="news-view bg-surface-muted py-10 pb-[30px]"
     aria-labelledby="latest-news-heading"
   >
     <UContainer class="mx-auto max-w-[1170px]">
       <div class="mb-0 w-full pb-[90px] text-center">
         <div class="block w-full">
           <em
-            class="icon icon-heading-icon inline-block h-10 align-top text-[56px] leading-none text-[#f15b22]"
+            class="icon icon-heading-icon inline-block h-10 align-top text-[56px] leading-none text-brand-500"
             aria-hidden="true"
           />
         </div>
@@ -27,7 +27,7 @@ const sideCard = latestNews.find(item => item.variant === 'side')!
           />
           <h2
             id="latest-news-heading"
-            class="relative z-[2] m-0 inline-block bg-[#f5f5f6] px-5 text-center text-2xl font-bold leading-8 text-[#333333] font-['Domine',Georgia,'Times_New_Roman',serif]"
+            class="relative z-[2] m-0 inline-block bg-surface-muted px-5 text-center text-2xl font-bold leading-8 text-[#333333] font-['Domine',Georgia,'Times_New_Roman',serif]"
           >
             Latest News
           </h2>
@@ -70,7 +70,7 @@ const sideCard = latestNews.find(item => item.variant === 'side')!
                   </p>
                   <NuxtLink
                     :to="featured.to"
-                    class="inline-block rounded-[3px] border border-solid border-[#f15b22] bg-[#f15b22] px-7 py-[9px] text-center text-lg leading-5 text-white shadow-[inset_0_1px_0_#e0a97f] transition-colors duration-1000 hover:bg-[#e7480b] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f15b22]"
+                    class="inline-block rounded-[3px] border border-solid border-brand-500 bg-brand-500 px-7 py-[9px] text-center text-lg leading-5 text-white shadow-[inset_0_1px_0_#e0a97f] transition-colors duration-1000 hover:bg-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
                   >
                     Read More
                   </NuxtLink>
@@ -104,7 +104,7 @@ const sideCard = latestNews.find(item => item.variant === 'side')!
                   </p>
                   <NuxtLink
                     :to="card.to"
-                    class="inline-block rounded-[3px] border border-solid border-[#f15b22] bg-[#f15b22] px-7 py-[9px] text-center text-lg leading-5 text-white shadow-[inset_0_1px_0_#e0a97f] transition-colors duration-1000 hover:bg-[#e7480b] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f15b22]"
+                    class="inline-block rounded-[3px] border border-solid border-brand-500 bg-brand-500 px-7 py-[9px] text-center text-lg leading-5 text-white shadow-[inset_0_1px_0_#e0a97f] transition-colors duration-1000 hover:bg-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
                   >
                     Read More
                   </NuxtLink>
@@ -144,7 +144,7 @@ const sideCard = latestNews.find(item => item.variant === 'side')!
                 </p>
                 <NuxtLink
                   :to="sideCard.to"
-                  class="inline-block rounded-[3px] border border-solid border-[#f15b22] bg-[#f15b22] px-7 py-[9px] text-center text-lg leading-5 text-white shadow-[inset_0_1px_0_#e0a97f] transition-colors duration-1000 hover:bg-[#e7480b] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f15b22]"
+                  class="inline-block rounded-[3px] border border-solid border-brand-500 bg-brand-500 px-7 py-[9px] text-center text-lg leading-5 text-white shadow-[inset_0_1px_0_#e0a97f] transition-colors duration-1000 hover:bg-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
                 >
                   Read More
                 </NuxtLink>

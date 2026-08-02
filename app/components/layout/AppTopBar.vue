@@ -16,7 +16,7 @@ const links: TopBarLink[] = [
 </script>
 
 <template>
-  <div class="quck-link bg-[#0e1123] py-[3px]">
+  <div class="quck-link bg-navy-500 py-[3px]">
     <UContainer class="mx-auto flex max-w-[1170px] flex-col items-center gap-1 md:h-5 md:flex-row md:justify-between md:gap-0">
       <a
         :href="`mailto:${siteContact.email}`"

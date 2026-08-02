@@ -20,7 +20,7 @@ const search = async () => {
     query: {
       ...(form.eventType.trim() ? { event_type: form.eventType.trim() } : {}),
       ...(form.location.trim() ? { location: form.location.trim() } : {}),
-      ...(form.date ? { date: form.date } : {})
+      ...(form.date.trim() ? { date: form.date.trim() } : {})
     }
   })
 }
@@ -32,68 +32,65 @@ const search = async () => {
     aria-label="Search events"
     @submit.prevent="search"
   >
+    <!-- Event Type — full width (master .input-box) -->
     <div class="relative mb-2.5 inline-block w-full">
       <span
         class="icon icon-grid-view pointer-events-none absolute top-0 left-0 z-10 mt-1 h-10 w-[37px] text-center text-lg leading-[48px] text-[#464e7b]"
         aria-hidden="true"
       />
-      <UInput
+      <input
         v-model="form.eventType"
+        type="text"
         name="event_type"
         placeholder="Event Type"
         aria-label="Event type"
         autocomplete="off"
-        :ui="{
-          base: 'h-[50px] w-full rounded border border-[#b8b8b8] bg-white py-[15px] pr-2.5 pl-[38px] text-base leading-5 text-[#333] focus-visible:ring-1 focus-visible:ring-[#f15b22]'
-        }"
-      />
+        class="box-border h-[50px] w-full rounded border border-solid border-[#b8b8b8] bg-white py-[15px] pr-2.5 pl-[38px] text-base leading-5 text-[#333] outline-none"
+      >
     </div>
 
-    <div class="mb-2.5 flex w-full flex-col max-[767px]:gap-2.5 min-[768px]:flex-row min-[768px]:gap-0">
-      <div class="relative mb-0 w-full max-[767px]:mb-2.5 min-[768px]:mr-[1.17%] min-[768px]:w-[67.64%]">
+    <!-- Location 67.64% + Date 30.39% (master .location / .date) -->
+    <div class="mb-2.5 w-full max-[767px]:block min-[768px]:flex min-[768px]:items-start">
+      <div class="relative mb-2.5 inline-block w-full max-[767px]:mb-2.5 min-[768px]:mb-0 min-[768px]:mr-[1.17%] min-[768px]:w-[67.64%]">
         <span
           class="icon icon-location-1 pointer-events-none absolute top-0 left-0 z-10 mt-1 h-10 w-[37px] text-center text-lg leading-[48px] text-[#464e7b]"
           aria-hidden="true"
         />
-        <UInput
+        <input
           v-model="form.location"
+          type="text"
           name="location"
           placeholder="Event Location"
           aria-label="Event location"
           autocomplete="address-level2"
-          :ui="{
-            base: 'h-[50px] w-full rounded border border-[#b8b8b8] bg-white py-[15px] pr-2.5 pl-[38px] text-base leading-5 text-[#333] focus-visible:ring-1 focus-visible:ring-[#f15b22]'
-          }"
-        />
+          class="box-border h-[50px] w-full rounded border border-solid border-[#b8b8b8] bg-white py-[15px] pr-2.5 pl-[38px] text-base leading-5 text-[#333] outline-none"
+        >
       </div>
 
-      <div class="relative w-full min-[768px]:w-[30.39%]">
+      <div class="relative inline-block w-full min-[768px]:w-[30.39%]">
         <span
           class="icon icon-calander-month pointer-events-none absolute top-0 left-0 z-10 mt-1 h-10 w-[37px] text-center text-lg leading-[48px] text-[#464e7b]"
           aria-hidden="true"
         />
-        <UInput
+        <input
           v-model="form.date"
+          type="text"
           name="date"
-          type="date"
           placeholder="Select Date"
           aria-label="Select date"
-          :ui="{
-            base: 'h-[50px] w-full rounded border border-[#b8b8b8] bg-white py-[15px] pr-2.5 pl-[38px] text-base leading-5 text-[#333] focus-visible:ring-1 focus-visible:ring-[#f15b22]'
-          }"
-        />
+          autocomplete="off"
+          class="box-border h-[50px] w-full rounded border border-solid border-[#b8b8b8] bg-white py-[15px] pr-2.5 pl-[38px] text-base leading-5 text-[#333] outline-none"
+        >
       </div>
     </div>
 
     <div class="mb-[15px] w-full">
-      <UButton
+      <button
         type="submit"
-        block
-        color="neutral"
-        class="h-auto w-full rounded-[3px] border border-[#f15b22] bg-[#f15b22] py-[14px] text-lg font-normal leading-5 text-white shadow-[inset_0_1px_0_#e0a97f] transition-colors duration-1000 hover:border-[#e7480b] hover:bg-[#e7480b] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f15b22]"
+        class="box-border w-full cursor-pointer rounded-[3px] border border-solid border-brand-500 bg-brand-500 py-[14px] text-center text-lg font-normal leading-5 text-white shadow-[inset_0_1px_0_#e0a97f] transition-colors duration-1000 hover:border-brand-600 hover:bg-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
       >
         Search Now
-      </UButton>
+      </button>
     </div>
 
     <p class="m-0 text-center text-sm leading-[21px] text-[#5e5d5d]">

@@ -25,14 +25,14 @@ const goPrev = () => {
 
 <template>
   <section
-    class="home-event relative py-[46px] pb-[95px]"
+    class="home-event relative bg-white py-[46px] pb-[95px]"
     aria-labelledby="events-overview-heading"
   >
     <UContainer class="mx-auto max-w-[1170px]">
       <div class="w-full text-center">
         <div class="block w-full">
           <em
-            class="icon icon-heading-icon inline-block h-10 align-top text-[56px] leading-none text-[#f15b22]"
+            class="icon icon-heading-icon inline-block h-10 align-top text-[56px] leading-none text-brand-500"
             aria-hidden="true"
           />
         </div>
@@ -116,17 +116,14 @@ const goPrev = () => {
                 </div>
 
                 <p
-                  :class="[
-                    'm-0 inline-block text-center text-sm leading-6 text-[#888888]',
-                    index === 0 ? 'text-justify' : ''
-                  ]"
+                  class="m-0 inline-block text-center text-sm leading-6 text-[#888888]"
                 >
                   {{ event.description }}
                 </p>
 
                 <NuxtLink
                   :to="event.to"
-                  class="block text-sm leading-6 text-[#f15b25] hover:text-[#e7480b] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f15b22]"
+                  class="mt-0 block text-sm leading-6 text-[#f15b25] hover:text-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
                 >
                   Readmore
                 </NuxtLink>
@@ -137,7 +134,7 @@ const goPrev = () => {
 
         <button
           type="button"
-          class="absolute top-1/2 left-[-6%] z-[9] mt-[-13px] h-[27px] w-[27px] rounded-full text-[#c9c9c9] transition-colors hover:text-[#888888] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f15b22] max-[1399px]:left-[-15px] max-[991px]:left-0"
+          class="absolute top-1/2 left-[-6%] z-[9] mt-[-13px] h-[27px] w-[27px] rounded-full text-[#c9c9c9] transition-colors hover:text-[#888888] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 max-[1399px]:left-[-15px] max-[991px]:left-0"
           aria-label="Previous events"
           @click="goPrev"
         >
@@ -149,7 +146,7 @@ const goPrev = () => {
 
         <button
           type="button"
-          class="absolute top-1/2 right-[-6%] z-[9] mt-[-13px] h-[27px] w-[27px] rounded-full text-[#c9c9c9] transition-colors hover:text-[#888888] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f15b22] max-[1399px]:right-[-15px] max-[991px]:right-0"
+          class="absolute top-1/2 right-[-6%] z-[9] mt-[-13px] h-[27px] w-[27px] rounded-full text-[#c9c9c9] transition-colors hover:text-[#888888] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 max-[1399px]:right-[-15px] max-[991px]:right-0"
           aria-label="Next events"
           @click="goNext"
         >
