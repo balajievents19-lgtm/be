@@ -28,6 +28,7 @@ useSeoMeta({
       />
 
       <ServicesServicesGrid />
+      <ServicesServicesCta />
     </main>
 
     <HomeFooter />
