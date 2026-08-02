@@ -1,101 +1,170 @@
 <script setup lang="ts">
+import { Swiper, SwiperSlide } from 'swiper/vue'
+import { Autoplay, EffectFade } from 'swiper/modules'
+
+import 'swiper/css'
+import 'swiper/css/effect-fade'
+
+const modules = [Autoplay, EffectFade]
+
 const slides = [
-  "/images/slider/slide1.jpg",
-  "/images/slider/slide2.jpg",
-  "/images/slider/slide3.jpg"
+  {
+    image: '/images/slider/slide1.jpg',
+    title: 'Luxury Wedding Planning',
+    subtitle: 'Creating Unforgettable Celebrations'
+  },
+  {
+    image: '/images/slider/slide2.jpg',
+    title: 'Premium Tent House',
+    subtitle: 'Elegant Decoration & Event Setup'
+  },
+  {
+    image: '/images/slider/slide3.jpg',
+    title: 'Corporate & Family Events',
+    subtitle: 'Professional Event Management'
+  }
 ]
-
-const current = ref(0)
-
-onMounted(() => {
-  setInterval(() => {
-    current.value = (current.value + 1) % slides.length
-  }, 5000)
-})
 </script>
 
 <template>
-  <section class="relative h-[680px] overflow-hidden">
+<section class="relative h-screen overflow-hidden">
 
-    <!-- Slider -->
-    <div class="absolute inset-0">
+<Swiper
+:modules="modules"
+:slides-per-view="1"
+:loop="true"
+effect="fade"
+:autoplay="{
+delay:5000,
+disableOnInteraction:false
+}"
+class="h-full"
+>
 
-      <img
-        v-for="(slide,index) in slides"
-        :key="slide"
-        :src="slide"
-        class="absolute inset-0 h-full w-full object-cover transition-opacity duration-700"
-        :class="index === current ? 'opacity-100' : 'opacity-0'"
-      >
+<SwiperSlide
+v-for="slide in slides"
+:key="slide.image"
+>
 
-      <div class="absolute inset-0 bg-black/45"/>
+<div class="relative h-screen">
 
-    </div>
+<img
+:src="slide.image"
+:alt="slide.title"
+class="absolute inset-0 h-full w-full object-cover"
+/>
 
-    <!-- Content -->
+<div class="absolute inset-0 bg-black/60"/>
 
-    <UContainer class="relative z-10 flex h-full items-center">
+<div
+class="relative z-10 mx-auto flex h-full max-w-7xl items-center px-6"
+>
 
-      <div class="mx-auto max-w-5xl text-center">
+<div class="max-w-3xl">
 
-        <h1
-          class="mb-5 text-6xl font-light leading-tight text-white"
-        >
-          Every Event Should Be
-          <strong class="font-bold">
-            Perfect
-          </strong>
-        </h1>
+<span
+class="mb-4 inline-flex rounded-full bg-orange-500 px-4 py-2 text-sm font-semibold text-white"
+>
+Balaji Events
+</span>
 
-        <div
-          class="mx-auto mb-10 h-[3px] w-28 rounded-full bg-[#f15b25]"
-        />
+<h1
+class="text-5xl font-extrabold leading-tight text-white md:text-7xl"
+>
+{{ slide.title }}
+</h1>
 
-        <UCard
-          class="mx-auto max-w-5xl rounded-none border-0 shadow-2xl"
-        >
+<p
+class="mt-6 max-w-xl text-lg text-gray-200 md:text-xl"
+>
+{{ slide.subtitle }}
+</p>
 
-          <div class="grid gap-4 lg:grid-cols-4">
+<div class="mt-10 flex flex-wrap gap-4">
 
-            <UInput
-              icon="i-lucide-map-pin"
-              placeholder="Location"
-              size="xl"
-            />
+<UButton
+size="xl"
+color="primary"
+to="/contact"
+>
+Book Event
+</UButton>
 
-            <USelectMenu
-              :items="[
-                'Wedding',
-                'Birthday',
-                'Corporate',
-                'Conference'
-              ]"
-              placeholder="Event Type"
-              size="xl"
-            />
+<UButton
+  size="xl"
+  variant="outline"
+  color="neutral"
+  to="/services"
+  class="border-white text-white hover:bg-white hover:text-black"
+>
+  Our Services
+</UButton>
 
-            <UInput
-              icon="i-lucide-calendar"
-              placeholder="Event Date"
-              size="xl"
-            />
+</div>
+              <!-- Statistics -->
+              <div class="mt-14 grid grid-cols-2 gap-6 md:grid-cols-4">
 
-            <UButton
-              size="xl"
-              color="primary"
-              block
-              class="bg-[#f15b25] hover:bg-[#d94e1b]"
-            >
-              Search
-            </UButton>
+                <div>
+                  <h3 class="text-4xl font-bold text-orange-400">
+                    15+
+                  </h3>
+
+                  <p class="mt-2 text-sm uppercase tracking-wider text-gray-300">
+                    Years Experience
+                  </p>
+                </div>
+
+                <div>
+                  <h3 class="text-4xl font-bold text-orange-400">
+                    5000+
+                  </h3>
+
+                  <p class="mt-2 text-sm uppercase tracking-wider text-gray-300">
+                    Happy Clients
+                  </p>
+                </div>
+
+                <div>
+                  <h3 class="text-4xl font-bold text-orange-400">
+                    1200+
+                  </h3>
+
+                  <p class="mt-2 text-sm uppercase tracking-wider text-gray-300">
+                    Events Completed
+                  </p>
+                </div>
+
+                <div>
+                  <h3 class="text-4xl font-bold text-orange-400">
+                    25+
+                  </h3>
+
+                  <p class="mt-2 text-sm uppercase tracking-wider text-gray-300">
+                    Team Members
+                  </p>
+                </div>
+
+              </div>
+
+            </div>
 
           </div>
 
-        </UCard>
+        </div>
 
-      </div>
+      </SwiperSlide>
 
-    </UContainer>
+    </Swiper>
+
+    <!-- Scroll Indicator -->
+    <div
+      class="absolute bottom-8 left-1/2 z-20 -translate-x-1/2 animate-bounce"
+    >
+      <UIcon
+        name="i-lucide-chevron-down"
+        class="size-8 text-white"
+      />
+    </div>
 
   </section>
 </template>
