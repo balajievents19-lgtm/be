@@ -5,6 +5,11 @@ export default defineNuxtConfig({
     '@nuxt/ui'
   ],
 
+  // Bootstrap master is light-only — prevent Nuxt UI dark mode (slate-900) from restyling sections
+  ui: {
+    colorMode: false
+  },
+
   devtools: {
     enabled: true
   },

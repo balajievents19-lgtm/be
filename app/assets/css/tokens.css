@@ -1,14 +1,35 @@
 :root {
-  /* Brand (Bootstrap master) */
+  /* Brand — Bootstrap master (docs.css / bootstrap.css .btn) */
   --color-primary: #f15b22;
+  --color-primary-alt: #f15b25; /* service hover, event Readmore */
   --color-primary-hover: #e7480b;
+  --color-primary-inset: #e0a97f;
+  --color-primary-overlay: rgba(241, 91, 34, 0.9);
+
+  /* Navy / dark */
   --color-secondary: #0e1123;
   --color-secondary-muted: #26293b;
+  --color-footer-bottom: #070811;
 
-  --color-heading: #333333;
-  --color-text: #666666;
-  --color-border: #e5e5e5;
+  /* Surfaces */
   --color-surface: #ffffff;
   --color-background: #f5f5f6;
-  --color-footer-bottom: #070811;
+  --color-border: #e5e5e5;
+
+  /* Text */
+  --color-heading: #333333;
+  --color-text: #666666;
+  --color-text-muted: #888888;
+  --color-text-info: #6a6767;
+  --color-nav: #202020;
+  --color-topbar: #d6d8e4;
+  --color-footer-text: #85889b;
+  --color-footer-update: #83879b;
+
+  /* Hero */
+  --color-hero-overlay: rgba(0, 0, 0, 0.5);
+  --color-hero-search-bg: rgba(255, 255, 255, 0.8);
+  --color-hero-icon: #464e7b;
+  --color-hero-caption: #5e5d5d;
+  --color-input-border: #b8b8b8;
 }
