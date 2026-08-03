@@ -1,11 +1,16 @@
 <script setup lang="ts">
-import { reactive } from 'vue'
+import { computed, reactive } from 'vue'
+import type { SiteSettings } from '~/types/home'
 import {
   footerCompanyLinks,
   footerSocialLinks,
   footerUpdates,
   siteContact
 } from '~/data/home'
+
+const props = defineProps<{
+  settings?: SiteSettings | null
+}>()
 
 const newsletter = reactive({
   firstName: '',
@@ -14,6 +19,45 @@ const newsletter = reactive({
 })
 
 const copyrightYear = new Date().getFullYear()
+
+const contact = computed(() => {
+  const c = props.settings?.contact
+  const phone = c?.phone || siteContact.phoneDisplay
+  return {
+    email: c?.email || siteContact.email,
+    phoneDisplay: phone,
+    phoneHref: `tel:${phone.replace(/[^\d+]/g, '')}`,
+    address: c?.address || siteContact.address
+  }
+})
+
+const socialLinks = computed(() => {
+  const social = props.settings?.social
+  if (!social) {
+    return footerSocialLinks
+  }
+
+  return footerSocialLinks.map((link) => {
+    if (link.label === 'Facebook' && social.facebook) {
+      return { ...link, href: social.facebook }
+    }
+    if (link.label === 'Twitter' && social.twitter) {
+      return { ...link, href: social.twitter }
+    }
+    if (link.label === 'LinkedIn' && social.linkedin) {
+      return { ...link, href: social.linkedin }
+    }
+    if (link.label === 'YouTube' && social.youtube) {
+      return { ...link, href: social.youtube }
+    }
+    return link
+  })
+})
+
+const copyrightText = computed(() =>
+  props.settings?.footer?.copyright_text
+  || `Copyright © ${copyrightYear} - BalajiEvents | All Rights Reserved`
+)
 
 const onNewsletterSubmit = (event: Event) => {
   event.preventDefault()
@@ -104,7 +148,7 @@ const onNewsletterSubmit = (event: Event) => {
                   aria-hidden="true"
                 />
                 <p class="m-0 w-full max-w-[195px] text-[13px] leading-6 text-[#85889b]">
-                  {{ siteContact.address }}
+                  {{ contact.address }}
                 </p>
               </div>
 
@@ -115,9 +159,9 @@ const onNewsletterSubmit = (event: Event) => {
                 />
                 <p class="m-0 w-full max-w-[195px] text-[13px] leading-6 text-[#85889b]">
                   <a
-                    :href="siteContact.phoneHref"
+                    :href="contact.phoneHref"
                     class="text-[13px] leading-6 text-[#85889b] transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
-                  >{{ siteContact.phoneDisplay }}</a>
+                  >{{ contact.phoneDisplay }}</a>
                 </p>
               </div>
 
@@ -127,10 +171,10 @@ const onNewsletterSubmit = (event: Event) => {
                   aria-hidden="true"
                 />
                 <a
-                  :href="`mailto:${siteContact.email}`"
+                  :href="`mailto:${contact.email}`"
                   class="text-[13px] leading-6 text-[#85889b] transition-colors group-hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
                 >
-                  {{ siteContact.email }}
+                  {{ contact.email }}
                 </a>
               </div>
             </div>
@@ -211,7 +255,7 @@ const onNewsletterSubmit = (event: Event) => {
               <div class="inline-block w-full pt-[13px]">
                 <ul class="m-0 list-none p-0">
                   <li
-                    v-for="social in footerSocialLinks"
+                    v-for="social in socialLinks"
                     :key="social.label"
                     class="mr-[6px] inline-block align-top last:mr-0"
                   >
@@ -238,7 +282,7 @@ const onNewsletterSubmit = (event: Event) => {
     <div class="bg-navy-600 pt-4 pb-[13px]">
       <UContainer class="mx-auto max-w-[1170px]">
         <p class="m-0 text-center text-[13px] leading-[30px] text-[#85889b]">
-          Copyright &copy; <span>{{ copyrightYear }}</span> - BalajiEvents | All Rights Reserved
+          {{ copyrightText }}
         </p>
       </UContainer>
     </div>

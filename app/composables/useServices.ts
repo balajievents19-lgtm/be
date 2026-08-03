@@ -1,3 +1,5 @@
+import { computed, ref } from 'vue'
+import type { HomePayload } from '~/types/home'
 import type { Service, ServiceDetailResponse, ServiceListResponse } from '~/types/service'
 
 const emptyList: Service[] = []
@@ -26,10 +28,29 @@ export const useServicesApi = () => {
   }
 }
 
-/** Shared cached list for layout + pages. */
+/** Shared cached list for layout + pages. Reuses /api/home on the homepage. */
 export const useServices = async () => {
-  const { fetchServices } = useServicesApi()
+  const route = useRoute()
   const failed = useState('services-api-failed', () => false)
+  const homePayload = useNuxtData<HomePayload>('home')
+
+  // Homepage already loaded featured services via the aggregator — no second request.
+  if (route.path === '/' && homePayload.data.value) {
+    failed.value = false
+
+    return {
+      data: computed(() => homePayload.data.value?.featured_services ?? emptyList),
+      pending: computed(() => false),
+      error: ref(null),
+      status: computed(() => 'success' as const),
+      refresh: async () => {},
+      clear: () => {},
+      execute: async () => {},
+      failed
+    }
+  }
+
+  const { fetchServices } = useServicesApi()
 
   const asyncData = await useAsyncData('services', async () => {
     try {

@@ -7,12 +7,41 @@ import { useServices } from '~/composables/useServices'
 const props = withDefaults(defineProps<{
   homepageOnly?: boolean
   filterQuery?: string
+  /** When provided (homepage aggregator), skip the services list request. */
+  services?: Service[] | null
+  pending?: boolean
+  failed?: boolean
 }>(), {
   homepageOnly: false,
-  filterQuery: ''
+  filterQuery: '',
+  services: undefined,
+  pending: undefined,
+  failed: undefined
 })
 
-const { data: services, pending, failed } = await useServices()
+const hasProvidedServices = computed(() => props.services !== undefined && props.services !== null)
+
+const fetched = hasProvidedServices.value
+  ? null
+  : await useServices()
+
+const services = computed(() =>
+  hasProvidedServices.value
+    ? (props.services ?? [])
+    : (fetched?.data.value ?? [])
+)
+
+const pending = computed(() =>
+  props.pending !== undefined
+    ? props.pending
+    : (fetched?.pending.value ?? false)
+)
+
+const failed = computed(() =>
+  props.failed !== undefined
+    ? props.failed
+    : (fetched?.failed.value ?? false)
+)
 
 const visibleServices = computed(() => {
   let list: Service[] = services.value ?? []

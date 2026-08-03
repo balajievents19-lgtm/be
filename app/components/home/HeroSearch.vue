@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { reactive } from 'vue'
 import { navigateTo } from '#imports'
-import { useServices } from '~/composables/useServices'
+import type { Service } from '~/types/service'
 
 interface SearchForm {
   eventType: string
@@ -9,7 +9,11 @@ interface SearchForm {
   date: string
 }
 
-const { data: services } = await useServices()
+const props = withDefaults(defineProps<{
+  services?: Service[]
+}>(), {
+  services: () => []
+})
 
 const form = reactive<SearchForm>({
   eventType: '',
@@ -18,7 +22,7 @@ const form = reactive<SearchForm>({
 })
 
 const search = async () => {
-  const selected = (services.value ?? []).find(item => item.slug === form.eventType)
+  const selected = props.services.find(item => item.slug === form.eventType)
 
   if (selected) {
     await navigateTo({

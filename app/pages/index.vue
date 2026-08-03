@@ -1,9 +1,22 @@
 <script setup lang="ts">
+const { data: home, pending, failed } = await useHome()
+
+provide('home', home)
+provide('homePending', pending)
+provide('homeFailed', failed)
+
+const settings = computed(() => home.value?.settings ?? null)
+const hero = computed(() => home.value?.hero ?? [])
+const featuredServices = computed(() => home.value?.featured_services ?? [])
+
 useSeoMeta({
-  title: 'Balaji Events | Every Event Should be Perfect',
-  description: 'Balaji Events is a trusted wedding and event management company in Rajasthan offering planning, décor, catering and entertainment services.',
-  ogTitle: 'Balaji Events',
-  ogDescription: 'Trusted wedding and event management in Rajasthan.',
+  title: () => settings.value?.seo?.meta_title || 'Balaji Events | Every Event Should be Perfect',
+  description: () => settings.value?.seo?.meta_description
+    || 'Balaji Events is a trusted wedding and event management company in Rajasthan offering planning, décor, catering and entertainment services.',
+  ogTitle: () => settings.value?.seo?.meta_title || 'Balaji Events',
+  ogDescription: () => settings.value?.seo?.meta_description
+    || 'Trusted wedding and event management in Rajasthan.',
+  ogImage: () => settings.value?.seo?.opengraph_image || undefined,
   twitterCard: 'summary_large_image'
 })
 </script>
@@ -20,13 +33,22 @@ useSeoMeta({
     <LayoutAppHeader />
 
     <main id="main-content">
-      <HomeHero />
-      <HomeServices />
+      <HomeHero
+        :slides="hero"
+        :services="featuredServices"
+        :pending="pending"
+        :failed="failed"
+      />
+      <HomeServices
+        :services="featuredServices"
+        :pending="pending"
+        :failed="failed"
+      />
       <HomeEventsOverview />
       <HomeTestimonials />
       <HomeLatestNews />
     </main>
 
-    <HomeFooter />
+    <HomeFooter :settings="settings" />
   </div>
 </template>

@@ -3,11 +3,24 @@ import { onMounted, onUnmounted, ref } from 'vue'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { A11y, Autoplay, EffectFade, Keyboard, Navigation } from 'swiper/modules'
 import HeroSearch from '~/components/home/HeroSearch.vue'
-import { heroSlides } from '~/data/home'
+import type { HeroSlide } from '~/types/home'
+import type { Service } from '~/types/service'
 
 import 'swiper/css'
 import 'swiper/css/effect-fade'
 import 'swiper/css/navigation'
+
+withDefaults(defineProps<{
+  slides?: HeroSlide[]
+  services?: Service[]
+  pending?: boolean
+  failed?: boolean
+}>(), {
+  slides: () => [],
+  services: () => [],
+  pending: false,
+  failed: false
+})
 
 const modules = [A11y, Autoplay, EffectFade, Keyboard, Navigation]
 const prefersReducedMotion = ref(false)
@@ -48,10 +61,27 @@ onUnmounted(() => {
     aria-label="Featured events"
   >
     <div class="relative w-full">
+      <p
+        v-if="pending && !slides.length"
+        class="py-20 text-center text-sm text-[#666]"
+        role="status"
+      >
+        Loading…
+      </p>
+
+      <p
+        v-else-if="failed && !slides.length"
+        class="py-20 text-center text-sm text-[#666]"
+        role="alert"
+      >
+        Unable to load slides.
+      </p>
+
       <Swiper
+        v-else-if="slides.length"
         :modules="modules"
         :slides-per-view="1"
-        :loop="true"
+        :loop="slides.length > 1"
         effect="fade"
         :speed="600"
         :keyboard="{ enabled: true, onlyInViewport: true }"
@@ -70,13 +100,13 @@ onUnmounted(() => {
         @swiper="onSwiper"
       >
         <SwiperSlide
-          v-for="(slide, index) in heroSlides"
-          :key="slide.src"
+          v-for="(slide, index) in slides"
+          :key="slide.id"
         >
           <div class="relative max-h-[850px] w-full">
             <img
-              :src="slide.src"
-              :alt="slide.alt"
+              :src="slide.desktop_image"
+              :alt="slide.title || 'Balaji Events'"
               :fetchpriority="index === 0 ? 'high' : 'auto'"
               :loading="index === 0 ? 'eager' : 'lazy'"
               decoding="async"
@@ -93,6 +123,7 @@ onUnmounted(() => {
       </Swiper>
 
       <button
+        v-if="slides.length > 1"
         type="button"
         class="absolute top-1/2 left-[2%] z-[9] mt-[-23px] flex h-[47px] w-[47px] items-center justify-center rounded-full border-2 border-[rgba(255,255,255,0.2)] text-xl text-[rgba(255,255,255,0.2)] transition-colors hover:border-white hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white max-[991px]:hidden"
         aria-label="Previous slide"
@@ -104,6 +135,7 @@ onUnmounted(() => {
         />
       </button>
       <button
+        v-if="slides.length > 1"
         type="button"
         class="absolute top-1/2 right-[2%] z-[9] mt-[-23px] flex h-[47px] w-[47px] items-center justify-center rounded-full border-2 border-[rgba(255,255,255,0.2)] text-xl text-[rgba(255,255,255,0.2)] transition-colors hover:border-white hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white max-[991px]:hidden"
         aria-label="Next slide"
@@ -131,7 +163,7 @@ onUnmounted(() => {
           </h1>
         </div>
 
-        <HeroSearch />
+        <HeroSearch :services="services" />
       </UContainer>
     </div>
   </section>

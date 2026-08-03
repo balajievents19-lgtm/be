@@ -1,4 +1,4 @@
-export interface HeroSlide {
+export interface StaticHeroSlide {
   src: string
   alt: string
 }
@@ -55,7 +55,7 @@ export interface SocialLink {
   href: string
 }
 
-export const heroSlides: HeroSlide[] = [
+export const heroSlides: StaticHeroSlide[] = [
   {
     src: '/images/banner/slider-img.jpg',
     alt: 'Balaji Events celebration'

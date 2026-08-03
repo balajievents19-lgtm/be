@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { Ref } from 'vue'
+import type { HomePayload } from '~/types/home'
 import { siteContact } from '~/data/home'
 
 interface TopBarLink {
@@ -6,6 +8,12 @@ interface TopBarLink {
   icon?: string
   to: string
 }
+
+const home = inject<Ref<HomePayload | null> | null>('home', null)
+
+const email = computed(() =>
+  home?.value?.settings?.contact?.email || siteContact.email
+)
 
 const links: TopBarLink[] = [
   { label: 'Become a Vendor', icon: 'icon-multi-user', to: '/vendor' },
@@ -19,14 +27,14 @@ const links: TopBarLink[] = [
   <div class="quck-link bg-navy-500 py-[3px]">
     <UContainer class="mx-auto flex max-w-[1170px] flex-col items-center gap-1 md:h-5 md:flex-row md:justify-between md:gap-0">
       <a
-        :href="`mailto:${siteContact.email}`"
+        :href="`mailto:${email}`"
         class="inline-flex items-center text-[13px] leading-[14px] text-[#d6d8e4] transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
       >
         <span
           class="icon icon-message-1 mr-[5px] text-sm"
           aria-hidden="true"
         />
-        {{ siteContact.email }}
+        {{ email }}
       </a>
 
       <ul class="m-0 flex list-none items-center p-0">
