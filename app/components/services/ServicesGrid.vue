@@ -12,7 +12,7 @@ const props = withDefaults(defineProps<{
   filterQuery: ''
 })
 
-const { data: services } = await useServices()
+const { data: services, pending, failed } = await useServices()
 
 const visibleServices = computed(() => {
   let list: Service[] = services.value ?? []
@@ -63,7 +63,23 @@ const visibleServices = computed(() => {
       </div>
 
       <p
-        v-if="!visibleServices.length"
+        v-if="pending"
+        class="pb-10 text-center text-sm text-[#666]"
+        role="status"
+      >
+        Loading services…
+      </p>
+
+      <p
+        v-else-if="failed"
+        class="pb-10 text-center text-sm text-[#666]"
+        role="alert"
+      >
+        Unable to load services. Please try again later.
+      </p>
+
+      <p
+        v-else-if="!visibleServices.length"
         class="pb-10 text-center text-sm text-[#666]"
       >
         No services available right now.

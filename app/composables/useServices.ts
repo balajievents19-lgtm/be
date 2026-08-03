@@ -7,12 +7,8 @@ export const useServicesApi = () => {
   const base = String(config.public.apiBase || 'http://127.0.0.1:8000/api').replace(/\/$/, '')
 
   const fetchServices = async (): Promise<Service[]> => {
-    try {
-      const response = await $fetch<ServiceListResponse>(`${base}/services`)
-      return response.data ?? emptyList
-    } catch {
-      return emptyList
-    }
+    const response = await $fetch<ServiceListResponse>(`${base}/services`)
+    return response.data ?? emptyList
   }
 
   const fetchServiceBySlug = async (slug: string): Promise<Service | null> => {
@@ -20,12 +16,8 @@ export const useServicesApi = () => {
       return null
     }
 
-    try {
-      const response = await $fetch<ServiceDetailResponse>(`${base}/services/${encodeURIComponent(slug)}`)
-      return response.data ?? null
-    } catch {
-      return null
-    }
+    const response = await $fetch<ServiceDetailResponse>(`${base}/services/${encodeURIComponent(slug)}`)
+    return response.data ?? null
   }
 
   return {
@@ -37,33 +29,52 @@ export const useServicesApi = () => {
 /** Shared cached list for layout + pages. */
 export const useServices = async () => {
   const { fetchServices } = useServicesApi()
+  const failed = useState('services-api-failed', () => false)
 
-  return useAsyncData('services', fetchServices, {
+  const asyncData = await useAsyncData('services', async () => {
+    try {
+      const items = await fetchServices()
+      failed.value = false
+      return items
+    } catch {
+      failed.value = true
+      return emptyList
+    }
+  }, {
     default: () => emptyList,
     server: true
   })
+
+  return {
+    ...asyncData,
+    failed
+  }
 }
 
 export const useService = async (slug: MaybeRefOrGetter<string>) => {
   const { fetchServiceBySlug } = useServicesApi()
+  const failed = useState('service-detail-api-failed', () => false)
 
-  return useAsyncData(
+  const asyncData = await useAsyncData(
     () => `service-${toValue(slug)}`,
-    () => fetchServiceBySlug(toValue(slug)),
+    async () => {
+      try {
+        const item = await fetchServiceBySlug(toValue(slug))
+        failed.value = false
+        return item
+      } catch {
+        failed.value = true
+        return null
+      }
+    },
     {
       default: () => null,
       watch: [() => toValue(slug)]
     }
   )
-}
 
-export const serviceIconClass = (service: Pick<Service, 'icon'>): string => {
-  const icon = service.icon?.trim()
-  if (!icon) {
-    return 'icon-calander'
+  return {
+    ...asyncData,
+    failed
   }
-  if (icon.startsWith('icon-')) {
-    return icon
-  }
-  return `icon-${icon}`
 }

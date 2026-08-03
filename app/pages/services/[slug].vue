@@ -5,7 +5,7 @@ import { useService, useServices } from '~/composables/useServices'
 const route = useRoute()
 const slug = computed(() => String(route.params.slug ?? ''))
 
-const { data: service } = await useService(slug)
+const { data: service, pending, failed } = await useService(slug)
 const { data: allServices } = await useServices()
 
 const relatedNames = computed(() =>
@@ -44,7 +44,20 @@ useSeoMeta({
     <LayoutAppHeader />
 
     <main
-      v-if="service"
+      v-if="pending"
+      id="main-content"
+      class="px-4 py-20 text-center"
+    >
+      <p
+        class="text-sm text-[#666]"
+        role="status"
+      >
+        Loading service…
+      </p>
+    </main>
+
+    <main
+      v-else-if="service"
       id="main-content"
     >
       <SharedPageHeader
@@ -95,11 +108,11 @@ useSeoMeta({
       class="px-4 py-20 text-center"
     >
       <SharedPageHeader
-        title="Service Not Found"
+        :title="failed ? 'Unable to Load Service' : 'Service Not Found'"
         :breadcrumbs="[{ label: 'Home', to: '/' }, { label: 'Services', to: '/services' }]"
       />
       <p class="mt-8 text-[#666]">
-        This service could not be found.
+        {{ failed ? 'Unable to load this service. Please try again later.' : 'This service could not be found.' }}
       </p>
       <NuxtLink
         to="/services"
