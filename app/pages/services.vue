@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useServices } from '~/composables/useServices'
 
 const route = useRoute()
 
@@ -20,9 +19,6 @@ const breadcrumbs = [
   { label: 'Home', to: '/' },
   { label: 'Services' }
 ]
-
-// Warm shared cache for header menus
-await useServices()
 </script>
 
 <template>

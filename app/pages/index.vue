@@ -2,8 +2,6 @@
 const { data: home, pending, failed } = await useHome()
 
 provide('home', home)
-provide('homePending', pending)
-provide('homeFailed', failed)
 
 const settings = computed(() => home.value?.settings ?? null)
 const hero = computed(() => home.value?.hero ?? [])

@@ -68,6 +68,8 @@ const imageSrc = computed(() =>
           :src="imageSrc"
           :alt="service.name"
           class="block h-auto w-full"
+          width="800"
+          height="500"
           loading="lazy"
           decoding="async"
         >

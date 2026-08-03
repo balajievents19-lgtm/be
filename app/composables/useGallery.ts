@@ -4,8 +4,7 @@ const emptyList: GalleryItem[] = []
 
 /** Shared gallery list from GET /api/gallery. */
 export const useGallery = async () => {
-  const config = useRuntimeConfig()
-  const base = String(config.public.apiBase || 'http://127.0.0.1:8000/api').replace(/\/$/, '')
+  const base = useApiBase()
   const failed = useState('gallery-api-failed', () => false)
 
   const asyncData = await useFetch(`${base}/gallery`, {

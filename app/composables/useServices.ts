@@ -5,8 +5,7 @@ import type { Service, ServiceDetailResponse, ServiceListResponse } from '~/type
 const emptyList: Service[] = []
 
 export const useServicesApi = () => {
-  const config = useRuntimeConfig()
-  const base = String(config.public.apiBase || 'http://127.0.0.1:8000/api').replace(/\/$/, '')
+  const base = useApiBase()
 
   const fetchServices = async (): Promise<Service[]> => {
     const response = await $fetch<ServiceListResponse>(`${base}/services`)

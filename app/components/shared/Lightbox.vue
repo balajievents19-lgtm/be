@@ -110,6 +110,8 @@ onUnmounted(() => {
           :src="currentSrc"
           :alt="currentAlt"
           class="max-h-[85vh] max-w-full rounded object-contain"
+          loading="eager"
+          decoding="async"
         >
 
         <button

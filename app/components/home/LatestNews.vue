@@ -47,6 +47,8 @@ const sideCard = latestNews.find(item => item.variant === 'side')!
                   :src="featured.image"
                   :alt="featured.title"
                   class="block h-auto w-full"
+                  width="770"
+                  height="420"
                   loading="lazy"
                   decoding="async"
                 >
@@ -121,6 +123,8 @@ const sideCard = latestNews.find(item => item.variant === 'side')!
                 :src="sideCard.image"
                 :alt="sideCard.title"
                 class="block h-auto w-full max-[991px]:float-left max-[991px]:w-1/2 max-[991px]:pr-[15px] max-[767px]:float-none max-[767px]:w-full max-[767px]:pr-0"
+                width="370"
+                height="240"
                 loading="lazy"
                 decoding="async"
               >

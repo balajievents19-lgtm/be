@@ -1,8 +1,3 @@
-export interface StaticHeroSlide {
-  src: string
-  alt: string
-}
-
 export interface EventItem {
   title: string
   caption: string
@@ -49,21 +44,6 @@ export interface SocialLink {
   label: string
   href: string
 }
-
-export const heroSlides: StaticHeroSlide[] = [
-  {
-    src: '/images/banner/slider-img.jpg',
-    alt: 'Balaji Events celebration'
-  },
-  {
-    src: '/images/banner/slider-img2.jpg',
-    alt: 'Balaji Events wedding setup'
-  },
-  {
-    src: '/images/banner/slider-img3.jpg',
-    alt: 'Balaji Events party venue'
-  }
-]
 
 export const overviewEvents: EventItem[] = [
   {

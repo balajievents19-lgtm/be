@@ -73,6 +73,9 @@ const submitSearch = async () => {
             <img
               src="/images/logo.png"
               alt="Balaji Events"
+              width="140"
+              height="56"
+              decoding="async"
               class="h-14 w-auto"
             >
           </NuxtLink>

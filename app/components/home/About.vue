@@ -44,6 +44,8 @@ withDefaults(defineProps<{
           src="/images/about-us/aboutUs.jpg"
           alt="Balaji Events about us"
           class="block h-auto w-full object-cover md:hidden"
+          width="800"
+          height="600"
           loading="lazy"
           decoding="async"
         >

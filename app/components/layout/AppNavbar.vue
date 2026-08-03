@@ -122,6 +122,9 @@ onUnmounted(() => {
           <img
             src="/images/logo.png"
             alt="Balaji Events"
+            width="160"
+            height="70"
+            decoding="async"
             class="h-auto w-auto max-h-[70px] transition-all duration-1000 ease-in-out"
             :class="props.isScrolled ? '!h-[50px] max-h-[50px]' : ''"
           >

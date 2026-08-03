@@ -53,6 +53,8 @@ const onSwiper = (swiper: { slideNext: () => void, slidePrev: () => void }) => {
             :src="src"
             :alt="`${service.name} gallery ${index + 1}`"
             class="block h-auto w-full"
+            width="800"
+            height="500"
             loading="lazy"
             decoding="async"
           >

@@ -92,6 +92,8 @@ const onNewsletterSubmit = (event: Event) => {
                   :src="item.image"
                   alt=""
                   class="block h-auto w-full"
+                  width="60"
+                  height="60"
                   loading="lazy"
                   decoding="async"
                 >

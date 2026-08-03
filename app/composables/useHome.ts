@@ -53,8 +53,7 @@ const emptyHome: HomePayload = {
 
 /** Single homepage aggregator request: settings + hero + featured services + gallery. */
 export const useHome = async () => {
-  const config = useRuntimeConfig()
-  const base = String(config.public.apiBase || 'http://127.0.0.1:8000/api').replace(/\/$/, '')
+  const base = useApiBase()
   const failed = useState('home-api-failed', () => false)
 
   const asyncData = await useFetch(`${base}/home`, {

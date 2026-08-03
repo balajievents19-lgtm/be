@@ -98,7 +98,11 @@ const onShareSubmit = (event: Event) => {
           <img
             src="/images/heading-blackBgimg.png"
             alt=""
+            width="120"
+            height="20"
             class="inline-block"
+            loading="lazy"
+            decoding="async"
             aria-hidden="true"
           >
         </div>
@@ -137,7 +141,11 @@ const onShareSubmit = (event: Event) => {
                   <img
                     src="/images/img-fream.png"
                     alt=""
+                    width="278"
+                    height="278"
                     class="inline-block w-auto max-w-none"
+                    loading="lazy"
+                    decoding="async"
                     aria-hidden="true"
                   >
                 </div>
@@ -155,14 +163,22 @@ const onShareSubmit = (event: Event) => {
                   <img
                     src="/images/starting-point.png"
                     alt=""
+                    width="24"
+                    height="24"
                     class="start-img mr-0 inline-block w-auto pr-2.5 align-middle"
+                    loading="lazy"
+                    decoding="async"
                     aria-hidden="true"
                   >
                   {{ item.quote }}
                   <img
                     src="/images/ending-point.png"
                     alt=""
+                    width="24"
+                    height="24"
                     class="end-img ml-0 inline-block w-auto pl-2.5 align-middle"
+                    loading="lazy"
+                    decoding="async"
                     aria-hidden="true"
                   >
                 </p>
@@ -236,7 +252,10 @@ const onShareSubmit = (event: Event) => {
                   :src="story.image"
                   :alt="story.name"
                   class="block h-auto w-full"
+                  width="370"
+                  height="280"
                   loading="lazy"
+                  decoding="async"
                 >
               </div>
 

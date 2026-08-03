@@ -97,6 +97,8 @@ const openLightbox = (index: number) => {
           :src="galleryItemSrc(item)"
           :alt="galleryItemAlt(item)"
           class="block h-auto w-full object-cover"
+          width="400"
+          height="300"
           loading="lazy"
           decoding="async"
         >
