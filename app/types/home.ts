@@ -1,3 +1,4 @@
+import type { GalleryItem } from '~/types/gallery'
 import type { Service } from '~/types/service'
 
 export interface SiteSettings {
@@ -73,6 +74,7 @@ export interface HomePayload {
   settings: SiteSettings
   hero: HeroSlide[]
   featured_services: Service[]
+  featured_gallery: GalleryItem[]
 }
 
 export interface HomeApiResponse {

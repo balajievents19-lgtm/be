@@ -11,11 +11,6 @@ export interface EventItem {
   to: string
 }
 
-export interface GalleryImage {
-  src: string
-  alt: string
-}
-
 export interface TestimonialItem {
   name: string
   quote: string
@@ -113,19 +108,6 @@ export const overviewEvents: EventItem[] = [
     description: 'Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s ype specimen book. It has survived not only five centuries,',
     to: '/services'
   }
-]
-
-export const galleryImages: GalleryImage[] = [
-  { src: '/images/gallery/home3-galleryImg1.jpg', alt: 'Gallery image 1' },
-  { src: '/images/gallery/home3-galleryImg2.jpg', alt: 'Gallery image 2' },
-  { src: '/images/gallery/home3-galleryImg3.jpg', alt: 'Gallery image 3' },
-  { src: '/images/gallery/home3-galleryImg4.jpg', alt: 'Gallery image 4' },
-  { src: '/images/gallery/home3-galleryImg5.jpg', alt: 'Gallery image 5' },
-  { src: '/images/gallery/home3-galleryImg6.jpg', alt: 'Gallery image 6' },
-  { src: '/images/gallery/home3-galleryImg7.jpg', alt: 'Gallery image 7' },
-  { src: '/images/gallery/home3-galleryImg8.jpg', alt: 'Gallery image 8' },
-  { src: '/images/gallery/home3-galleryImg9.jpg', alt: 'Gallery image 9' },
-  { src: '/images/gallery/home3-galleryImg10.jpg', alt: 'Gallery image 10' }
 ]
 
 export const testimonials: TestimonialItem[] = [

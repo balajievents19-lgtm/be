@@ -8,6 +8,7 @@ provide('homeFailed', failed)
 const settings = computed(() => home.value?.settings ?? null)
 const hero = computed(() => home.value?.hero ?? [])
 const featuredServices = computed(() => home.value?.featured_services ?? [])
+const featuredGallery = computed(() => home.value?.featured_gallery ?? [])
 
 useSeoMeta({
   title: () => settings.value?.seo?.meta_title || 'Balaji Events | Every Event Should be Perfect',
@@ -45,6 +46,11 @@ useSeoMeta({
         :failed="failed"
       />
       <HomeEventsOverview />
+      <HomeGallery
+        :items="featuredGallery"
+        :pending="pending"
+        :failed="failed"
+      />
       <HomeTestimonials />
       <HomeLatestNews />
     </main>

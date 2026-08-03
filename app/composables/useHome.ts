@@ -47,10 +47,11 @@ const emptyHome: HomePayload = {
     }
   },
   hero: [],
-  featured_services: []
+  featured_services: [],
+  featured_gallery: []
 }
 
-/** Single homepage aggregator request: settings + hero + featured services. */
+/** Single homepage aggregator request: settings + hero + featured services + gallery. */
 export const useHome = async () => {
   const config = useRuntimeConfig()
   const base = String(config.public.apiBase || 'http://127.0.0.1:8000/api').replace(/\/$/, '')
