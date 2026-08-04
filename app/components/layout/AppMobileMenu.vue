@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import type { Ref } from 'vue'
 import { ref, watch } from 'vue'
 import { useRoute, useRouter } from '#imports'
 import { useServices } from '~/composables/useServices'
+import type { HomePayload } from '~/types/home'
 
 interface NavigationItem {
   label: string
@@ -20,6 +22,8 @@ const searchQuery = ref('')
 const route = useRoute()
 const router = useRouter()
 const { data: services } = await useServices()
+const home = inject<Ref<HomePayload | null> | null>('home', null)
+const logoSrc = computed(() => home?.value?.settings?.brand?.logo || '/images/logo.png')
 
 const isActive = (item: NavigationItem) => {
   if (!item.to) {
@@ -71,7 +75,7 @@ const submitSearch = async () => {
             @click="close"
           >
             <img
-              src="/images/logo.png"
+              :src="logoSrc"
               alt="Balaji Events"
               width="140"
               height="56"

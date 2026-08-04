@@ -7,6 +7,7 @@ const slug = computed(() => String(route.params.slug ?? ''))
 
 const { data: service, pending, failed } = await useService(slug)
 const { data: allServices } = await useServices()
+const { data: settings } = await useSettings()
 
 const relatedNames = computed(() =>
   (allServices.value ?? [])
@@ -122,6 +123,6 @@ useSeoMeta({
       </NuxtLink>
     </main>
 
-    <HomeFooter />
+    <HomeFooter :settings="settings" />
   </div>
 </template>

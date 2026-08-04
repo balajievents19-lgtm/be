@@ -1,8 +1,12 @@
 <script setup lang="ts">
 withDefaults(defineProps<{
+  description?: string | null
+  image?: string | null
   /** When false, hides the Know More CTA (e.g. on /about). */
   showCta?: boolean
 }>(), {
+  description: null,
+  image: null,
   showCta: true
 })
 </script>
@@ -15,6 +19,7 @@ withDefaults(defineProps<{
     <div class="relative flex w-full flex-col md:block">
       <div
         class="ourText box-border w-full px-6 py-10 text-base leading-[30px] text-white min-[640px]:px-[25px] min-[640px]:py-10 md:float-left md:w-1/2 md:px-[50px] md:py-[73px] md:pb-[68px]"
+        :class="{ 'md:w-full': !image }"
       >
         <h2
           id="about-heading"
@@ -24,8 +29,11 @@ withDefaults(defineProps<{
           <span class="font-bold font-['Domine',Georgia,'Times_New_Roman',serif]">Us</span>
         </h2>
 
-        <p class="m-0 text-base leading-[30px] text-white">
-          Balaji Events is trusted wedding management company in india. We were Provide many differnt service in Rajasthan. We promise to set the perfect pitch for to-be and groom to celebrate their special day in grand way.
+        <p
+          v-if="description"
+          class="m-0 text-base leading-[30px] text-white"
+        >
+          {{ description }}
         </p>
 
         <NuxtLink
@@ -38,11 +46,12 @@ withDefaults(defineProps<{
       </div>
 
       <div
+        v-if="image"
         class="ourImg relative w-full overflow-hidden md:absolute md:top-0 md:right-0 md:h-full md:w-1/2"
       >
         <img
-          src="/images/about-us/aboutUs.jpg"
-          alt="Balaji Events about us"
+          :src="image"
+          alt="About us"
           class="block h-auto w-full object-cover md:hidden"
           width="800"
           height="600"
@@ -50,7 +59,8 @@ withDefaults(defineProps<{
           decoding="async"
         >
         <div
-          class="hidden h-full min-h-[320px] w-full bg-[url('/images/about-us/aboutUs.jpg')] bg-cover bg-center md:block"
+          class="hidden h-full min-h-[320px] w-full bg-cover bg-center md:block"
+          :style="{ backgroundImage: `url('${image}')` }"
           aria-hidden="true"
         />
       </div>

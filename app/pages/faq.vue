@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import { faqBreadcrumbs, faqPageHeader } from '~/data/faq'
 
+const { data: faqs } = await useFaqs()
+const { data: settings } = await useSettings()
+
 useSeoMeta({
   title: 'FAQ’s | Balaji Events',
-  description: 'Frequently asked questions about Balaji Events services, location, and contact details.',
+  description: () => settings.value?.seo?.meta_description
+    || 'Frequently asked questions about Balaji Events services and contact details.',
   ogTitle: 'FAQ’s | Balaji Events',
   twitterCard: 'summary_large_image'
 })
@@ -26,9 +30,9 @@ useSeoMeta({
         :breadcrumbs="faqBreadcrumbs"
       />
 
-      <FaqFaqList />
+      <FaqFaqList :items="faqs ?? []" />
     </main>
 
-    <HomeFooter />
+    <HomeFooter :settings="settings" />
   </div>
 </template>

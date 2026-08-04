@@ -1,11 +1,25 @@
 <script setup lang="ts">
 import { aboutBreadcrumbs, aboutPageHeader } from '~/data/about'
+import { contactBoxesFromSettings } from '~/utils/content'
+
+const { data: settings } = await useSettings()
+
+const about = computed(() => settings.value?.about ?? null)
+const contactBoxes = computed(() => contactBoxesFromSettings(settings.value))
 
 useSeoMeta({
-  title: 'About Us | Balaji Events',
-  description: 'Learn about Balaji Events — trusted wedding and event management in Rajasthan. Contact details and company information.',
+  title: () => settings.value?.seo?.meta_title
+    ? `About Us | ${settings.value.company?.name || 'Balaji Events'}`
+    : 'About Us | Balaji Events',
+  description: () => about.value?.description
+    || settings.value?.seo?.meta_description
+    || settings.value?.company?.description
+    || 'Learn about Balaji Events — wedding and event management.',
   ogTitle: 'About Us | Balaji Events',
-  ogDescription: 'Trusted wedding and event management in Rajasthan.',
+  ogDescription: () => about.value?.description
+    || settings.value?.company?.description
+    || undefined,
+  ogImage: () => about.value?.image || settings.value?.seo?.opengraph_image || undefined,
   twitterCard: 'summary_large_image'
 })
 </script>
@@ -27,13 +41,15 @@ useSeoMeta({
         :breadcrumbs="aboutBreadcrumbs"
       />
 
-      <!-- Existing About Us split section (master .aboutUs / .ourText) -->
-      <HomeAbout :show-cta="false" />
+      <HomeAbout
+        :description="about?.description"
+        :image="about?.image"
+        :show-cta="false"
+      />
 
-      <!-- Master about.html contact boxes section -->
-      <AboutAboutContactSection />
+      <AboutAboutContactSection :boxes="contactBoxes" />
     </main>
 
-    <HomeFooter />
+    <HomeFooter :settings="settings" />
   </div>
 </template>

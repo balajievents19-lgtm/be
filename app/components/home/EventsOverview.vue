@@ -2,10 +2,20 @@
 import { ref } from 'vue'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { A11y, Keyboard, Navigation } from 'swiper/modules'
-import { overviewEvents } from '~/data/home'
+import type { EventOverviewItem } from '~/types/home'
 
 import 'swiper/css'
 import 'swiper/css/navigation'
+
+withDefaults(defineProps<{
+  items?: EventOverviewItem[]
+  pending?: boolean
+  failed?: boolean
+}>(), {
+  items: () => [],
+  pending: false,
+  failed: false
+})
 
 const modules = [A11y, Keyboard, Navigation]
 const swiperRef = ref<{ slideNext: () => void, slidePrev: () => void } | null>(null)
@@ -21,6 +31,8 @@ const goNext = () => {
 const goPrev = () => {
   swiperRef.value?.slidePrev()
 }
+
+const eventLink = (item: EventOverviewItem) => item.link_url || '/services'
 </script>
 
 <template>
@@ -49,13 +61,32 @@ const goPrev = () => {
             Events Overview
           </h2>
         </div>
-
-        <p class="info-text mx-auto m-0 inline-block w-full max-w-[761px] text-center text-sm leading-7 text-[#6a6767]">
-          It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.
-        </p>
       </div>
 
-      <div class="relative mt-0 max-[991px]:px-[15px]">
+      <p
+        v-if="failed"
+        class="m-0 py-8 text-center text-sm text-[#888888]"
+        role="alert"
+      >
+        Events overview is temporarily unavailable.
+      </p>
+      <p
+        v-else-if="pending && !items.length"
+        class="m-0 py-8 text-center text-sm text-[#888888]"
+      >
+        Loading events…
+      </p>
+      <p
+        v-else-if="!items.length"
+        class="m-0 py-8 text-center text-sm text-[#888888]"
+      >
+        No events to show yet.
+      </p>
+
+      <div
+        v-else
+        class="relative mt-0 max-[991px]:px-[15px]"
+      >
         <Swiper
           :modules="modules"
           :slides-per-view="1"
@@ -71,14 +102,14 @@ const goPrev = () => {
           @swiper="onSwiper"
         >
           <SwiperSlide
-            v-for="(event, index) in overviewEvents"
-            :key="`event-${index}-${event.title}`"
+            v-for="event in items"
+            :key="event.id"
           >
             <div class="px-[15px]">
               <article class="event-box block pt-[42px] text-center">
                 <div class="group relative mb-[22px] block w-full bg-black text-center">
                   <NuxtLink
-                    :to="event.to"
+                    :to="eventLink(event)"
                     class="relative block"
                     :aria-label="event.title"
                   >
@@ -103,7 +134,7 @@ const goPrev = () => {
                       <span
                         class="absolute top-1/2 left-0 mt-[-15px] w-full text-center text-sm leading-[30px] text-white"
                       >
-                        {{ event.caption }}
+                        {{ event.caption || event.title }}
                       </span>
                     </span>
                   </NuxtLink>
@@ -122,7 +153,7 @@ const goPrev = () => {
                 </p>
 
                 <NuxtLink
-                  :to="event.to"
+                  :to="eventLink(event)"
                   class="mt-0 block text-sm leading-6 text-[#f15b25] hover:text-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
                 >
                   Readmore

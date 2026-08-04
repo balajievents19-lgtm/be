@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { ContactBox } from '~/data/contact'
-import { contactBoxes, contactInfoHeading } from '~/data/contact'
 
 withDefaults(defineProps<{
   headingId?: string
@@ -9,9 +8,9 @@ withDefaults(defineProps<{
   info?: string
 }>(), {
   headingId: 'contact-info-heading',
-  boxes: undefined,
-  title: undefined,
-  info: undefined
+  boxes: () => [],
+  title: 'Contact Us',
+  info: ''
 })
 </script>
 
@@ -39,12 +38,15 @@ withDefaults(defineProps<{
               :id="headingId"
               class="relative z-[2] m-0 inline-block bg-white px-5 text-center text-2xl font-bold leading-8 text-[#333333] font-['Domine',Georgia,'Times_New_Roman',serif]"
             >
-              {{ title ?? contactInfoHeading.title }}
+              {{ title }}
             </h2>
           </div>
 
-          <p class="info-text mx-auto m-0 inline-block w-full max-w-[761px] text-center text-sm leading-7 text-[#6a6767]">
-            {{ info ?? contactInfoHeading.info }}
+          <p
+            v-if="info"
+            class="info-text mx-auto m-0 inline-block w-full max-w-[761px] text-center text-sm leading-7 text-[#6a6767]"
+          >
+            {{ info }}
           </p>
 
           <div
@@ -55,7 +57,7 @@ withDefaults(defineProps<{
 
         <div class="-mx-[15px] flex flex-wrap">
           <div
-            v-for="(box, index) in (boxes ?? contactBoxes)"
+            v-for="(box, index) in boxes"
             :key="`contact-box-${index}`"
             class="mt-[52px] w-full px-[15px] text-center sm:w-1/3"
           >

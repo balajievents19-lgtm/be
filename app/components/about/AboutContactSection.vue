@@ -1,12 +1,22 @@
 <script setup lang="ts">
-import { aboutContactBoxes, aboutContactHeading } from '~/data/about'
+import type { ContactBox } from '~/data/contact'
+
+withDefaults(defineProps<{
+  boxes?: ContactBox[]
+  title?: string
+  info?: string
+}>(), {
+  boxes: () => [],
+  title: 'Contact Us',
+  info: ''
+})
 </script>
 
 <template>
   <ContactContactInfoCards
     heading-id="about-contact-heading"
-    :title="aboutContactHeading.title"
-    :info="aboutContactHeading.info"
-    :boxes="aboutContactBoxes"
+    :title="title"
+    :info="info"
+    :boxes="boxes"
   />
 </template>

@@ -1,9 +1,11 @@
 <script setup lang="ts">
+import type { Ref } from 'vue'
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from '#imports'
 import AppMegaMenu from '~/components/layout/AppMegaMenu.vue'
 import AppMobileMenu from '~/components/layout/AppMobileMenu.vue'
 import AppSearchPopup from '~/components/layout/AppSearchPopup.vue'
+import type { HomePayload } from '~/types/home'
 
 export interface NavigationItem {
   label: string
@@ -16,6 +18,8 @@ const props = defineProps<{
 }>()
 
 const route = useRoute()
+const home = inject<Ref<HomePayload | null> | null>('home', null)
+const logoSrc = computed(() => home?.value?.settings?.brand?.logo || '/images/logo.png')
 const isMegaMenuOpen = ref(false)
 const isMobileMenuOpen = ref(false)
 const isSearchOpen = ref(false)
@@ -120,7 +124,7 @@ onUnmounted(() => {
           aria-label="Balaji Events home"
         >
           <img
-            src="/images/logo.png"
+            :src="logoSrc"
             alt="Balaji Events"
             width="160"
             height="70"

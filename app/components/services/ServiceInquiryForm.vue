@@ -1,28 +1,64 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
 
-defineProps<{
+const props = defineProps<{
   serviceTitle: string
 }>()
+
+const { submitContact } = usePublicForms()
 
 const form = reactive({
   name: '',
   email: '',
   phone: '',
   date: '',
-  message: ''
+  message: '',
+  website: ''
 })
 
 const sent = ref(false)
+const submitting = ref(false)
+const apiError = ref('')
 
-const onSubmit = (event: Event) => {
+const onSubmit = async (event: Event) => {
   event.preventDefault()
-  sent.value = true
-  form.name = ''
-  form.email = ''
-  form.phone = ''
-  form.date = ''
-  form.message = ''
+  sent.value = false
+  apiError.value = ''
+
+  if (form.website.trim()) {
+    return
+  }
+
+  if (!form.name.trim() || !form.phone.trim()) {
+    apiError.value = 'Name and phone are required.'
+    return
+  }
+
+  submitting.value = true
+  try {
+    await submitContact({
+      name: form.name.trim(),
+      mobile: form.phone.trim(),
+      email: form.email.trim() || null,
+      subject: `Service inquiry: ${props.serviceTitle}`,
+      message: form.message.trim() || `Inquiry for ${props.serviceTitle}`,
+      service_interested: props.serviceTitle,
+      event_date: form.date.trim() || null,
+      website: ''
+    })
+    sent.value = true
+    form.name = ''
+    form.email = ''
+    form.phone = ''
+    form.date = ''
+    form.message = ''
+    form.website = ''
+  } catch (error: unknown) {
+    const err = error as { data?: { message?: string }, message?: string }
+    apiError.value = err?.data?.message || err?.message || 'Unable to send inquiry. Please try again.'
+  } finally {
+    submitting.value = false
+  }
 }
 </script>
 
@@ -38,6 +74,16 @@ const onSubmit = (event: Event) => {
       class="form-filde block px-5 pt-[5px]"
       @submit="onSubmit"
     >
+      <input
+        v-model="form.website"
+        type="text"
+        name="website"
+        tabindex="-1"
+        autocomplete="off"
+        class="absolute left-[-10000px] h-px w-px overflow-hidden"
+        aria-hidden="true"
+      >
+
       <div class="input-box mb-2.5 block w-full">
         <label
           class="sr-only"
@@ -62,7 +108,6 @@ const onSubmit = (event: Event) => {
           v-model="form.email"
           type="email"
           placeholder="Email"
-          required
           class="box-border h-[38px] w-full rounded-[3px] border border-solid border-[#cccccc] px-2.5 py-[5px] text-[13px] leading-[26px] text-[#333] italic outline-none"
         >
       </div>
@@ -76,6 +121,7 @@ const onSubmit = (event: Event) => {
           v-model="form.phone"
           type="text"
           placeholder="Phone"
+          required
           class="box-border h-[38px] w-full rounded-[3px] border border-solid border-[#cccccc] px-2.5 py-[5px] text-[13px] leading-[26px] text-[#333] italic outline-none"
         >
       </div>
@@ -108,11 +154,19 @@ const onSubmit = (event: Event) => {
       <div class="submit-box mt-0.5 block">
         <button
           type="submit"
-          class="h-[38px] w-full cursor-pointer rounded-[3px] border border-solid border-brand-500 bg-brand-500 text-sm text-white transition-colors hover:bg-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
+          :disabled="submitting"
+          class="h-[38px] w-full cursor-pointer rounded-[3px] border border-solid border-brand-500 bg-brand-500 text-sm text-white transition-colors hover:bg-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 disabled:opacity-60"
         >
           Send Inquiry
         </button>
       </div>
+      <p
+        v-if="apiError"
+        class="mt-2 text-xs text-[#ff0000]"
+        role="alert"
+      >
+        {{ apiError }}
+      </p>
       <p
         v-if="sent"
         class="mt-2 text-xs text-[#6a6767]"

@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 
 const route = useRoute()
+const { data: settings } = await useSettings()
 
 const filterQuery = computed(() =>
   String(route.query.search ?? route.query.event_type ?? '')
@@ -9,9 +10,10 @@ const filterQuery = computed(() =>
 
 useSeoMeta({
   title: 'Services | Balaji Events',
-  description: 'Explore Balaji Events services including catering, décor, event planning, photography, DJ, mehndi, cakes and more across Rajasthan.',
+  description: () => settings.value?.seo?.meta_description
+    || 'Explore Balaji Events wedding and event services.',
   ogTitle: 'Services | Balaji Events',
-  ogDescription: 'Wedding and event services by Balaji Events.',
+  ogDescription: () => settings.value?.company?.description || undefined,
   twitterCard: 'summary_large_image'
 })
 
@@ -42,6 +44,6 @@ const breadcrumbs = [
       <ServicesServicesCta />
     </main>
 
-    <HomeFooter />
+    <HomeFooter :settings="settings" />
   </div>
 </template>

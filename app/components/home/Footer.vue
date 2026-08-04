@@ -1,69 +1,122 @@
 <script setup lang="ts">
-import { computed, reactive } from 'vue'
-import type { SiteSettings } from '~/types/home'
-import {
-  footerCompanyLinks,
-  footerSocialLinks,
-  footerUpdates,
-  siteContact
-} from '~/data/home'
+import { computed, reactive, ref } from 'vue'
+import type { BlogPostItem, SiteSettings } from '~/types/home'
 
 const props = defineProps<{
   settings?: SiteSettings | null
+  updates?: BlogPostItem[]
 }>()
+
+const { submitNewsletter } = usePublicForms()
+
+const companyLinks = [
+  { label: 'Home', to: '/' },
+  { label: 'About', to: '/about' },
+  { label: 'Services', to: '/services' },
+  { label: 'Gallery', to: '/gallery' },
+  { label: 'FAQ', to: '/faq' },
+  { label: 'Contact', to: '/contact' },
+  { label: 'Blog', to: '/blog' }
+] as const
+
+const socialIconMap: Record<string, string> = {
+  facebook: 'icon-facebook',
+  twitter: 'icon-twitter',
+  linkedin: 'icon-linkedin',
+  youtube: 'icon-play',
+  instagram: 'icon-instagram'
+}
 
 const newsletter = reactive({
   firstName: '',
   lastName: '',
-  email: ''
+  email: '',
+  website: ''
 })
+
+const newsletterSubmitting = ref(false)
+const newsletterSent = ref(false)
+const newsletterError = ref('')
 
 const copyrightYear = new Date().getFullYear()
 
 const contact = computed(() => {
   const c = props.settings?.contact
-  const phone = c?.phone || siteContact.phoneDisplay
   return {
-    email: c?.email || siteContact.email,
-    phoneDisplay: phone,
-    phoneHref: `tel:${phone.replace(/[^\d+]/g, '')}`,
-    address: c?.address || siteContact.address
+    email: c?.email || '',
+    phoneDisplay: c?.phone || '',
+    phoneHref: c?.phone ? `tel:${c.phone.replace(/[^\d+]/g, '')}` : '',
+    address: c?.address || ''
   }
 })
 
 const socialLinks = computed(() => {
   const social = props.settings?.social
   if (!social) {
-    return footerSocialLinks
+    return []
   }
 
-  return footerSocialLinks.map((link) => {
-    if (link.label === 'Facebook' && social.facebook) {
-      return { ...link, href: social.facebook }
-    }
-    if (link.label === 'Twitter' && social.twitter) {
-      return { ...link, href: social.twitter }
-    }
-    if (link.label === 'LinkedIn' && social.linkedin) {
-      return { ...link, href: social.linkedin }
-    }
-    if (link.label === 'YouTube' && social.youtube) {
-      return { ...link, href: social.youtube }
-    }
-    return link
-  })
+  return (Object.keys(socialIconMap) as Array<keyof typeof socialIconMap>)
+    .map((key) => {
+      const href = social[key as keyof typeof social]
+      if (!href) {
+        return null
+      }
+      return {
+        key,
+        href,
+        icon: socialIconMap[key],
+        label: key.charAt(0).toUpperCase() + key.slice(1)
+      }
+    })
+    .filter((link): link is NonNullable<typeof link> => link !== null)
 })
+
+const latestUpdates = computed(() => (props.updates ?? []).slice(0, 3))
+
+const updateImage = (post: BlogPostItem) => post.thumbnail || post.featured_image || ''
+
+const updateText = (post: BlogPostItem) => post.excerpt || post.title
 
 const copyrightText = computed(() =>
   props.settings?.footer?.copyright_text
   || `Copyright © ${copyrightYear} - BalajiEvents | All Rights Reserved`
 )
 
-const onNewsletterSubmit = (event: Event) => {
+const onNewsletterSubmit = async (event: Event) => {
   event.preventDefault()
-  newsletter.firstName = ''
-  newsletter.lastName = ''
-  newsletter.email = ''
+  newsletterSent.value = false
+  newsletterError.value = ''
+
+  if (newsletter.website.trim()) {
+    return
+  }
+
+  const email = newsletter.email.trim()
+  if (!email) {
+    newsletterError.value = 'Email is required.'
+    return
+  }
+
+  newsletterSubmitting.value = true
+  try {
+    await submitNewsletter({
+      first_name: newsletter.firstName.trim() || null,
+      last_name: newsletter.lastName.trim() || null,
+      email,
+      website: ''
+    })
+    newsletterSent.value = true
+    newsletter.firstName = ''
+    newsletter.lastName = ''
+    newsletter.email = ''
+    newsletter.website = ''
+  } catch (error: unknown) {
+    const err = error as { data?: { message?: string }, message?: string }
+    newsletterError.value = err?.data?.message || err?.message || 'Unable to subscribe. Please try again.'
+  } finally {
+    newsletterSubmitting.value = false
+  }
 }
 </script>
 
@@ -83,14 +136,18 @@ const onNewsletterSubmit = (event: Event) => {
             </h5>
 
             <div
-              v-for="(item, index) in footerUpdates"
-              :key="`update-${index}`"
-              class="relative my-[3px] mb-[7px] inline-block min-h-14 w-full pl-[70px]"
+              v-for="item in latestUpdates"
+              :key="item.id"
+              class="relative my-[3px] mb-[7px] inline-block min-h-14 w-full"
+              :class="{ 'pl-[70px]': !!updateImage(item) }"
             >
-              <div class="absolute top-0 left-0 w-[60px] border border-solid border-[#b69c9c]">
+              <div
+                v-if="updateImage(item)"
+                class="absolute top-0 left-0 w-[60px] border border-solid border-[#b69c9c]"
+              >
                 <img
-                  :src="item.image"
-                  alt=""
+                  :src="updateImage(item)"
+                  :alt="item.alt_text || item.title"
                   class="block h-auto w-full"
                   width="60"
                   height="60"
@@ -100,10 +157,10 @@ const onNewsletterSubmit = (event: Event) => {
               </div>
               <div>
                 <p class="m-0 text-xs leading-[18px] text-[#83879b]">
-                  {{ item.text }}
+                  {{ updateText(item) }}
                 </p>
                 <NuxtLink
-                  :to="item.to"
+                  :to="`/blog/${item.slug}`"
                   class="text-[13px] leading-[18px] text-brand-600 no-underline transition-colors hover:text-[#fffffe] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
                 >
                   Read More
@@ -121,7 +178,7 @@ const onNewsletterSubmit = (event: Event) => {
               </h5>
               <ul class="m-0 list-none p-0">
                 <li
-                  v-for="link in footerCompanyLinks"
+                  v-for="link in companyLinks"
                   :key="link.label"
                   class="group"
                 >
@@ -144,7 +201,10 @@ const onNewsletterSubmit = (event: Event) => {
                 Contact us
               </h5>
 
-              <div class="relative pb-[7px] pl-5">
+              <div
+                v-if="contact.address"
+                class="relative pb-[7px] pl-5"
+              >
                 <span
                   class="icon icon-location-1 absolute top-1 left-0 text-[#85889b]"
                   aria-hidden="true"
@@ -154,7 +214,10 @@ const onNewsletterSubmit = (event: Event) => {
                 </p>
               </div>
 
-              <div class="relative pb-[7px] pl-5">
+              <div
+                v-if="contact.phoneDisplay"
+                class="relative pb-[7px] pl-5"
+              >
                 <span
                   class="icon icon-phone absolute top-1 left-0 text-[#85889b]"
                   aria-hidden="true"
@@ -167,7 +230,10 @@ const onNewsletterSubmit = (event: Event) => {
                 </p>
               </div>
 
-              <div class="group relative pb-[7px] pl-5">
+              <div
+                v-if="contact.email"
+                class="group relative pb-[7px] pl-5"
+              >
                 <span
                   class="icon icon-message absolute top-1 left-0 text-[#85889b] transition-colors group-hover:text-white"
                   aria-hidden="true"
@@ -197,6 +263,16 @@ const onNewsletterSubmit = (event: Event) => {
                 novalidate
                 @submit="onNewsletterSubmit"
               >
+                <input
+                  v-model="newsletter.website"
+                  type="text"
+                  name="website"
+                  tabindex="-1"
+                  autocomplete="off"
+                  class="absolute left-[-10000px] h-px w-px overflow-hidden"
+                  aria-hidden="true"
+                >
+
                 <div class="relative clear-both -mx-[5px]">
                   <div class="mb-2.5 w-1/2 float-left px-[5px]">
                     <label
@@ -246,26 +322,46 @@ const onNewsletterSubmit = (event: Event) => {
                   <div class="absolute top-0 right-[5px] w-[72px]">
                     <button
                       type="submit"
-                      class="h-[29px] w-full border-none bg-brand-500 text-center text-xs text-white transition-colors duration-1000 hover:bg-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                      :disabled="newsletterSubmitting"
+                      class="h-[29px] w-full border-none bg-brand-500 text-center text-xs text-white transition-colors duration-1000 hover:bg-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:opacity-60"
                     >
                       Submit
                     </button>
                   </div>
                 </div>
+
+                <p
+                  v-if="newsletterError"
+                  class="mt-1 text-xs text-brand-500"
+                  role="alert"
+                >
+                  {{ newsletterError }}
+                </p>
+                <p
+                  v-if="newsletterSent"
+                  class="mt-1 text-xs text-[#85889b]"
+                  role="status"
+                >
+                  Subscribed. Thank you!
+                </p>
               </form>
 
-              <div class="inline-block w-full pt-[13px]">
+              <div
+                v-if="socialLinks.length"
+                class="inline-block w-full pt-[13px]"
+              >
                 <ul class="m-0 list-none p-0">
                   <li
                     v-for="social in socialLinks"
-                    :key="social.label"
+                    :key="social.key"
                     class="mr-[6px] inline-block align-top last:mr-0"
                   >
                     <a
                       :href="social.href"
                       :aria-label="social.label"
+                      target="_blank"
+                      rel="noopener noreferrer"
                       class="block h-[26px] w-[26px] rounded-full bg-navy-400 text-center transition-colors hover:bg-brand-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
-                      @click.prevent
                     >
                       <span
                         :class="['icon', social.icon, 'mt-0.5 inline-block w-full text-center leading-[26px] text-white']"

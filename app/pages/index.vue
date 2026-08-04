@@ -6,17 +6,38 @@ provide('home', home)
 const settings = computed(() => home.value?.settings ?? null)
 const hero = computed(() => home.value?.hero ?? [])
 const featuredServices = computed(() => home.value?.featured_services ?? [])
+const eventsOverview = computed(() => home.value?.events_overview ?? [])
 const featuredGallery = computed(() => home.value?.featured_gallery ?? [])
+const testimonials = computed(() => home.value?.testimonials ?? [])
+const successStories = computed(() => home.value?.success_stories ?? [])
+const featuredBlog = computed(() => home.value?.featured_blog ?? [])
 
 useSeoMeta({
   title: () => settings.value?.seo?.meta_title || 'Balaji Events | Every Event Should be Perfect',
   description: () => settings.value?.seo?.meta_description
-    || 'Balaji Events is a trusted wedding and event management company in Rajasthan offering planning, décor, catering and entertainment services.',
-  ogTitle: () => settings.value?.seo?.meta_title || 'Balaji Events',
+    || settings.value?.company?.description
+    || 'Balaji Events wedding and event management.',
+  ogTitle: () => settings.value?.seo?.meta_title || settings.value?.company?.name || 'Balaji Events',
   ogDescription: () => settings.value?.seo?.meta_description
-    || 'Trusted wedding and event management in Rajasthan.',
+    || settings.value?.company?.description
+    || undefined,
   ogImage: () => settings.value?.seo?.opengraph_image || undefined,
   twitterCard: 'summary_large_image'
+})
+
+useHead(() => {
+  const schema = home.value?.faq_schema
+  if (!schema) {
+    return {}
+  }
+  return {
+    script: [
+      {
+        type: 'application/ld+json',
+        innerHTML: JSON.stringify(schema)
+      }
+    ]
+  }
 })
 </script>
 
@@ -43,16 +64,32 @@ useSeoMeta({
         :pending="pending"
         :failed="failed"
       />
-      <HomeEventsOverview />
+      <HomeEventsOverview
+        :items="eventsOverview"
+        :pending="pending"
+        :failed="failed"
+      />
       <HomeGallery
         :items="featuredGallery"
         :pending="pending"
         :failed="failed"
       />
-      <HomeTestimonials />
-      <HomeLatestNews />
+      <HomeTestimonials
+        :testimonials="testimonials"
+        :success-stories="successStories"
+        :pending="pending"
+        :failed="failed"
+      />
+      <HomeLatestNews
+        :posts="featuredBlog"
+        :pending="pending"
+        :failed="failed"
+      />
     </main>
 
-    <HomeFooter :settings="settings" />
+    <HomeFooter
+      :settings="settings"
+      :updates="featuredBlog"
+    />
   </div>
 </template>

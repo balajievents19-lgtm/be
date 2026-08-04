@@ -1,10 +1,23 @@
 <script setup lang="ts">
 import { contactBreadcrumbs, contactPageHeader } from '~/data/contact'
+import { contactBoxesFromSettings } from '~/utils/content'
+
+const { data: settings } = await useSettings()
+
+const contactBoxes = computed(() => contactBoxesFromSettings(settings.value))
 
 useSeoMeta({
-  title: 'Contact Us | Balaji Events',
-  description: 'Contact Balaji Events in Jhunjhunu, Rajasthan. Phone, address, email, and contact form.',
+  title: () => settings.value?.seo?.meta_title
+    ? `Contact Us | ${settings.value.company?.name || 'Balaji Events'}`
+    : 'Contact Us | Balaji Events',
+  description: () => settings.value?.seo?.meta_description
+    || settings.value?.company?.description
+    || 'Contact Balaji Events. Phone, address, email, and contact form.',
   ogTitle: 'Contact Us | Balaji Events',
+  ogDescription: () => settings.value?.seo?.meta_description
+    || settings.value?.company?.description
+    || undefined,
+  ogImage: () => settings.value?.seo?.opengraph_image || undefined,
   twitterCard: 'summary_large_image'
 })
 </script>
@@ -26,13 +39,11 @@ useSeoMeta({
         :breadcrumbs="contactBreadcrumbs"
       />
 
-      <!-- Master contact.html: contact boxes -->
-      <ContactContactInfoCards />
+      <ContactContactInfoCards :boxes="contactBoxes" />
 
-      <!-- Master contact.html: contact form -->
       <ContactContactForm />
     </main>
 
-    <HomeFooter />
+    <HomeFooter :settings="settings" />
   </div>
 </template>

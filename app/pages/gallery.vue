@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { galleryBreadcrumbs, galleryPageHeader } from '~/data/gallery'
 
+const { data: settings } = await useSettings()
+
 useSeoMeta({
   title: 'Gallery | Balaji Events',
-  description: 'Browse Balaji Events gallery photos from weddings and celebrations across Rajasthan.',
+  description: () => settings.value?.seo?.meta_description
+    || 'Browse Balaji Events gallery photos from weddings and celebrations.',
   ogTitle: 'Gallery | Balaji Events',
   twitterCard: 'summary_large_image'
 })
@@ -29,6 +32,6 @@ useSeoMeta({
       <GalleryGalleryGrid />
     </main>
 
-    <HomeFooter />
+    <HomeFooter :settings="settings" />
   </div>
 </template>

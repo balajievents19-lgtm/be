@@ -1,43 +1,76 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
 
+const { submitContact } = usePublicForms()
+
 const form = reactive({
   name: '',
+  mobile: '',
   email: '',
   subject: '',
-  message: ''
+  message: '',
+  website: ''
 })
 
 const errors = reactive({
   name: '',
+  mobile: '',
   email: '',
   subject: '',
   message: ''
 })
 
 const submitted = ref(false)
+const submitting = ref(false)
+const apiError = ref('')
 
 const validate = () => {
   errors.name = form.name.trim() ? '' : 'Name cannot be blank.'
+  errors.mobile = form.mobile.trim() ? '' : 'Phone cannot be blank.'
   errors.email = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())
     ? ''
     : 'Incorrect e-mail address'
   errors.subject = form.subject.trim() ? '' : 'Subject cannot be blank.'
   errors.message = form.message.trim() ? '' : 'Message cannot be blank.'
-  return !errors.name && !errors.email && !errors.subject && !errors.message
+  return !errors.name && !errors.mobile && !errors.email && !errors.subject && !errors.message
 }
 
-const onSubmit = (event: Event) => {
+const onSubmit = async (event: Event) => {
   event.preventDefault()
   submitted.value = false
+  apiError.value = ''
+
+  if (form.website.trim()) {
+    return
+  }
+
   if (!validate()) {
     return
   }
-  submitted.value = true
-  form.name = ''
-  form.email = ''
-  form.subject = ''
-  form.message = ''
+
+  submitting.value = true
+  try {
+    await submitContact({
+      name: form.name.trim(),
+      mobile: form.mobile.trim(),
+      email: form.email.trim(),
+      subject: form.subject.trim(),
+      message: form.message.trim(),
+      website: ''
+    })
+    submitted.value = true
+    form.name = ''
+    form.mobile = ''
+    form.email = ''
+    form.subject = ''
+    form.message = ''
+    form.website = ''
+  } catch (error: unknown) {
+    const err = error as { data?: { message?: string }, message?: string }
+    apiError.value = err?.data?.message || err?.message || 'Unable to send your message. Please try again.'
+  } finally {
+    submitting.value = false
+  }
 }
 </script>
 
@@ -59,6 +92,16 @@ const onSubmit = (event: Event) => {
         novalidate
         @submit="onSubmit"
       >
+        <input
+          v-model="form.website"
+          type="text"
+          name="website"
+          tabindex="-1"
+          autocomplete="off"
+          class="absolute left-[-10000px] h-px w-px overflow-hidden"
+          aria-hidden="true"
+        >
+
         <div class="w-full px-[15px] md:w-1/2">
           <div class="mb-[22px]">
             <label
@@ -80,6 +123,29 @@ const onSubmit = (event: Event) => {
               class="mt-1 text-xs text-[#ff0000]"
             >
               {{ errors.name }}
+            </p>
+          </div>
+
+          <div class="mb-[22px]">
+            <label
+              class="mb-1.5 block font-normal text-[#666]"
+              for="contact-mobile"
+            >
+              Phone <sup class="top-[-0.1em] text-base text-[#ff0000]">*</sup>
+            </label>
+            <input
+              id="contact-mobile"
+              v-model="form.mobile"
+              type="tel"
+              name="mobile"
+              autocomplete="tel"
+              class="box-border h-[38px] w-full border border-solid border-[#e8e8e8] px-2.5 py-2.5 text-sm text-[#333] outline-none"
+            >
+            <p
+              v-if="errors.mobile"
+              class="mt-1 text-xs text-[#ff0000]"
+            >
+              {{ errors.mobile }}
             </p>
           </div>
 
@@ -153,10 +219,19 @@ const onSubmit = (event: Event) => {
 
           <button
             type="submit"
-            class="float-right w-[170px] cursor-pointer rounded-[3px] border border-solid border-brand-500 bg-brand-500 py-[14px] text-center text-lg leading-5 text-white shadow-[inset_0_1px_0_#e0a97f] transition-colors duration-1000 hover:border-brand-600 hover:bg-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
+            :disabled="submitting"
+            class="float-right w-[170px] cursor-pointer rounded-[3px] border border-solid border-brand-500 bg-brand-500 py-[14px] text-center text-lg leading-5 text-white shadow-[inset_0_1px_0_#e0a97f] transition-colors duration-1000 hover:border-brand-600 hover:bg-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 disabled:opacity-60"
           >
             Submit
           </button>
+
+          <p
+            v-if="apiError"
+            class="clear-both mt-4 text-sm text-[#ff0000]"
+            role="alert"
+          >
+            {{ apiError }}
+          </p>
 
           <p
             v-if="submitted"

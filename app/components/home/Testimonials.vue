@@ -1,11 +1,25 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { A11y, Keyboard, Navigation } from 'swiper/modules'
-import { successStories, testimonials } from '~/data/home'
+import type { TestimonialItem } from '~/types/home'
 
 import 'swiper/css'
 import 'swiper/css/navigation'
+
+const props = withDefaults(defineProps<{
+  testimonials?: TestimonialItem[]
+  successStories?: TestimonialItem[]
+  pending?: boolean
+  failed?: boolean
+}>(), {
+  testimonials: () => [],
+  successStories: () => [],
+  pending: false,
+  failed: false
+})
+
+const { submitContact } = usePublicForms()
 
 const modules = [A11y, Keyboard, Navigation]
 const swiperRef = ref<{ slideNext: () => void, slidePrev: () => void } | null>(null)
@@ -13,17 +27,26 @@ const swiperRef = ref<{ slideNext: () => void, slidePrev: () => void } | null>(n
 const shareForm = reactive({
   name: '',
   email: '',
+  mobile: '',
   photoName: '',
-  story: ''
+  story: '',
+  website: ''
 })
 
 const shareErrors = reactive({
   name: '',
   email: '',
+  mobile: '',
   story: ''
 })
 
+const shareSubmitting = ref(false)
+const shareSent = ref(false)
+const shareApiError = ref('')
 const fileInputRef = ref<HTMLInputElement | null>(null)
+
+const hasTestimonials = computed(() => props.testimonials.length > 0)
+const hasStories = computed(() => props.successStories.length > 0)
 
 const onSwiper = (swiper: { slideNext: () => void, slidePrev: () => void }) => {
   swiperRef.value = swiper
@@ -45,25 +68,51 @@ const onPhotoChange = (event: Event) => {
 
 const validateEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
 
-const onShareSubmit = (event: Event) => {
+const onShareSubmit = async (event: Event) => {
   event.preventDefault()
+  shareSent.value = false
+  shareApiError.value = ''
 
-  shareErrors.name = shareForm.name.trim() ? '' : 'Name cannot be blank.'
-  shareErrors.email = shareForm.email.trim()
-    ? (validateEmail(shareForm.email.trim()) ? '' : 'Incorrect e-mail address')
-    : 'Incorrect e-mail address'
-  shareErrors.story = shareForm.story.trim() ? '' : 'Story cannot be blank.'
-
-  if (shareErrors.name || shareErrors.email || shareErrors.story) {
+  if (shareForm.website.trim()) {
     return
   }
 
-  shareForm.name = ''
-  shareForm.email = ''
-  shareForm.photoName = ''
-  shareForm.story = ''
-  if (fileInputRef.value) {
-    fileInputRef.value.value = ''
+  shareErrors.name = shareForm.name.trim() ? '' : 'Name cannot be blank.'
+  shareErrors.mobile = shareForm.mobile.trim() ? '' : 'Phone cannot be blank.'
+  shareErrors.email = shareForm.email.trim()
+    ? (validateEmail(shareForm.email.trim()) ? '' : 'Incorrect e-mail address')
+    : ''
+  shareErrors.story = shareForm.story.trim() ? '' : 'Story cannot be blank.'
+
+  if (shareErrors.name || shareErrors.mobile || shareErrors.email || shareErrors.story) {
+    return
+  }
+
+  shareSubmitting.value = true
+  try {
+    await submitContact({
+      name: shareForm.name.trim(),
+      mobile: shareForm.mobile.trim(),
+      email: shareForm.email.trim() || null,
+      subject: 'Share Your Story',
+      message: shareForm.story.trim(),
+      website: ''
+    })
+    shareSent.value = true
+    shareForm.name = ''
+    shareForm.email = ''
+    shareForm.mobile = ''
+    shareForm.photoName = ''
+    shareForm.story = ''
+    shareForm.website = ''
+    if (fileInputRef.value) {
+      fileInputRef.value.value = ''
+    }
+  } catch (error: unknown) {
+    const err = error as { data?: { message?: string }, message?: string }
+    shareApiError.value = err?.data?.message || err?.message || 'Unable to submit your story. Please try again.'
+  } finally {
+    shareSubmitting.value = false
   }
 }
 </script>
@@ -108,7 +157,30 @@ const onShareSubmit = (event: Event) => {
         </div>
       </div>
 
-      <div class="relative mt-[21px]">
+      <p
+        v-if="failed"
+        class="m-0 mt-[21px] py-8 text-center text-sm text-white/80"
+        role="alert"
+      >
+        Testimonials are temporarily unavailable.
+      </p>
+      <p
+        v-else-if="pending && !hasTestimonials"
+        class="m-0 mt-[21px] py-8 text-center text-sm text-white/80"
+      >
+        Loading testimonials…
+      </p>
+      <p
+        v-else-if="!hasTestimonials"
+        class="m-0 mt-[21px] py-8 text-center text-sm text-white/80"
+      >
+        No client stories to show yet.
+      </p>
+
+      <div
+        v-else
+        class="relative mt-[21px]"
+      >
         <Swiper
           :modules="modules"
           :slides-per-view="1"
@@ -119,8 +191,8 @@ const onShareSubmit = (event: Event) => {
           @swiper="onSwiper"
         >
           <SwiperSlide
-            v-for="(item, index) in testimonials"
-            :key="`testimonial-${index}`"
+            v-for="item in testimonials"
+            :key="item.id"
           >
             <div
               class="friends-info relative mt-0 block min-h-0 p-0 min-[768px]:min-h-[315px] min-[768px]:pl-[315px]"
@@ -128,6 +200,7 @@ const onShareSubmit = (event: Event) => {
               <div class="friend-img relative w-full text-center min-[768px]:absolute min-[768px]:top-0 min-[768px]:left-0 min-[768px]:m-0 min-[768px]:w-auto">
                 <div class="relative inline-block w-[278px] overflow-hidden px-[50px] py-[55px]">
                   <img
+                    v-if="item.avatar"
                     :src="item.avatar"
                     :alt="item.name"
                     width="178"
@@ -240,12 +313,20 @@ const onShareSubmit = (event: Event) => {
               </NuxtLink>
             </h2>
 
+            <p
+              v-if="!hasStories"
+              class="m-0 mt-[27px] text-sm leading-6 text-[#888888]"
+            >
+              No success stories to show yet.
+            </p>
+
             <article
               v-for="story in successStories"
-              :key="story.name"
+              :key="story.id"
               class="relative mt-[27px] block p-0 pt-1.5 min-[768px]:pl-[100px] max-[479px]:p-0"
             >
               <div
+                v-if="story.image"
                 class="absolute top-0 left-[7px] w-[74px] overflow-hidden rounded-full border-2 border-solid border-[#c6c6c6] max-[479px]:static max-[479px]:mx-auto max-[479px]:mb-2.5"
               >
                 <img
@@ -261,7 +342,7 @@ const onShareSubmit = (event: Event) => {
 
               <div>
                 <p class="m-0 text-sm leading-6 text-[#888888]">
-                  {{ story.text }}
+                  {{ story.body }}
                 </p>
                 <div class="block text-right text-sm leading-6 text-black italic">
                   - {{ story.name }}
@@ -283,6 +364,16 @@ const onShareSubmit = (event: Event) => {
               novalidate
               @submit="onShareSubmit"
             >
+              <input
+                v-model="shareForm.website"
+                type="text"
+                name="website"
+                tabindex="-1"
+                autocomplete="off"
+                class="absolute left-[-10000px] h-px w-px overflow-hidden"
+                aria-hidden="true"
+              >
+
               <div class="mb-2.5">
                 <label
                   class="sr-only"
@@ -301,6 +392,27 @@ const onShareSubmit = (event: Event) => {
                   class="mt-1 text-xs text-brand-600"
                 >
                   {{ shareErrors.name }}
+                </p>
+              </div>
+
+              <div class="mb-2.5">
+                <label
+                  class="sr-only"
+                  for="share-mobile"
+                >Phone</label>
+                <input
+                  id="share-mobile"
+                  v-model="shareForm.mobile"
+                  type="tel"
+                  placeholder="Phone"
+                  class="h-10 w-full rounded-[5px] border border-solid border-[#cacbcb] bg-white px-2.5 py-2.5 text-sm leading-[18px] text-[#333] italic outline-none"
+                  autocomplete="tel"
+                >
+                <p
+                  v-if="shareErrors.mobile"
+                  class="mt-1 text-xs text-brand-600"
+                >
+                  {{ shareErrors.mobile }}
                 </p>
               </div>
 
@@ -374,11 +486,27 @@ const onShareSubmit = (event: Event) => {
               <div>
                 <button
                   type="submit"
-                  class="w-full rounded-[3px] border border-solid border-brand-500 bg-brand-500 py-[9px] text-center text-lg leading-5 text-white shadow-[inset_0_1px_0_#e0a97f] transition-colors duration-1000 hover:bg-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
+                  :disabled="shareSubmitting"
+                  class="w-full rounded-[3px] border border-solid border-brand-500 bg-brand-500 py-[9px] text-center text-lg leading-5 text-white shadow-[inset_0_1px_0_#e0a97f] transition-colors duration-1000 hover:bg-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 disabled:opacity-60"
                 >
                   Share Your Story
                 </button>
               </div>
+
+              <p
+                v-if="shareApiError"
+                class="mt-2 text-xs text-brand-600"
+                role="alert"
+              >
+                {{ shareApiError }}
+              </p>
+              <p
+                v-if="shareSent"
+                class="mt-2 text-xs text-[#6a6767]"
+                role="status"
+              >
+                Thank you for sharing your story.
+              </p>
             </form>
           </div>
         </div>

@@ -1,9 +1,31 @@
 <script setup lang="ts">
-import { latestNews } from '~/data/home'
+import { computed } from 'vue'
+import type { BlogPostItem } from '~/types/home'
+import { formatBlogDate } from '~/utils/content'
 
-const featured = latestNews.find(item => item.variant === 'featured')!
-const textCards = latestNews.filter(item => item.variant === 'text')
-const sideCard = latestNews.find(item => item.variant === 'side')!
+const props = withDefaults(defineProps<{
+  posts?: BlogPostItem[]
+  pending?: boolean
+  failed?: boolean
+}>(), {
+  posts: () => [],
+  pending: false,
+  failed: false
+})
+
+const featured = computed(() => props.posts[0] ?? null)
+const textCards = computed(() => props.posts.slice(1, 3))
+const sideCard = computed(() => props.posts[3] ?? null)
+
+const postImage = (post: BlogPostItem) => post.featured_image || post.thumbnail || ''
+
+const postMeta = (post: BlogPostItem) => {
+  const date = formatBlogDate(post.published_at)
+  if (post.author && date) {
+    return `${post.author} on ${date}`
+  }
+  return post.author || date
+}
 </script>
 
 <template>
@@ -32,20 +54,45 @@ const sideCard = latestNews.find(item => item.variant === 'side')!
             Latest News
           </h2>
         </div>
-
-        <p class="mx-auto m-0 inline-block w-full max-w-[761px] text-center text-sm leading-7 text-[#6a6767]">
-          It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.
-        </p>
       </div>
 
-      <div class="-mx-[15px] flex flex-wrap">
+      <p
+        v-if="failed"
+        class="m-0 py-8 text-center text-sm text-[#888888]"
+        role="alert"
+      >
+        Latest news is temporarily unavailable.
+      </p>
+      <p
+        v-else-if="pending && !posts.length"
+        class="m-0 py-8 text-center text-sm text-[#888888]"
+      >
+        Loading news…
+      </p>
+      <p
+        v-else-if="!posts.length"
+        class="m-0 py-8 text-center text-sm text-[#888888]"
+      >
+        No news to show yet.
+      </p>
+
+      <div
+        v-else
+        class="-mx-[15px] flex flex-wrap"
+      >
         <div class="w-full px-[15px] min-[992px]:w-2/3">
-          <article class="news-box mb-[30px] bg-white">
+          <article
+            v-if="featured"
+            class="news-box mb-[30px] bg-white"
+          >
             <div class="-mx-[15px] flex flex-wrap">
-              <div class="w-full px-[15px] min-[768px]:w-1/2">
+              <div
+                v-if="postImage(featured)"
+                class="w-full px-[15px] min-[768px]:w-1/2"
+              >
                 <img
-                  :src="featured.image"
-                  :alt="featured.title"
+                  :src="postImage(featured)"
+                  :alt="featured.alt_text || featured.title"
                   class="block h-auto w-full"
                   width="770"
                   height="420"
@@ -53,25 +100,34 @@ const sideCard = latestNews.find(item => item.variant === 'side')!
                   decoding="async"
                 >
               </div>
-              <div class="w-full px-[15px] min-[768px]:w-1/2">
+              <div
+                class="w-full px-[15px]"
+                :class="postImage(featured) ? 'min-[768px]:w-1/2' : ''"
+              >
                 <div class="px-5 pt-[35px] pb-11 max-[1199px]:py-[15px] max-[767px]:p-[30px]">
                   <div class="relative mb-[34px] pb-[15px] max-[1199px]:mb-2.5">
                     <h3 class="m-0 block font-['Domine',Georgia,'Times_New_Roman',serif] text-2xl font-bold leading-9 text-[#333333]">
                       {{ featured.title }}
                     </h3>
-                    <span class="block text-sm leading-6 text-[#666]">
-                      {{ featured.author }} on {{ featured.date }}
+                    <span
+                      v-if="postMeta(featured)"
+                      class="block text-sm leading-6 text-[#666]"
+                    >
+                      {{ postMeta(featured) }}
                     </span>
                     <span
                       class="absolute bottom-0 left-0 h-px w-16 bg-[#cccccc]"
                       aria-hidden="true"
                     />
                   </div>
-                  <p class="m-0 w-full max-w-[280px] pb-6 text-sm leading-6 text-[#666]">
+                  <p
+                    v-if="featured.excerpt"
+                    class="m-0 w-full max-w-[280px] pb-6 text-sm leading-6 text-[#666]"
+                  >
                     {{ featured.excerpt }}
                   </p>
                   <NuxtLink
-                    :to="featured.to"
+                    :to="`/blog/${featured.slug}`"
                     class="inline-block rounded-[3px] border border-solid border-brand-500 bg-brand-500 px-7 py-[9px] text-center text-lg leading-5 text-white shadow-[inset_0_1px_0_#e0a97f] transition-colors duration-1000 hover:bg-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
                   >
                     Read More
@@ -81,10 +137,13 @@ const sideCard = latestNews.find(item => item.variant === 'side')!
             </div>
           </article>
 
-          <div class="-mx-[15px] flex flex-wrap">
+          <div
+            v-if="textCards.length"
+            class="-mx-[15px] flex flex-wrap"
+          >
             <div
-              v-for="(card, index) in textCards"
-              :key="`news-text-${index}`"
+              v-for="card in textCards"
+              :key="card.id"
               class="w-full px-[15px] min-[768px]:w-1/2"
             >
               <article class="news-box style2 mb-[30px] bg-white">
@@ -93,19 +152,25 @@ const sideCard = latestNews.find(item => item.variant === 'side')!
                     <h3 class="m-0 block font-['Domine',Georgia,'Times_New_Roman',serif] text-2xl font-bold leading-9 text-[#333333]">
                       {{ card.title }}
                     </h3>
-                    <span class="block text-sm leading-6 text-[#666]">
-                      {{ card.author }} on {{ card.date }}
+                    <span
+                      v-if="postMeta(card)"
+                      class="block text-sm leading-6 text-[#666]"
+                    >
+                      {{ postMeta(card) }}
                     </span>
                     <span
                       class="absolute bottom-0 left-0 h-px w-16 bg-[#cccccc]"
                       aria-hidden="true"
                     />
                   </div>
-                  <p class="m-0 w-full max-w-[280px] pb-6 text-sm leading-6 text-[#666]">
+                  <p
+                    v-if="card.excerpt"
+                    class="m-0 w-full max-w-[280px] pb-6 text-sm leading-6 text-[#666]"
+                  >
                     {{ card.excerpt }}
                   </p>
                   <NuxtLink
-                    :to="card.to"
+                    :to="`/blog/${card.slug}`"
                     class="inline-block rounded-[3px] border border-solid border-brand-500 bg-brand-500 px-7 py-[9px] text-center text-lg leading-5 text-white shadow-[inset_0_1px_0_#e0a97f] transition-colors duration-1000 hover:bg-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
                   >
                     Read More
@@ -116,12 +181,16 @@ const sideCard = latestNews.find(item => item.variant === 'side')!
           </div>
         </div>
 
-        <div class="w-full px-[15px] min-[992px]:w-1/3">
+        <div
+          v-if="sideCard"
+          class="w-full px-[15px] min-[992px]:w-1/3"
+        >
           <article class="news-box style3 mb-[30px] overflow-hidden bg-white">
             <div class="max-[991px]:overflow-hidden max-[767px]:block">
               <img
-                :src="sideCard.image"
-                :alt="sideCard.title"
+                v-if="postImage(sideCard)"
+                :src="postImage(sideCard)"
+                :alt="sideCard.alt_text || sideCard.title"
                 class="block h-auto w-full max-[991px]:float-left max-[991px]:w-1/2 max-[991px]:pr-[15px] max-[767px]:float-none max-[767px]:w-full max-[767px]:pr-0"
                 width="370"
                 height="240"
@@ -135,19 +204,25 @@ const sideCard = latestNews.find(item => item.variant === 'side')!
                   <h3 class="m-0 block font-['Domine',Georgia,'Times_New_Roman',serif] text-2xl font-bold leading-9 text-[#333333]">
                     {{ sideCard.title }}
                   </h3>
-                  <span class="block text-sm leading-6 text-[#666]">
-                    {{ sideCard.author }} on {{ sideCard.date }}
+                  <span
+                    v-if="postMeta(sideCard)"
+                    class="block text-sm leading-6 text-[#666]"
+                  >
+                    {{ postMeta(sideCard) }}
                   </span>
                   <span
                     class="absolute bottom-0 left-0 h-px w-16 bg-[#cccccc]"
                     aria-hidden="true"
                   />
                 </div>
-                <p class="m-0 w-full max-w-[280px] pb-6 text-sm leading-6 text-[#666]">
+                <p
+                  v-if="sideCard.excerpt"
+                  class="m-0 w-full max-w-[280px] pb-6 text-sm leading-6 text-[#666]"
+                >
                   {{ sideCard.excerpt }}
                 </p>
                 <NuxtLink
-                  :to="sideCard.to"
+                  :to="`/blog/${sideCard.slug}`"
                   class="inline-block rounded-[3px] border border-solid border-brand-500 bg-brand-500 px-7 py-[9px] text-center text-lg leading-5 text-white shadow-[inset_0_1px_0_#e0a97f] transition-colors duration-1000 hover:bg-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
                 >
                   Read More
