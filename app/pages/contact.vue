@@ -20,6 +20,12 @@ useSeoMeta({
   ogImage: () => settings.value?.seo?.opengraph_image || undefined,
   twitterCard: 'summary_large_image'
 })
+
+useHead(() => ({
+  link: settings.value?.seo?.canonical_url
+    ? [{ rel: 'canonical' as const, href: `${settings.value.seo.canonical_url.replace(/\/$/, '')}/contact` }]
+    : []
+}))
 </script>
 
 <template>

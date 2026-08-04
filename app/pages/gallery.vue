@@ -8,8 +8,17 @@ useSeoMeta({
   description: () => settings.value?.seo?.meta_description
     || 'Browse Balaji Events gallery photos from weddings and celebrations.',
   ogTitle: 'Gallery | Balaji Events',
+  ogDescription: () => settings.value?.seo?.meta_description
+    || 'Browse Balaji Events gallery photos from weddings and celebrations.',
+  ogImage: () => settings.value?.seo?.opengraph_image || undefined,
   twitterCard: 'summary_large_image'
 })
+
+useHead(() => ({
+  link: settings.value?.seo?.canonical_url
+    ? [{ rel: 'canonical' as const, href: `${settings.value.seo.canonical_url.replace(/\/$/, '')}/gallery` }]
+    : []
+}))
 </script>
 
 <template>

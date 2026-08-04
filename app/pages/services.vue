@@ -13,9 +13,18 @@ useSeoMeta({
   description: () => settings.value?.seo?.meta_description
     || 'Explore Balaji Events wedding and event services.',
   ogTitle: 'Services | Balaji Events',
-  ogDescription: () => settings.value?.company?.description || undefined,
+  ogDescription: () => settings.value?.seo?.meta_description
+    || settings.value?.company?.description
+    || 'Explore Balaji Events wedding and event services.',
+  ogImage: () => settings.value?.seo?.opengraph_image || undefined,
   twitterCard: 'summary_large_image'
 })
+
+useHead(() => ({
+  link: settings.value?.seo?.canonical_url
+    ? [{ rel: 'canonical' as const, href: `${settings.value.seo.canonical_url.replace(/\/$/, '')}/services` }]
+    : []
+}))
 
 const breadcrumbs = [
   { label: 'Home', to: '/' },

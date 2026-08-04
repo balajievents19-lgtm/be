@@ -35,8 +35,22 @@ useSeoMeta({
     || service.value?.short_description
     || 'Balaji Events service details.',
   ogTitle: () => service.value ? `${service.value.name} | Balaji Events` : 'Service | Balaji Events',
+  ogDescription: () =>
+    service.value?.seo?.description
+    || service.value?.short_description
+    || undefined,
   ogImage: () => service.value?.seo?.opengraph_image || service.value?.featured_image || undefined,
   twitterCard: 'summary_large_image'
+})
+
+useHead(() => {
+  const base = settings.value?.seo?.canonical_url?.replace(/\/$/, '')
+  if (!base || !slug.value) {
+    return {}
+  }
+  return {
+    link: [{ rel: 'canonical' as const, href: `${base}/services/${slug.value}` }]
+  }
 })
 </script>
 

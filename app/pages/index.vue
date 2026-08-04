@@ -26,17 +26,20 @@ useSeoMeta({
 })
 
 useHead(() => {
+  const canonical = settings.value?.seo?.canonical_url
   const schema = home.value?.faq_schema
-  if (!schema) {
-    return {}
-  }
   return {
-    script: [
-      {
-        type: 'application/ld+json',
-        innerHTML: JSON.stringify(schema)
-      }
-    ]
+    link: canonical
+      ? [{ rel: 'canonical' as const, href: canonical }]
+      : [],
+    script: schema
+      ? [
+          {
+            type: 'application/ld+json' as const,
+            innerHTML: JSON.stringify(schema)
+          }
+        ]
+      : []
   }
 })
 </script>

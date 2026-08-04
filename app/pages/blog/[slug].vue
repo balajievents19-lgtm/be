@@ -29,6 +29,14 @@ useSeoMeta({
   twitterCard: 'summary_large_image'
 })
 
+useHead(() => {
+  const href = post.value?.seo?.canonical_url
+    || (settings.value?.seo?.canonical_url && slug.value
+      ? `${settings.value.seo.canonical_url.replace(/\/$/, '')}/blog/${slug.value}`
+      : undefined)
+  return href ? { link: [{ rel: 'canonical' as const, href }] } : {}
+})
+
 if (!post.value && !pending.value) {
   throw createError({ statusCode: 404, statusMessage: 'Blog post not found' })
 }

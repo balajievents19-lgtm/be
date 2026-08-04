@@ -17,8 +17,17 @@ useSeoMeta({
   description: () => settings.value?.seo?.meta_description
     || 'Latest news and updates from Balaji Events.',
   ogTitle: 'Blog | Balaji Events',
+  ogDescription: () => settings.value?.seo?.meta_description
+    || 'Latest news and updates from Balaji Events.',
+  ogImage: () => settings.value?.seo?.opengraph_image || undefined,
   twitterCard: 'summary_large_image'
 })
+
+useHead(() => ({
+  link: settings.value?.seo?.canonical_url
+    ? [{ rel: 'canonical' as const, href: `${settings.value.seo.canonical_url.replace(/\/$/, '')}/blog` }]
+    : []
+}))
 </script>
 
 <template>
