@@ -1,64 +1,52 @@
-# Nuxt Starter Template
+# Balaji Events — Frontend (Nuxt SSR)
 
-[![Nuxt UI](https://img.shields.io/badge/Made%20with-Nuxt%20UI-00DC82?logo=nuxt&labelColor=020420)](https://ui.nuxt.com)
+Nuxt **4** + Vue 3 public website for Balaji Events. Consumes the Laravel API in the sibling **backend** repository.
 
-Use this template to get started with [Nuxt UI](https://ui.nuxt.com) quickly.
+## Stack
 
-- [Live demo](https://starter-template.nuxt.dev/)
-- [Documentation](https://ui.nuxt.com/docs/getting-started/installation/nuxt)
+- Nuxt 4 / Vue 3 / TypeScript / Tailwind (Nuxt UI)
+- PNPM package manager
+- SSR (+ homepage prerender)
 
-<a href="https://starter-template.nuxt.dev/" target="_blank">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://ui.nuxt.com/assets/templates/nuxt/starter-dark.png">
-    <source media="(prefers-color-scheme: light)" srcset="https://ui.nuxt.com/assets/templates/nuxt/starter-light.png">
-    <img alt="Nuxt Starter Template" src="https://ui.nuxt.com/assets/templates/nuxt/starter-light.png" width="830" height="466">
-  </picture>
-</a>
-
-> The starter template for Vue is on https://github.com/nuxt-ui-templates/starter-vue.
-
-## Quick Start
-
-```bash [Terminal]
-npm create nuxt@latest -- -t ui
-```
-
-## Deploy your own
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-name=starter&repository-url=https%3A%2F%2Fgithub.com%2Fnuxt-ui-templates%2Fstarter&demo-image=https%3A%2F%2Fui.nuxt.com%2Fassets%2Ftemplates%2Fnuxt%2Fstarter-dark.png&demo-url=https%3A%2F%2Fstarter-template.nuxt.dev%2F&demo-title=Nuxt%20Starter%20Template&demo-description=A%20minimal%20template%20to%20get%20started%20with%20Nuxt%20UI.)
-
-## Setup
-
-Make sure to install the dependencies:
+## Local setup
 
 ```bash
+cp .env.example .env   # or .env.production.example for prod-like values
 pnpm install
-```
-
-## Development Server
-
-Start the development server on `http://localhost:3000`:
-
-```bash
 pnpm dev
 ```
 
+Set API base (defaults to `http://127.0.0.1:8000/api` in `nuxt.config.ts`):
+
+```bash
+# .env
+NUXT_PUBLIC_API_BASE=http://127.0.0.1:8000/api
+```
+
+## Scripts
+
+| Command | Purpose |
+|---------|---------|
+| `pnpm dev` | Development server |
+| `pnpm build` | Production Nitro build |
+| `pnpm preview` | Preview `.output` |
+| `pnpm lint` | ESLint |
+| `pnpm typecheck` | `nuxt typecheck` |
+| `pnpm test:e2e` | Playwright smoke (requires build) |
+
 ## Production
 
-Build the application for production:
+Full stack runbook (Nginx, Supervisor, SSL, backups): see the backend repo **[DEPLOYMENT.md](../backend/DEPLOYMENT.md)** (or `backend/DEPLOYMENT.md` on the server).
 
-```bash
-pnpm build
-```
+Frontend-specific:
 
-Locally preview production build:
+1. Copy [`.env.production.example`](./.env.production.example) → `.env`
+2. Set `NUXT_PUBLIC_API_BASE=https://api.example.com/api`
+3. `pnpm install --frozen-lockfile && pnpm build`
+4. Run `node .output/server/index.mjs` (Supervisor sample lives in backend `deploy/supervisor/balaji-events-nuxt.conf`)
 
-```bash
-pnpm preview
-```
+Also see [PRODUCTION_CHECKLIST.md](./PRODUCTION_CHECKLIST.md) and [CHANGELOG.md](./CHANGELOG.md).
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+## License
 
-## Renovate integration
-
-Install [Renovate GitHub app](https://github.com/apps/renovate/installations/select_target) on your repository and you are good to go.
+Proprietary — Balaji Events.
