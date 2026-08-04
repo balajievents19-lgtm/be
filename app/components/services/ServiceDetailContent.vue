@@ -70,7 +70,8 @@ const imageSrc = computed(() =>
           class="block h-auto w-full"
           width="800"
           height="500"
-          loading="lazy"
+          loading="eager"
+          fetchpriority="high"
           decoding="async"
         >
       </div>

@@ -18,8 +18,11 @@ const props = defineProps<{
 }>()
 
 const route = useRoute()
+const { data: settings } = await useSettings()
 const home = inject<Ref<HomePayload | null> | null>('home', null)
-const logoSrc = computed(() => home?.value?.settings?.brand?.logo || '/images/logo.png')
+const logoSrc = computed(
+  () => settings.value?.brand?.logo || home?.value?.settings?.brand?.logo || '/images/logo.png'
+)
 const isMegaMenuOpen = ref(false)
 const isMobileMenuOpen = ref(false)
 const isSearchOpen = ref(false)
@@ -128,6 +131,8 @@ onUnmounted(() => {
             alt="Balaji Events"
             width="160"
             height="70"
+            loading="eager"
+            fetchpriority="high"
             decoding="async"
             class="h-auto w-auto max-h-[70px] transition-all duration-1000 ease-in-out"
             :class="props.isScrolled ? '!h-[50px] max-h-[50px]' : ''"

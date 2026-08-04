@@ -22,8 +22,11 @@ const searchQuery = ref('')
 const route = useRoute()
 const router = useRouter()
 const { data: services } = await useServices()
+const { data: settings } = await useSettings()
 const home = inject<Ref<HomePayload | null> | null>('home', null)
-const logoSrc = computed(() => home?.value?.settings?.brand?.logo || '/images/logo.png')
+const logoSrc = computed(
+  () => settings.value?.brand?.logo || home?.value?.settings?.brand?.logo || '/images/logo.png'
+)
 
 const isActive = (item: NavigationItem) => {
   if (!item.to) {
@@ -79,6 +82,8 @@ const submitSearch = async () => {
               alt="Balaji Events"
               width="140"
               height="56"
+              loading="eager"
+              fetchpriority="high"
               decoding="async"
               class="h-14 w-auto"
             >
