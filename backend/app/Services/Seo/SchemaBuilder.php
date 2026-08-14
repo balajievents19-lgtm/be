@@ -1,0 +1,355 @@
+<?php
+
+namespace App\Services\Seo;
+
+use App\Models\BlogPost;
+use App\Models\Faq;
+use App\Models\GalleryItem;
+use App\Models\Service;
+use App\Models\Setting;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
+
+class SchemaBuilder
+{
+    public function __construct(
+        protected Setting $settings,
+        protected string $siteUrl,
+        protected MetaBuilder $meta,
+    ) {}
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function organization(): array
+    {
+        $schema = [
+            '@context' => 'https://schema.org',
+            '@type' => 'Organization',
+            '@id' => $this->siteUrl.'/#organization',
+            'name' => $this->settings->company_name ?: 'Balaji Events',
+            'url' => $this->siteUrl,
+            'description' => $this->settings->company_description
+                ?: $this->settings->meta_description,
+        ];
+
+        if ($logo = $this->settings->imageUrl($this->settings->logo)) {
+            $schema['logo'] = $logo;
+            $schema['image'] = $logo;
+        }
+
+        if ($email = $this->settings->email) {
+            $schema['email'] = $email;
+        }
+
+        if ($phone = $this->settings->phone) {
+            $schema['telephone'] = $phone;
+        }
+
+        $sameAs = $this->socialLinks();
+        if ($sameAs !== []) {
+            $schema['sameAs'] = $sameAs;
+        }
+
+        return $this->filterNull($schema);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function localBusiness(): array
+    {
+        $schema = [
+            '@context' => 'https://schema.org',
+            '@type' => 'LocalBusiness',
+            '@id' => $this->siteUrl.'/#localbusiness',
+            'name' => $this->settings->company_name ?: 'Balaji Events',
+            'url' => $this->siteUrl,
+            'description' => $this->settings->company_description
+                ?: $this->settings->meta_description,
+        ];
+
+        if ($logo = $this->settings->imageUrl($this->settings->logo)) {
+            $schema['image'] = $logo;
+            $schema['logo'] = $logo;
+        }
+
+        if ($phone = $this->settings->phone) {
+            $schema['telephone'] = $phone;
+        }
+
+        if ($email = $this->settings->email) {
+            $schema['email'] = $email;
+        }
+
+        // Only real CMS address — do not invent locality/region/price data.
+        if ($address = $this->settings->address) {
+            $schema['address'] = [
+                '@type' => 'PostalAddress',
+                'streetAddress' => $address,
+                'addressCountry' => 'IN',
+            ];
+        }
+
+        if ($hours = $this->settings->working_hours) {
+            $schema['openingHours'] = preg_split("/\r\n|\n|\r/", trim($hours)) ?: [];
+        }
+
+        $sameAs = $this->socialLinks();
+        if ($sameAs !== []) {
+            $schema['sameAs'] = $sameAs;
+        }
+
+        return $this->filterNull($schema);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function webSite(): array
+    {
+        return $this->filterNull([
+            '@context' => 'https://schema.org',
+            '@type' => 'WebSite',
+            '@id' => $this->siteUrl.'/#website',
+            'name' => $this->settings->company_name ?: 'Balaji Events',
+            'url' => $this->siteUrl,
+            'description' => $this->settings->meta_description
+                ?: $this->settings->company_description,
+            'publisher' => [
+                '@id' => $this->siteUrl.'/#organization',
+            ],
+            'potentialAction' => [
+                '@type' => 'SearchAction',
+                'target' => $this->siteUrl.'/services?search={search_term_string}',
+                'query-input' => 'required name=search_term_string',
+            ],
+        ]);
+    }
+
+    /**
+     * @param  list<array{name: string, url?: string|null}>  $items
+     * @return array<string, mixed>
+     */
+    public function breadcrumb(array $items): array
+    {
+        $list = [];
+
+        foreach (array_values($items) as $index => $item) {
+            $entry = [
+                '@type' => 'ListItem',
+                'position' => $index + 1,
+                'name' => $item['name'],
+            ];
+
+            if (! empty($item['url'])) {
+                $entry['item'] = $this->meta->absolute($item['url']);
+            }
+
+            $list[] = $entry;
+        }
+
+        return [
+            '@context' => 'https://schema.org',
+            '@type' => 'BreadcrumbList',
+            'itemListElement' => $list,
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function article(BlogPost $post): array
+    {
+        $url = $this->meta->absolute('/blog/'.$post->slug);
+        $image = $post->imageUrl($post->featured_image)
+            ?: $post->imageUrl($post->opengraph_image);
+
+        return $this->filterNull([
+            '@context' => 'https://schema.org',
+            '@type' => $post->schema_type ?: 'BlogPosting',
+            'headline' => $post->seo_title ?: $post->title,
+            'description' => $post->seo_description ?: $post->excerpt,
+            'datePublished' => $post->published_at?->toIso8601String(),
+            'dateModified' => $post->updated_at?->toIso8601String(),
+            'author' => [
+                '@type' => 'Person',
+                'name' => $post->author ?: ($this->settings->company_name ?: 'Balaji Events'),
+            ],
+            'publisher' => [
+                '@id' => $this->siteUrl.'/#organization',
+            ],
+            'mainEntityOfPage' => $url,
+            'url' => $url,
+            'image' => $image ? $this->imageObject($image, $post->title) : null,
+            'keywords' => is_array($post->tags) ? implode(', ', $post->tags) : $post->seo_keywords,
+            'wordCount' => str_word_count(strip_tags((string) $post->content)),
+            'articleSection' => $post->category?->name,
+        ]);
+    }
+
+    /**
+     * @param  Collection<int, Faq>|iterable<Faq>  $faqs
+     * @return array<string, mixed>
+     */
+    public function faqPage(iterable $faqs): array
+    {
+        $entities = [];
+
+        foreach ($faqs as $faq) {
+            $answer = method_exists($faq, 'plainAnswer')
+                ? $faq->plainAnswer()
+                : trim(html_entity_decode(strip_tags((string) $faq->answer)));
+
+            if (blank($faq->question) || blank($answer)) {
+                continue;
+            }
+
+            $entities[] = [
+                '@type' => 'Question',
+                'name' => $faq->question,
+                'acceptedAnswer' => [
+                    '@type' => 'Answer',
+                    'text' => $answer,
+                ],
+            ];
+        }
+
+        return [
+            '@context' => 'https://schema.org',
+            '@type' => 'FAQPage',
+            'mainEntity' => $entities,
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function imageObject(string $url, ?string $name = null, ?string $caption = null): array
+    {
+        return $this->filterNull([
+            '@context' => 'https://schema.org',
+            '@type' => 'ImageObject',
+            'contentUrl' => $url,
+            'url' => $url,
+            'name' => $name,
+            'caption' => $caption,
+            'creditText' => $this->settings->company_name ?: 'Balaji Events',
+        ]);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function service(Service $service): array
+    {
+        $url = $this->meta->absolute('/services/'.$service->slug);
+        $image = $service->imageUrl($service->featured_image);
+
+        return $this->filterNull([
+            '@context' => 'https://schema.org',
+            '@type' => 'Service',
+            'name' => $service->name,
+            'description' => $service->seo_description ?: $service->short_description,
+            'url' => $url,
+            'provider' => [
+                '@id' => $this->siteUrl.'/#localbusiness',
+            ],
+            'image' => $image,
+            'areaServed' => [
+                '@type' => 'AdministrativeArea',
+                'name' => 'Rajasthan',
+            ],
+        ]);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function galleryImage(GalleryItem $item): array
+    {
+        $url = $item->imageUrl($item->image);
+        $pageUrl = $this->meta->absolute('/gallery/'.$item->slug);
+
+        return $this->filterNull([
+            ...$this->imageObject(
+                (string) $url,
+                $item->title,
+                $item->caption ?: $item->alt_text
+            ),
+            'url' => $pageUrl,
+        ]);
+    }
+
+    /**
+     * Generic Event schema for promotions / bookings.
+     *
+     * @param  array{
+     *     name: string,
+     *     description?: string|null,
+     *     startDate: string,
+     *     endDate?: string|null,
+     *     url?: string|null,
+     *     image?: string|null,
+     *     locationName?: string|null,
+     *     locationAddress?: string|null
+     * }  $event
+     * @return array<string, mixed>
+     */
+    public function event(array $event): array
+    {
+        $location = null;
+        if (! empty($event['locationName']) || ! empty($event['locationAddress'])) {
+            $location = $this->filterNull([
+                '@type' => 'Place',
+                'name' => $event['locationName'] ?? ($this->settings->company_name ?: 'Balaji Events'),
+                'address' => $event['locationAddress'] ?? $this->settings->address,
+            ]);
+        }
+
+        return $this->filterNull([
+            '@context' => 'https://schema.org',
+            '@type' => 'Event',
+            'name' => $event['name'],
+            'description' => $event['description'] ?? null,
+            'startDate' => $event['startDate'],
+            'endDate' => $event['endDate'] ?? null,
+            'eventAttendanceMode' => 'https://schema.org/OfflineEventAttendanceMode',
+            'eventStatus' => 'https://schema.org/EventScheduled',
+            'url' => isset($event['url']) ? $this->meta->absolute($event['url']) : $this->siteUrl,
+            'image' => $event['image'] ?? $this->settings->imageUrl($this->settings->opengraph_image),
+            'location' => $location,
+            'organizer' => [
+                '@id' => $this->siteUrl.'/#organization',
+            ],
+        ]);
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function socialLinks(): array
+    {
+        return collect([
+            $this->settings->facebook,
+            $this->settings->instagram,
+            $this->settings->youtube,
+            $this->settings->linkedin,
+            $this->settings->twitter,
+        ])->filter(fn (?string $url) => filled($url) && Str::startsWith($url, ['http://', 'https://']))
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    private function filterNull(array $data): array
+    {
+        return array_filter(
+            $data,
+            static fn (mixed $value) => $value !== null && $value !== '' && $value !== []
+        );
+    }
+}

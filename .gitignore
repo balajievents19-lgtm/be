@@ -1,31 +1,86 @@
-# Nuxt dev/build outputs
-.output
-.data
-.nuxt
-.nitro
-.cache
-dist
+# ============================================================
+# Balaji Events monorepo — root .gitignore
+# Consolidates backend/frontend ignore rules without changing
+# application behavior. Nested .gitignore files remain in place.
+# ============================================================
 
-# Node dependencies
-node_modules
+# --- Nested Git metadata safety copies (do not track) ---
+backend/.git.bak-monorepo/
+frontend/.git.bak-monorepo/
 
-# Logs
-logs
-*.log
-
-# Misc
+# --- OS / IDE / editor ---
 .DS_Store
-.fleet
-.idea
+Thumbs.db
+.idea/
+.fleet/
+.vscode/
+.zed/
+.nova/
+.codex/
+.cursor/
+*.swp
+*.swo
+*~
 
-# Local env files
-.env
-.env.*
-!.env.example
-!.env.production.example
+# --- Logs / temp / caches (general) ---
+# Note: do NOT use a bare "logs/" rule — it would hide
+# backend/storage/logs/.gitignore (Laravel placeholder).
+*.log
+/logs/
+.tmp/
+temp/
+tmp/
 
-# Playwright
-/test-results/
-/playwright-report/
-/blob-report/
-/playwright/.cache/
+# ============================================================
+# Backend (Laravel) — adapted from backend/.gitignore
+# ============================================================
+backend/.env
+backend/.env.*
+!backend/.env.example
+!backend/.env.production.example
+
+backend/vendor/
+backend/node_modules/
+backend/auth.json
+backend/.phpactor.json
+backend/.phpunit.result.cache
+backend/.phpunit.cache/
+backend/_ide_helper.php
+backend/Homestead.json
+backend/Homestead.yaml
+
+backend/public/build/
+backend/public/hot
+backend/public/storage
+backend/public/fonts-manifest.dev.json
+
+# Keep Laravel structure: nested .gitignore files under storage/ and
+# bootstrap/cache/ ignore contents while remaining tracked themselves
+# (same behavior as the original backend repository).
+backend/storage/*.key
+backend/storage/pail/
+
+# ============================================================
+# Frontend (Nuxt) — adapted from frontend/.gitignore
+# ============================================================
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+!frontend/.env.production.example
+
+frontend/node_modules/
+frontend/.output/
+frontend/.data/
+frontend/.nuxt/
+frontend/.nitro/
+frontend/.cache/
+frontend/dist/
+
+frontend/logs/
+frontend/.fleet/
+frontend/.idea/
+
+frontend/test-results/
+frontend/playwright-report/
+frontend/blob-report/
+frontend/playwright/.cache/

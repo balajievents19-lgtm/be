@@ -1,0 +1,74 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
+
+class BlogCategory extends Model
+{
+    use SoftDeletes;
+
+    protected $fillable = [
+        'name',
+        'slug',
+        'description',
+        'sort_order',
+        'status',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'status' => 'boolean',
+            'sort_order' => 'integer',
+        ];
+    }
+
+    protected static function booted(): void
+    {
+        static::saving(function (BlogCategory $category): void {
+            if (blank($category->slug) && filled($category->name)) {
+                $category->slug = static::uniqueSlugFrom($category->name, $category->id);
+            }
+        });
+    }
+
+    public static function uniqueSlugFrom(string $name, ?int $ignoreId = null): string
+    {
+        $base = Str::slug($name) ?: 'blog-category';
+        $slug = $base;
+        $counter = 1;
+
+        while (
+            static::query()
+                ->withTrashed()
+                ->where('slug', $slug)
+                ->when($ignoreId, fn (Builder $query) => $query->whereKeyNot($ignoreId))
+                ->exists()
+        ) {
+            $slug = $base.'-'.$counter;
+            $counter++;
+        }
+
+        return $slug;
+    }
+
+    public function posts(): HasMany
+    {
+        return $this->hasMany(BlogPost::class);
+    }
+
+    public function scopeActive(Builder $query): Builder
+    {
+        return $query->where('status', true);
+    }
+
+    public function scopeOrdered(Builder $query): Builder
+    {
+        return $query->orderBy('sort_order')->orderBy('id');
+    }
+}
