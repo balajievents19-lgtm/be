@@ -1,4 +1,4 @@
-# Balaji Events Platform — Master Plan
+# Balaji Royal Events Platform — Master Plan
 
 **Generated:** 2026-08-04  
 **Companion:** [`PROJECT_UNDERSTANDING.md`](./PROJECT_UNDERSTANDING.md)  

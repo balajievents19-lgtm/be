@@ -210,4 +210,42 @@ class AdminHomeDashboardTest extends TestCase
             ], 'filtersForm')
             ->assertSet('filters.period', LeadDashboardMetrics::PERIOD_TODAY);
     }
+
+    public function test_website_admins_see_clean_and_optimize_action(): void
+    {
+        $super = $this->userWithRole(AdminModules::ROLE_SUPER_ADMIN);
+        $this->actingAs($super);
+
+        Livewire::test(Dashboard::class)
+            ->assertSuccessful()
+            ->assertActionVisible('cleanAndOptimize')
+            ->assertSee('Clean & Optimize Website');
+
+        $content = $this->userWithRole(AdminModules::ROLE_CONTENT_MANAGER);
+        $this->actingAs($content);
+
+        Livewire::test(Dashboard::class)
+            ->assertSuccessful()
+            ->assertActionVisible('cleanAndOptimize');
+    }
+
+    public function test_lead_manager_does_not_see_clean_and_optimize_action(): void
+    {
+        $leadManager = $this->userWithRole(AdminModules::ROLE_LEAD_MANAGER);
+        $this->actingAs($leadManager);
+
+        Livewire::test(Dashboard::class)
+            ->assertSuccessful()
+            ->assertActionHidden('cleanAndOptimize');
+    }
+
+    public function test_clean_and_optimize_action_runs_safely(): void
+    {
+        $super = $this->userWithRole(AdminModules::ROLE_SUPER_ADMIN);
+        $this->actingAs($super);
+
+        Livewire::test(Dashboard::class)
+            ->callAction('cleanAndOptimize')
+            ->assertNotified();
+    }
 }

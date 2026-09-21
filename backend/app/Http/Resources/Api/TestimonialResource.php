@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Api;
 
 use App\Models\Testimonial;
+use App\Support\Brand;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -18,8 +19,8 @@ class TestimonialResource extends JsonResource
             'id' => $this->id,
             'type' => $this->type?->value,
             'name' => $this->name,
-            'quote' => $this->quote,
-            'body' => $this->body,
+            'quote' => Brand::rewrite($this->quote),
+            'body' => Brand::rewrite($this->body),
             'avatar' => $this->imageUrl($this->avatar),
             'image' => $this->imageUrl($this->image),
             'rating' => $this->rating,

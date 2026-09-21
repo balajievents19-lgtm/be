@@ -1,8 +1,8 @@
-# Balaji Events - Master Rules
+# Balaji Royal Events - Master Rules
 
 ## Project Goal
 
-Modernize the Balaji Events website using Nuxt 4 while preserving the original Bootstrap design.
+Modernize the Balaji Royal Events website using Nuxt 4 while preserving the original Bootstrap design.
 
 ---
 

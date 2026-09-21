@@ -1,8 +1,8 @@
-# Balaji Events — Implementation Plan
+# Balaji Royal Events — Implementation Plan
 
 ## Purpose
 
-Modernize the Balaji Events frontend with Nuxt 4, Nuxt UI 4, Tailwind CSS 4, and TypeScript while preserving `reference/bootstrap-master` as the master design.
+Modernize the Balaji Royal Events frontend with Nuxt 4, Nuxt UI 4, Tailwind CSS 4, and TypeScript while preserving `reference/bootstrap-master` as the master design.
 
 ## Non-negotiable rules
 

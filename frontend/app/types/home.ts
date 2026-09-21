@@ -1,6 +1,8 @@
+import type { EventType } from '~/types/eventType'
 import type { GalleryItem } from '~/types/gallery'
 import type { CmsNavigationItem } from '~/types/navigation'
 import type { Service } from '~/types/service'
+import type { ExternalMediaItem } from '~/utils/externalMedia'
 
 export interface SiteSettings {
   company: {
@@ -29,6 +31,7 @@ export interface SiteSettings {
     support_email: string | null
     address: string | null
     google_map_embed: string | null
+    google_reviews_url?: string | null
   }
   social: {
     facebook: string | null
@@ -90,9 +93,12 @@ export interface SiteSettings {
 export interface HeroSlide {
   id: number
   title: string | null
+  title_highlight?: string | null
   subtitle: string | null
   button_text: string | null
   button_url: string | null
+  secondary_button_text?: string | null
+  secondary_button_url?: string | null
   desktop_image: string
   mobile_image: string | null
   video_url: string | null
@@ -177,12 +183,89 @@ export interface FaqItem {
   }
 }
 
+export interface OfficeLocationItem {
+  id: number
+  name: string | null
+  address: string | null
+  city: string | null
+  state: string | null
+  pincode: string | null
+  phone: string | null
+  email: string | null
+  map_embed: string | null
+  latitude: string | number | null
+  longitude: string | number | null
+  is_primary: boolean
+  sort_order: number
+}
+
+export interface StatisticItem {
+  id: number
+  label: string
+  value: string
+  icon: string | null
+  suffix: string | null
+  sort_order: number
+  show_on_homepage: boolean
+}
+
+export interface CtaSectionItem {
+  id: number
+  key: string | null
+  title: string
+  subtitle: string | null
+  body: string | null
+  button_text: string | null
+  button_url: string | null
+  secondary_button_text: string | null
+  secondary_button_url: string | null
+  background_image: string | null
+  sort_order: number
+  show_on_homepage: boolean
+}
+
+export interface GoogleReviewItem {
+  author_name: string
+  rating: number | null
+  text: string
+  publish_time: string | null
+  relative_time: string | null
+  author_url: string | null
+  profile_photo_url: string | null
+}
+
+export interface GoogleReviewsPayload {
+  configured: boolean
+  enabled: boolean
+  source?: string
+  rating: number | null
+  review_count: number | null
+  maps_url: string | null
+  fetched_at: string | null
+  stale?: boolean
+  error: string | null
+  reviews: GoogleReviewItem[]
+}
+
+export interface HomeGalleryCategory {
+  id: number
+  name: string
+  slug: string
+  description?: string | null
+  sort_order?: number
+  image_count?: number
+  cover_image?: string | null
+}
+
 export interface HomePayload {
   settings: SiteSettings
   hero: HeroSlide[]
   featured_services: Service[]
   events_overview: EventOverviewItem[]
   featured_gallery: GalleryItem[]
+  gallery_categories?: HomeGalleryCategory[]
+  external_media?: ExternalMediaItem[]
+  event_types?: EventType[]
   testimonials: TestimonialItem[]
   success_stories: TestimonialItem[]
   featured_blog: BlogPostItem[]
@@ -190,6 +273,23 @@ export interface HomePayload {
   faq_schema?: Record<string, unknown> | null
   header_navigation?: CmsNavigationItem[]
   footer_navigation?: CmsNavigationItem[]
+  office_locations?: OfficeLocationItem[]
+  statistics?: StatisticItem[]
+  cta_sections?: CtaSectionItem[]
+  google_reviews?: GoogleReviewsPayload | null
+  sections?: HomepageSections
+}
+
+export interface HomepageSections {
+  slider: boolean
+  about: boolean
+  services: boolean
+  gallery: boolean
+  packages: boolean
+  testimonials: boolean
+  blog: boolean
+  faq: boolean
+  contact: boolean
 }
 
 export interface HomeApiResponse {
@@ -207,7 +307,8 @@ export const emptySettings = (): SiteSettings => ({
     email: null,
     support_email: null,
     address: null,
-    google_map_embed: null
+    google_map_embed: null,
+    google_reviews_url: null
   },
   social: {
     facebook: null,
@@ -266,17 +367,37 @@ export const emptySettings = (): SiteSettings => ({
   }
 })
 
+export const defaultHomepageSections = (): HomepageSections => ({
+  slider: true,
+  about: false,
+  services: true,
+  gallery: true,
+  packages: false,
+  testimonials: true,
+  blog: true,
+  faq: false,
+  contact: true
+})
+
 export const emptyHome = (): HomePayload => ({
   settings: emptySettings(),
   hero: [],
   featured_services: [],
   events_overview: [],
   featured_gallery: [],
+  gallery_categories: [],
+  external_media: [],
+  event_types: [],
   testimonials: [],
   success_stories: [],
   featured_blog: [],
   featured_faqs: [],
   faq_schema: null,
   header_navigation: [],
-  footer_navigation: []
+  footer_navigation: [],
+  office_locations: [],
+  statistics: [],
+  cta_sections: [],
+  google_reviews: null,
+  sections: defaultHomepageSections()
 })

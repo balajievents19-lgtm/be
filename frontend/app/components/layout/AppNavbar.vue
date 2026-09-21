@@ -19,6 +19,7 @@ const home = inject<Ref<HomePayload | null> | null>('home', null)
 const logoSrc = computed(
   () => settings.value?.brand?.logo || home?.value?.settings?.brand?.logo || '/images/logo.png'
 )
+const brandName = computed(() => settings.value?.company?.name?.trim() || 'Balaji Royal Events')
 const headerCtaLabel = computed(() => settings.value?.header?.cta_label?.trim() || '')
 const headerCtaUrl = computed(() => settings.value?.header?.cta_url?.trim() || '')
 const showHeaderCta = computed(() => Boolean(headerCtaLabel.value && headerCtaUrl.value))
@@ -49,10 +50,10 @@ const isActive = (item: NavLink) => {
 }
 
 const navLinkClass = (item: NavLink, open = false) => [
-  'relative flex items-center border-t-4 px-[18px] text-lg font-normal uppercase transition-all duration-1000 ease-in-out max-[991px]:px-3 max-[991px]:text-sm',
+  'relative flex items-center whitespace-nowrap border-t-4 px-[14px] text-base font-normal uppercase transition-all duration-1000 ease-in-out xl:px-[18px] xl:text-lg max-[991px]:px-3 max-[991px]:text-sm',
   'after:absolute after:top-0 after:left-1/2 after:ml-[-6px] after:hidden after:border-x-[6px] after:border-t-[6px] after:border-b-0 after:border-x-transparent after:border-t-brand-500 after:content-[\'\']',
   'hover:text-brand-500 hover:after:block',
-  props.isScrolled ? 'py-5' : 'py-[30px]',
+  props.isScrolled ? 'py-5' : 'py-[28px]',
   isActive(item) || open
     ? 'border-brand-500 text-brand-500 after:block'
     : 'border-white text-[#202020]'
@@ -120,18 +121,18 @@ onUnmounted(() => {
           to="/"
           class="shrink-0 transition-all duration-1000 ease-in-out"
           :class="props.isScrolled ? 'my-[10px]' : 'my-[15px] md:mt-[15px] md:mb-0'"
-          aria-label="Balaji Events home"
+          :aria-label="`${brandName} home`"
         >
           <img
             :src="logoSrc"
-            alt="Balaji Events"
+            :alt="brandName"
             width="160"
             height="70"
             loading="eager"
             fetchpriority="high"
             decoding="async"
-            class="h-auto w-auto max-h-[70px] transition-all duration-1000 ease-in-out"
-            :class="props.isScrolled ? '!h-[50px] max-h-[50px]' : ''"
+            class="block h-auto w-auto max-h-[64px] object-contain object-left transition-all duration-1000 ease-in-out"
+            :class="props.isScrolled ? '!h-[48px] max-h-[48px]' : ''"
           >
         </NuxtLink>
 

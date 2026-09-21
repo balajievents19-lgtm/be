@@ -22,8 +22,10 @@ export default defineNuxtConfig({
     // Must match backend SSR_INTERNAL_SECRET. Never put this under `public`.
     ssrInternalSecret: '',
     public: {
-      // Override via NUXT_PUBLIC_API_BASE (required for production builds).
-      apiBase: 'http://127.0.0.1:8000/api'
+      // Override with NUXT_PUBLIC_API_BASE. Required for production (must not be localhost).
+      // Local .env.example sets http://localhost:8000/api. Empty here so production builds
+      // cannot silently bake a localhost API origin.
+      apiBase: ''
     }
   },
 
@@ -35,7 +37,8 @@ export default defineNuxtConfig({
       headers: {
         'X-Content-Type-Options': 'nosniff',
         'X-Frame-Options': 'SAMEORIGIN',
-        'Referrer-Policy': 'strict-origin-when-cross-origin'
+        'Referrer-Policy': 'strict-origin-when-cross-origin',
+        'Permissions-Policy': 'camera=(), microphone=(), geolocation=(self)'
       }
     }
   },

@@ -34,7 +34,7 @@ class ServiceSeeder extends Seeder
                 [
                     'name' => $item['name'],
                     'short_description' => $item['short'],
-                    'full_description' => '<p>'.$item['short'].' Balaji Events delivers trusted event services across Rajasthan.</p>',
+                    'full_description' => '<p>'.$item['short'].' Balaji Royal Events delivers trusted event services across Rajasthan.</p>',
                     'featured_image' => $image,
                     'banner_image' => $image,
                     'gallery_images' => [$image],
@@ -43,9 +43,9 @@ class ServiceSeeder extends Seeder
                     'featured' => $index < 4,
                     'status' => true,
                     'show_on_homepage' => true,
-                    'seo_title' => $item['name'].' | Balaji Events',
+                    'seo_title' => $item['name'].' | Balaji Royal Events',
                     'seo_description' => $item['short'],
-                    'seo_keywords' => $item['name'].', Balaji Events, Rajasthan',
+                    'seo_keywords' => $item['name'].', Balaji Royal Events, Rajasthan',
                     'opengraph_image' => $image,
                 ]
             );

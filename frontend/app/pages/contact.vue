@@ -2,11 +2,11 @@
 import { contactBreadcrumbs, contactPageHeader } from '~/data/contact'
 import { contactBoxesFromSettings } from '~/utils/content'
 
+const seo = usePageSeo({ type: 'contact' })
 const { data: settings } = useSettings()
+await seo
 
 const contactBoxes = computed(() => contactBoxesFromSettings(settings.value))
-
-usePageSeo({ type: 'contact' })
 </script>
 
 <template>

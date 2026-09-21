@@ -25,8 +25,8 @@ export const faqBreadcrumbs: BreadcrumbItem[] = [
 export const faqItems: FaqItem[] = [
   {
     id: 'faq-1',
-    question: 'How can I contact Balaji Events?',
-    answer: 'You can call us at +91-9462577065, +91-8058780290. Email balajievents19@gmail.com.'
+    question: 'How can I contact Balaji Royal Events?',
+    answer: 'You can call us at +91-9462577065. Email balajievents19@gmail.com.'
   },
   {
     id: 'faq-2',
@@ -41,7 +41,7 @@ export const faqItems: FaqItem[] = [
   {
     id: 'faq-4',
     question: 'Do you manage weddings in Rajasthan?',
-    answer: 'Balaji Events is trusted wedding management company in india. We were Provide many differnt service in Rajasthan. We promise to set the perfect pitch for to-be and groom to celebrate their special day in grand way.'
+    answer: 'Balaji Royal Events is trusted wedding management company in india. We were Provide many differnt service in Rajasthan. We promise to set the perfect pitch for to-be and groom to celebrate their special day in grand way.'
   },
   {
     id: 'faq-5',

@@ -46,6 +46,11 @@ class ContactInquiry extends Model
         return $this->belongsTo(User::class, 'assigned_to');
     }
 
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
     public function scopeStatus(Builder $query, ContactInquiryStatus|string $status): Builder
     {
         $value = $status instanceof ContactInquiryStatus ? $status->value : $status;

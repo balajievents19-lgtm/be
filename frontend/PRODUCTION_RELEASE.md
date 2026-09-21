@@ -1,6 +1,6 @@
 # Production Release — Frontend
 
-Nuxt SSR app for Balaji Events.
+Nuxt SSR app for Balaji Royal Events.
 
 - **Repository:** this nested git repo (`frontend/`)
 - **Remote:** `https://github.com/balajievents19-lgtm/be.git`

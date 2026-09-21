@@ -5,9 +5,15 @@ import { useService, useServices } from '~/composables/useServices'
 const route = useRoute()
 const slug = computed(() => String(route.params.slug ?? ''))
 
+const seo = usePageSeo({ type: 'service', slug: slug.value })
 const { data: service, pending, failed } = await useService(slug)
 const { data: allServices } = useServices()
 const { data: settings } = useSettings()
+await seo
+
+if (!service.value && !pending.value && !failed.value) {
+  throw createError({ statusCode: 404, statusMessage: 'Service not found' })
+}
 
 const relatedNames = computed(() =>
   (allServices.value ?? [])
@@ -21,8 +27,6 @@ const inquiryRef = ref<HTMLElement | null>(null)
 const scrollToInquiry = () => {
   inquiryRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
-
-usePageSeo({ type: 'service', slug: slug.value })
 </script>
 
 <template>

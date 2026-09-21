@@ -95,8 +95,8 @@ class BlogSeeder extends Seeder
         foreach ($titles as $index => $title) {
             $category = $categoryModels[$index % count($categoryModels)];
             $image = $this->storeSeedImage($index);
-            $excerpt = 'Expert guidance from Balaji Events on '.$title.' for celebrations across Rajasthan.';
-            $content = '<p>'.$excerpt.'</p><p>Balaji Events helps couples and organizers plan weddings, décor, catering, photography, and entertainment with trusted local expertise.</p><h2>Key Takeaways</h2><ul><li>Plan early and confirm vendors in writing.</li><li>Align décor, catering, and entertainment with your guest experience.</li><li>Work with a local team that understands Rajasthan venues and traditions.</li></ul><p>Contact Balaji Events to customize this approach for your celebration.</p>';
+            $excerpt = 'Expert guidance from Balaji Royal Events on '.$title.' for celebrations across Rajasthan.';
+            $content = '<p>'.$excerpt.'</p><p>Balaji Royal Events helps couples and organizers plan weddings, décor, catering, photography, and entertainment with trusted local expertise.</p><h2>Key Takeaways</h2><ul><li>Plan early and confirm vendors in writing.</li><li>Align décor, catering, and entertainment with your guest experience.</li><li>Work with a local team that understands Rajasthan venues and traditions.</li></ul><p>Contact Balaji Royal Events to customize this approach for your celebration.</p>';
 
             BlogPost::query()->create([
                 'blog_category_id' => $category->id,
@@ -112,14 +112,14 @@ class BlogSeeder extends Seeder
                 'homepage_featured' => $index < 4,
                 'published_at' => now()->subDays(25 - $index)->setTime(10, 0),
                 'status' => true,
-                'seo_title' => $title.' | Balaji Events Blog',
+                'seo_title' => $title.' | Balaji Royal Events Blog',
                 'seo_description' => $excerpt,
                 'seo_keywords' => implode(', ', $tagSets[$index]),
                 'canonical_url' => 'http://localhost:3000/blog/'.Str::slug($title),
                 'opengraph_image' => $image,
                 'schema_type' => 'BlogPosting',
                 'reading_time' => null,
-                'author' => 'Balaji Events',
+                'author' => 'Balaji Royal Events',
                 'tags' => $tagSets[$index],
             ]);
         }

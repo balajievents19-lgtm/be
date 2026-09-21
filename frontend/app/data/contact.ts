@@ -18,8 +18,7 @@ export const contactBoxes: ContactBox[] = [
     icon: 'icon-phone',
     type: 'phones',
     phones: [
-      { label: '+91-9462577065', href: 'tel:+919462577065' },
-      { label: '+91-8058780290', href: 'tel:+918058780290' }
+      { label: '+91-9462577065', href: 'tel:+919462577065' }
     ]
   },
   {
@@ -51,7 +50,7 @@ export const contactInfoHeading = {
 } as const
 
 export const contactPageHeader = {
-  title: 'contact us'
+  title: 'Contact Us'
 } as const
 
 export const contactBreadcrumbs: BreadcrumbItem[] = [

@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Api;
 
 use App\Models\Setting;
+use App\Support\Brand;
 use App\Support\Media\ResponsiveImageBuilder;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -17,16 +18,16 @@ class SettingResource extends JsonResource
     {
         return [
             'company' => [
-                'name' => $this->company_name,
-                'tagline' => $this->company_tagline,
-                'description' => $this->company_description,
+                'name' => Brand::name($this->company_name),
+                'tagline' => Brand::rewrite($this->company_tagline),
+                'description' => Brand::rewrite($this->company_description),
             ],
             'about' => [
-                'description' => $this->company_description,
+                'description' => Brand::rewrite($this->company_description),
                 'image' => $this->imageUrl($this->about_image),
-                'vision' => $this->about_vision,
-                'mission' => $this->about_mission,
-                'journey' => $this->about_journey,
+                'vision' => Brand::rewrite($this->about_vision),
+                'mission' => Brand::rewrite($this->about_mission),
+                'journey' => Brand::rewrite($this->about_journey),
             ],
             'brand' => [
                 'logo' => $this->imageUrl($this->logo),
@@ -47,6 +48,7 @@ class SettingResource extends JsonResource
                 'support_email' => $this->support_email,
                 'address' => $this->address,
                 'google_map_embed' => $this->google_map_embed,
+                'google_reviews_url' => $this->google_reviews_url,
             ],
             'social' => [
                 'facebook' => $this->facebook,
@@ -61,12 +63,12 @@ class SettingResource extends JsonResource
                 'emergency_contact' => $this->emergency_contact,
             ],
             'seo' => [
-                'meta_title' => $this->meta_title,
-                'meta_description' => $this->meta_description,
-                'meta_keywords' => $this->meta_keywords,
-                'homepage_title' => $this->homepage_seo_title,
-                'homepage_description' => $this->homepage_seo_description,
-                'homepage_keywords' => $this->homepage_seo_keywords,
+                'meta_title' => Brand::rewrite($this->meta_title),
+                'meta_description' => Brand::rewrite($this->meta_description),
+                'meta_keywords' => Brand::rewrite($this->meta_keywords),
+                'homepage_title' => Brand::rewrite($this->homepage_seo_title),
+                'homepage_description' => Brand::rewrite($this->homepage_seo_description),
+                'homepage_keywords' => Brand::rewrite($this->homepage_seo_keywords),
                 'opengraph_image' => $this->imageUrl($this->opengraph_image),
                 'robots' => $this->robots,
                 'robots_txt_extra' => $this->robots_txt_extra,
@@ -97,8 +99,8 @@ class SettingResource extends JsonResource
                 'button_label' => $this->hero_search_button_label,
             ],
             'footer' => [
-                'about' => $this->footer_about,
-                'copyright_text' => $this->copyright_text,
+                'about' => Brand::rewrite($this->footer_about),
+                'copyright_text' => Brand::rewrite($this->copyright_text),
                 'enabled' => $this->footer_enabled,
                 'newsletter_enabled' => $this->footer_newsletter_enabled,
                 'social_enabled' => $this->footer_social_enabled,

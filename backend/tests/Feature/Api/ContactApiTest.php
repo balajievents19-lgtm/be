@@ -3,12 +3,15 @@
 namespace Tests\Feature\Api;
 
 use App\Models\ContactInquiry;
+use App\Models\EventType;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\RateLimiter;
+use Tests\Support\CreatesWebsiteContent;
 use Tests\TestCase;
 
 class ContactApiTest extends TestCase
 {
+    use CreatesWebsiteContent;
     use RefreshDatabase;
 
     /**
@@ -41,73 +44,125 @@ class ContactApiTest extends TestCase
 
     public function test_slider_lead_stores_event_fields_and_source(): void
     {
+        $eventType = EventType::query()->create([
+            'name' => 'Wedding',
+            'slug' => 'wedding',
+            'status' => true,
+            'sort_order' => 1,
+        ]);
+
         $this->postJson('/api/contact', $this->validPayload([
-            'subject' => 'Slider inquiry: Wedding Planning',
-            'service_interested' => 'Wedding Planning',
+            'subject' => 'Slider inquiry: Wedding',
+            'event_type_id' => $eventType->id,
+            'service_interested' => 'ignored-client-value',
             'event_date' => '2030-12-20',
             'event_location' => 'Jaipur',
             'budget' => '5-10 Lakh',
             'source' => 'slider',
-            'message' => "Event Type: Wedding Planning\nEvent Location: Jaipur\nEvent Date: 2030-12-20",
+            'message' => "Event Type: Wedding\nEvent Location: Jaipur\nEvent Date: 2030-12-20",
         ]))
             ->assertCreated()
             ->assertJsonPath('data.event_location', 'Jaipur')
-            ->assertJsonPath('data.source', 'slider');
+            ->assertJsonPath('data.source', 'slider')
+            ->assertJsonPath('data.service_interested', 'Wedding');
 
         $this->assertDatabaseHas('contact_inquiries', [
             'source' => 'slider',
             'event_location' => 'Jaipur',
-            'service_interested' => 'Wedding Planning',
+            'service_interested' => 'Wedding',
         ]);
     }
 
-    public function test_service_inquiry_lead_stores_service_and_source(): void
+    public function test_slider_rejects_inactive_event_type_id(): void
+    {
+        $inactive = EventType::query()->create([
+            'name' => 'Hidden Party',
+            'slug' => 'hidden-party',
+            'status' => false,
+            'sort_order' => 1,
+        ]);
+
+        $this->postJson('/api/contact', $this->validPayload([
+            'event_type_id' => $inactive->id,
+            'source' => 'slider',
+            'event_date' => '2030-12-20',
+            'event_location' => 'Jaipur',
+            'message' => 'test',
+        ]))->assertStatus(422)
+            ->assertJsonValidationErrors(['event_type_id']);
+    }
+
+    public function test_contact_rejects_past_event_date(): void
     {
         $this->postJson('/api/contact', $this->validPayload([
+            'event_date' => '2020-01-01',
+        ]))->assertStatus(422)
+            ->assertJsonValidationErrors(['event_date']);
+    }
+
+    public function test_service_inquiry_guest_is_unauthorized(): void
+    {
+        $this->postJson('/api/contact', $this->validPayload([
+            'email' => 'guest@example.com',
             'subject' => 'Service inquiry: Wedding Planning',
             'service_interested' => 'Wedding Planning',
             'event_date' => '2031-07-20',
             'source' => 'service_inquiry',
             'message' => 'Inquiry for Wedding Planning',
-        ]))
-            ->assertCreated()
-            ->assertJsonPath('data.source', 'service_inquiry')
-            ->assertJsonPath('data.service_interested', 'Wedding Planning');
+        ]))->assertUnauthorized();
 
-        $this->assertDatabaseHas('contact_inquiries', [
-            'source' => 'service_inquiry',
-            'service_interested' => 'Wedding Planning',
-        ]);
-
-        $inquiry = ContactInquiry::query()->latest('id')->firstOrFail();
-        $this->assertSame('new', $inquiry->status->value);
-        $this->assertSame(1, ContactInquiry::query()->where('source', 'service_inquiry')->count());
+        $this->assertSame(0, ContactInquiry::query()->count());
     }
 
-    public function test_package_inquiry_lead_stores_package_context_and_source(): void
+    public function test_package_inquiry_guest_is_unauthorized(): void
     {
         $this->postJson('/api/contact', $this->validPayload([
+            'email' => 'guest@example.com',
             'subject' => 'Package Enquiry: Premium Wedding Package',
             'service_interested' => 'Premium Wedding Package',
             'source' => 'package_inquiry',
             'message' => 'Interested in the Premium Wedding Package.',
-        ]))
-            ->assertCreated()
-            ->assertJsonPath('data.source', 'package_inquiry')
-            ->assertJsonPath('data.service_interested', 'Premium Wedding Package')
-            ->assertJsonPath('data.subject', 'Package Enquiry: Premium Wedding Package');
+        ]))->assertUnauthorized();
 
-        $this->assertDatabaseHas('contact_inquiries', [
-            'source' => 'package_inquiry',
-            'service_interested' => 'Premium Wedding Package',
-            'subject' => 'Package Enquiry: Premium Wedding Package',
+        $this->assertSame(0, ContactInquiry::query()->count());
+    }
+
+    public function test_contact_rejects_invalid_phone(): void
+    {
+        $this->postJson('/api/contact', $this->validPayload([
+            'mobile' => '12345',
+        ]))->assertStatus(422)
+            ->assertJsonValidationErrors(['mobile']);
+    }
+
+    public function test_slider_requires_event_date_and_location(): void
+    {
+        $eventType = EventType::query()->create([
+            'name' => 'Wedding',
+            'slug' => 'wedding-required-fields',
+            'status' => true,
+            'sort_order' => 1,
         ]);
 
-        $inquiry = ContactInquiry::query()->latest('id')->firstOrFail();
-        $this->assertSame('new', $inquiry->status->value);
-        $this->assertSame('medium', $inquiry->priority->value);
-        $this->assertNull($inquiry->assigned_to);
-        $this->assertSame(1, ContactInquiry::query()->where('source', 'package_inquiry')->count());
+        $this->postJson('/api/contact', $this->validPayload([
+            'event_type_id' => $eventType->id,
+            'source' => 'slider',
+        ]))->assertStatus(422)
+            ->assertJsonValidationErrors(['event_date', 'event_location']);
+    }
+
+    public function test_contact_notifies_team_when_enquiry_email_is_configured(): void
+    {
+        \Illuminate\Support\Facades\Notification::fake();
+
+        $this->seedSettings([
+            'email' => 'leads@balaji.test',
+        ]);
+
+        $this->postJson('/api/contact', $this->validPayload())
+            ->assertCreated();
+
+        \Illuminate\Support\Facades\Notification::assertSentOnDemand(\App\Notifications\NewContactInquiryNotification::class);
     }
 
     public function test_contact_rejects_missing_required_fields(): void
@@ -159,5 +214,17 @@ class ContactApiTest extends TestCase
             'mobile' => '9000000009',
             'email' => 'user9@example.com',
         ]))->assertStatus(429);
+    }
+
+    public function test_contact_from_frontend_origin_does_not_csrf_mismatch(): void
+    {
+        config(['sanctum.stateful' => ['localhost', 'localhost:3000', '127.0.0.1', '127.0.0.1:3000']]);
+
+        $this->withHeaders([
+            'Origin' => 'http://localhost:3000',
+            'Referer' => 'http://localhost:3000/',
+        ])->postJson('/api/contact', $this->validPayload([
+            'email' => 'csrf-inquiry@example.com',
+        ]))->assertCreated()->assertJsonMissing(['message' => 'CSRF token mismatch.']);
     }
 }

@@ -23,10 +23,10 @@ class SeoApiTest extends TestCase
         parent::setUp();
         Cache::flush();
         $this->seedSettings([
-            'meta_title' => 'Balaji Events SEO',
+            'meta_title' => 'Balaji Royal Events SEO',
             'meta_description' => 'SEO description',
             'canonical_url' => 'https://frontend.test',
-            'company_name' => 'Balaji Events',
+            'company_name' => 'Balaji Royal Events',
             'company_description' => 'Wedding and event management.',
             'opengraph_image' => 'settings/seo/og.jpg',
         ]);
@@ -49,7 +49,7 @@ class SeoApiTest extends TestCase
                     'schema',
                 ],
             ])
-            ->assertJsonPath('data.meta.title', 'Balaji Events SEO')
+            ->assertJsonPath('data.meta.title', 'Balaji Royal Events SEO')
             ->assertJsonPath('data.meta.description', 'SEO description')
             ->assertJsonPath('data.meta.canonical', 'https://frontend.test')
             ->assertJsonPath('data.meta.open_graph.url', 'https://frontend.test');
@@ -62,7 +62,7 @@ class SeoApiTest extends TestCase
             'homepage_seo_description' => 'Homepage SEO Description',
             'homepage_seo_keywords' => 'wedding, events',
             'canonical_url' => 'https://frontend.test',
-            'meta_title' => 'Balaji Events SEO',
+            'meta_title' => 'Balaji Royal Events SEO',
             'meta_description' => 'SEO description',
         ]);
         $this->createFaq();
@@ -95,17 +95,17 @@ class SeoApiTest extends TestCase
         $this->getJson('/api/seo/resolve?type=services')
             ->assertOk()
             ->assertJsonPath('data.meta.canonical', 'https://frontend.test/services')
-            ->assertJsonPath('data.meta.title', 'Services | Balaji Events');
+            ->assertJsonPath('data.meta.title', 'Services | Balaji Royal Events');
 
         $this->getJson('/api/seo/resolve?type=packages')
             ->assertOk()
             ->assertJsonPath('data.meta.canonical', 'https://frontend.test/packages')
-            ->assertJsonPath('data.meta.title', 'Packages | Balaji Events');
+            ->assertJsonPath('data.meta.title', 'Packages | Balaji Royal Events');
 
         $this->getJson('/api/seo/resolve?type=contact')
             ->assertOk()
             ->assertJsonPath('data.meta.canonical', 'https://frontend.test/contact')
-            ->assertJsonPath('data.meta.title', 'Contact Us | Balaji Events');
+            ->assertJsonPath('data.meta.title', 'Contact Us | Balaji Royal Events');
     }
 
     public function test_seo_resolve_service_detail(): void
@@ -134,12 +134,12 @@ class SeoApiTest extends TestCase
         $this->getJson('/api/seo/resolve?type=gallery')
             ->assertOk()
             ->assertJsonPath('data.meta.canonical', 'https://frontend.test/gallery')
-            ->assertJsonPath('data.meta.title', 'Gallery | Balaji Events');
+            ->assertJsonPath('data.meta.title', 'Gallery | Balaji Royal Events');
 
         $this->getJson('/api/seo/resolve?type=gallery-category&slug='.$category->slug)
             ->assertOk()
             ->assertJsonPath('data.meta.canonical', 'https://frontend.test/gallery/'.$category->slug)
-            ->assertJsonPath('data.meta.title', $category->name.' Gallery | Balaji Events');
+            ->assertJsonPath('data.meta.title', $category->name.' Gallery | Balaji Royal Events');
     }
 
     public function test_seo_resolve_blog_index_and_detail(): void
@@ -271,6 +271,30 @@ class SeoApiTest extends TestCase
         $this->assertArrayNotHasKey('priceRange', $schema);
     }
 
+    public function test_local_business_schema_uses_locality_from_existing_address_copy(): void
+    {
+        $this->seedSettings([
+            'address' => 'Road No.3, Near J.M Bajaj Bike Agency - Jhunjhunu (Rajasthan)',
+            'company_description' => 'Wedding planning in Jhunjhunu, Mandawa and Alsisar.',
+            'meta_keywords' => 'Jhunjhunu, Mandawa, Alsisar, Khetri',
+        ]);
+        Cache::flush();
+
+        $schema = collect($this->getJson('/api/seo')->json('data.schema'))
+            ->firstWhere('@type', 'LocalBusiness');
+
+        $this->assertIsArray($schema);
+        $this->assertSame('Jhunjhunu', $schema['address']['addressLocality'] ?? null);
+        $this->assertSame('Rajasthan', $schema['address']['addressRegion'] ?? null);
+        $this->assertArrayNotHasKey('geo', $schema);
+        $this->assertArrayNotHasKey('priceRange', $schema);
+
+        $names = collect($schema['areaServed'] ?? [])->pluck('name')->all();
+        $this->assertContains('Jhunjhunu', $names);
+        $this->assertContains('Mandawa', $names);
+        $this->assertNotContains('Khetri', $names);
+    }
+
     public function test_site_url_config_preferred_over_app_url_for_canonical_og_and_sitemap(): void
     {
         config([
@@ -280,7 +304,7 @@ class SeoApiTest extends TestCase
 
         $this->seedSettings([
             'canonical_url' => null,
-            'meta_title' => 'Balaji Events SEO',
+            'meta_title' => 'Balaji Royal Events SEO',
             'meta_description' => 'SEO description',
         ]);
 

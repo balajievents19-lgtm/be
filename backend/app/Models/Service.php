@@ -7,6 +7,7 @@ use App\Models\Concerns\Publication\HasPublicationWindow;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
@@ -89,6 +90,12 @@ class Service extends Model
     public function packages(): HasMany
     {
         return $this->hasMany(ServicePackage::class);
+    }
+
+    public function galleryItems(): BelongsToMany
+    {
+        return $this->belongsToMany(GalleryItem::class, 'gallery_item_service')
+            ->withTimestamps();
     }
 
     public function scopeActive(Builder $query): Builder

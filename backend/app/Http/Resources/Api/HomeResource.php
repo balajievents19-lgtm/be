@@ -5,7 +5,10 @@ namespace App\Http\Resources\Api;
 use App\Models\BlogPost;
 use App\Models\CtaSection;
 use App\Models\EventOverview;
+use App\Models\EventType;
+use App\Models\ExternalMedia;
 use App\Models\Faq;
+use App\Models\GalleryCategory;
 use App\Models\GalleryItem;
 use App\Models\HeroSlide;
 use App\Models\OfficeLocation;
@@ -27,6 +30,9 @@ use Illuminate\Support\Collection;
  *     featured_services: Collection<int, Service>,
  *     events_overview: Collection<int, EventOverview>,
  *     featured_gallery: Collection<int, GalleryItem>,
+ *     gallery_categories: Collection<int, GalleryCategory>,
+ *     external_media: Collection<int, ExternalMedia>,
+ *     event_types: Collection<int, EventType>,
  *     testimonials: Collection<int, Testimonial>,
  *     success_stories: Collection<int, Testimonial>,
  *     featured_blog: Collection<int, BlogPost>,
@@ -34,7 +40,9 @@ use Illuminate\Support\Collection;
  *     statistics: Collection<int, Statistic>,
  *     cta_sections: Collection<int, CtaSection>,
  *     team_members: Collection<int, TeamMember>,
- *     office_locations: Collection<int, OfficeLocation>
+ *     office_locations: Collection<int, OfficeLocation>,
+ *     google_reviews: array<string, mixed>,
+ *     sections: array<string, bool>
  * } $resource
  */
 class HomeResource extends JsonResource
@@ -53,7 +61,10 @@ class HomeResource extends JsonResource
             'hero' => HeroSlideResource::collection($this->resource['hero']),
             'featured_services' => ServiceResource::collection($this->resource['featured_services']),
             'events_overview' => EventOverviewResource::collection($this->resource['events_overview']),
-            'featured_gallery' => GalleryItemResource::collection($this->resource['featured_gallery']),
+            'featured_gallery' => GalleryItemResource::collection($this->resource['featured_gallery'] ?? collect()),
+            'gallery_categories' => GalleryCategoryResource::collection($this->resource['gallery_categories'] ?? collect()),
+            'external_media' => ExternalMediaResource::collection($this->resource['external_media'] ?? collect()),
+            'event_types' => EventTypeResource::collection($this->resource['event_types'] ?? collect()),
             'testimonials' => TestimonialResource::collection($this->resource['testimonials']),
             'success_stories' => TestimonialResource::collection($this->resource['success_stories']),
             'featured_blog' => BlogPostResource::collection($this->resource['featured_blog']),
@@ -63,6 +74,12 @@ class HomeResource extends JsonResource
             'cta_sections' => CtaSectionResource::collection($this->resource['cta_sections'] ?? collect()),
             'team_members' => TeamMemberResource::collection($this->resource['team_members'] ?? collect()),
             'office_locations' => OfficeLocationResource::collection($this->resource['office_locations'] ?? collect()),
+            'google_reviews' => $this->resource['google_reviews'] ?? [
+                'configured' => false,
+                'enabled' => false,
+                'reviews' => [],
+            ],
+            'sections' => $this->resource['sections'] ?? [],
         ];
     }
 }

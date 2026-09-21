@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { formatBlogDate } from '~/utils/content'
 
-usePageSeo({ type: 'blog-index' })
+const seo = usePageSeo({ type: 'blog-index' })
 const { data: posts, pending, failed } = await useBlog()
 const { data: settings } = useSettings()
+await seo
 
 const breadcrumbs = [
   { label: 'Home', to: '/' },

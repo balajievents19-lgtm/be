@@ -8,7 +8,7 @@ withDefaults(defineProps<{
 }>(), {
   decorated: false,
   heading: 'Our Event Categories',
-  description: 'Explore Balaji Events galleries by celebration type.'
+  description: 'Explore Balaji Royal Events galleries by celebration type.'
 })
 
 const { data: categories, pending, failed } = useGalleryCategories()
@@ -95,9 +95,9 @@ const { data: categories, pending, failed } = useGalleryCategories()
         >
           <NuxtLink
             :to="`/gallery/${category.slug}`"
-            class="group block overflow-hidden bg-[#e1e8ed] no-underline"
+            class="group block h-full overflow-hidden rounded-[8px] border border-solid border-[#ececec] bg-white no-underline shadow-[0_6px_18px_rgba(16,15,15,0.06)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(241,91,34,0.16)]"
           >
-            <div class="relative aspect-[4/3] overflow-hidden">
+            <div class="relative aspect-[4/3] overflow-hidden bg-[#e1e8ed]">
               <img
                 v-if="category.cover_image"
                 :src="category.cover_image"
@@ -122,14 +122,16 @@ const { data: categories, pending, failed } = useGalleryCategories()
               />
             </div>
             <div class="bg-white px-3 py-3 text-center">
-              <h3 class="m-0 font-['Domine',Georgia,'Times_New_Roman',serif] text-base font-normal text-[#333]">
+              <h3 class="m-0 font-['Domine',Georgia,'Times_New_Roman',serif] text-base font-semibold text-[#333] transition-colors group-hover:text-brand-500">
                 {{ category.name }}
               </h3>
               <p
-                v-if="category.image_count"
+                v-if="category.image_count != null"
                 class="m-0 mt-1 text-xs text-[#888]"
               >
-                {{ category.image_count }} photos
+                {{ category.image_count === 0
+                  ? 'Photos not added yet'
+                  : (category.image_count === 1 ? '1 photo' : `${category.image_count} photos`) }}
               </p>
             </div>
           </NuxtLink>

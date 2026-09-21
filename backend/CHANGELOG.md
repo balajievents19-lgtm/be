@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the Balaji Events backend (Laravel API + Filament admin).
+All notable changes to the Balaji Royal Events backend (Laravel API + Filament admin).
 
 ## [1.0.0] — 2026-08-04
 

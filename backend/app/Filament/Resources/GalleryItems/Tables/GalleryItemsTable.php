@@ -30,9 +30,15 @@ class GalleryItemsTable
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('category.name')
-                    ->label('Category')
+                    ->label('Gallery Category')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('services.name')
+                    ->label('Services')
+                    ->badge()
+                    ->separator(',')
+                    ->limitList(3)
+                    ->toggleable(),
                 TextColumn::make('slug')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -66,10 +72,16 @@ class GalleryItemsTable
             ->reorderable('sort_order')
             ->filters([
                 SelectFilter::make('gallery_category_id')
-                    ->label('Category')
+                    ->label('Gallery Category')
                     ->relationship('category', 'name')
                     ->searchable()
                     ->preload(),
+                SelectFilter::make('services')
+                    ->label('Service')
+                    ->relationship('services', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->multiple(),
                 TernaryFilter::make('status')
                     ->label('Active')
                     ->boolean()

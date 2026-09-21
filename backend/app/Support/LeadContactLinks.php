@@ -36,10 +36,15 @@ final class LeadContactLinks
             return null;
         }
 
+        if (strlen($digits) === 10) {
+            $digits = '91'.$digits;
+        }
+
         $name = trim((string) $lead->name);
+        $brand = Brand::name();
         $message = filled($name)
-            ? "Hello {$name}, this is Balaji Events. We received your event enquiry. How can we help you?"
-            : 'Hello, this is Balaji Events. We received your event enquiry. How can we help you?';
+            ? "Hello {$name}, this is {$brand}. We received your event enquiry. How can we help you?"
+            : "Hello, this is {$brand}. We received your event enquiry. How can we help you?";
 
         return 'https://wa.me/'.$digits.'?text='.rawurlencode($message);
     }

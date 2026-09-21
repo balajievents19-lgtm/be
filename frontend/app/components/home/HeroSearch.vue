@@ -1,29 +1,26 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
-import type { Service } from '~/types/service'
+import FormsAppDatePicker from '~/components/forms/AppDatePicker.vue'
+import FormsAppEventTypeSelect from '~/components/forms/AppEventTypeSelect.vue'
+import FormsAppLocationPicker from '~/components/forms/AppLocationPicker.vue'
 
 interface SearchForm {
   name: string
   mobile: string
-  eventType: string
+  eventTypeId: string
   location: string
   date: string
   budget: string
   website: string
 }
 
-const props = withDefaults(defineProps<{
-  services?: Service[]
-}>(), {
-  services: () => []
-})
-
 const { submitContact } = usePublicForms()
+const { data: eventTypes } = useEventTypes()
 
 const form = reactive<SearchForm>({
   name: '',
   mobile: '',
-  eventType: '',
+  eventTypeId: '',
   location: '',
   date: '',
   budget: '',
@@ -42,7 +39,7 @@ const search = async () => {
     return
   }
 
-  if (!form.eventType.trim() || !form.location.trim() || !form.date.trim()) {
+  if (!form.eventTypeId.trim() || !form.location.trim() || !form.date.trim()) {
     apiError.value = 'Event Type, Event Location, and Event Date are required.'
     return
   }
@@ -52,22 +49,26 @@ const search = async () => {
     return
   }
 
-  const selected = props.services.find(item => item.slug === form.eventType)
-  const serviceName = selected?.name || form.eventType.trim()
+  const selected = eventTypes.value.find(item => String(item.id) === form.eventTypeId)
+  if (!selected) {
+    apiError.value = 'Please select a valid event type.'
+    return
+  }
 
   submitting.value = true
   try {
     await submitContact({
       name: form.name.trim(),
       mobile: form.mobile.trim(),
-      subject: `Slider inquiry: ${serviceName}`,
+      subject: `Slider inquiry: ${selected.name}`,
       message: [
-        `Event Type: ${serviceName}`,
+        `Event Type: ${selected.name}`,
         `Event Location: ${form.location.trim()}`,
         `Event Date: ${form.date.trim()}`,
         form.budget.trim() ? `Budget: ${form.budget.trim()}` : null
       ].filter(Boolean).join('\n'),
-      service_interested: serviceName,
+      event_type_id: selected.id,
+      service_interested: selected.name,
       event_date: form.date.trim(),
       event_location: form.location.trim(),
       budget: form.budget.trim() || null,
@@ -78,14 +79,17 @@ const search = async () => {
     submitted.value = true
     form.name = ''
     form.mobile = ''
-    form.eventType = ''
+    form.eventTypeId = ''
     form.location = ''
     form.date = ''
     form.budget = ''
     form.website = ''
   } catch (error: unknown) {
-    const err = error as { data?: { message?: string }, message?: string }
-    apiError.value = err?.data?.message || err?.message || 'Unable to send your inquiry. Please try again.'
+    const err = error as { data?: { message?: string, errors?: Record<string, string[]> }, message?: string }
+    const firstValidation = err?.data?.errors
+      ? Object.values(err.data.errors).flat()[0]
+      : null
+    apiError.value = firstValidation || err?.data?.message || err?.message || 'Unable to send your inquiry. Please try again.'
   } finally {
     submitting.value = false
   }
@@ -94,7 +98,7 @@ const search = async () => {
 
 <template>
   <form
-    class="banner-search mx-auto mb-5 w-full max-w-[570px] rounded-[3px] bg-[rgba(255,255,255,0.8)] px-[30px] pt-[30px] pb-[23px] max-[991px]:mt-[30px] max-[991px]:mb-5 min-[992px]:mt-[30px] min-[1200px]:mt-[35px] min-[1400px]:mt-[67px]"
+    class="banner-search relative mx-auto mb-0 w-full max-w-[570px] rounded-[3px] bg-[rgba(255,255,255,0.8)] px-[30px] pt-[30px] pb-[23px] max-[991px]:mt-6 min-[992px]:mt-8 min-[1200px]:mt-10 lg:max-w-[960px]"
     aria-label="Event inquiry"
     @submit.prevent="search"
   >
@@ -108,110 +112,74 @@ const search = async () => {
       aria-hidden="true"
     >
 
-    <div class="relative mb-2.5 inline-block w-full">
-      <span
-        class="icon icon-user pointer-events-none absolute top-0 left-0 z-10 mt-1 h-10 w-[37px] text-center text-lg leading-[48px] text-[#464e7b]"
-        aria-hidden="true"
-      />
-      <input
-        v-model="form.name"
-        type="text"
-        name="name"
-        placeholder="Your Name"
-        aria-label="Your name"
-        autocomplete="name"
-        class="box-border h-[50px] w-full rounded border border-solid border-[#b8b8b8] bg-white py-[15px] pr-2.5 pl-[38px] text-base leading-5 text-[#333] outline-none"
-      >
-    </div>
-
-    <div class="relative mb-2.5 inline-block w-full">
-      <span
-        class="icon icon-phone pointer-events-none absolute top-0 left-0 z-10 mt-1 h-10 w-[37px] text-center text-lg leading-[48px] text-[#464e7b]"
-        aria-hidden="true"
-      />
-      <input
-        v-model="form.mobile"
-        type="tel"
-        name="mobile"
-        placeholder="Phone Number"
-        aria-label="Phone number"
-        autocomplete="tel"
-        class="box-border h-[50px] w-full rounded border border-solid border-[#b8b8b8] bg-white py-[15px] pr-2.5 pl-[38px] text-base leading-5 text-[#333] outline-none"
-      >
-    </div>
-
-    <div class="relative mb-2.5 inline-block w-full">
-      <span
-        class="icon icon-grid-view pointer-events-none absolute top-0 left-0 z-10 mt-1 h-10 w-[37px] text-center text-lg leading-[48px] text-[#464e7b]"
-        aria-hidden="true"
-      />
-      <select
-        v-model="form.eventType"
-        name="event_type"
-        aria-label="Event type"
-        required
-        class="box-border h-[50px] w-full appearance-none rounded border border-solid border-[#b8b8b8] bg-white py-[15px] pr-2.5 pl-[38px] text-base leading-5 text-[#333] outline-none"
-      >
-        <option value="">
-          Event Type
-        </option>
-        <option
-          v-for="service in services"
-          :key="service.id"
-          :value="service.slug"
-        >
-          {{ service.name }}
-        </option>
-      </select>
-    </div>
-
-    <div class="mb-2.5 w-full max-[767px]:block min-[768px]:flex min-[768px]:items-start">
-      <div class="relative mb-2.5 inline-block w-full max-[767px]:mb-2.5 min-[768px]:mb-0 min-[768px]:mr-[1.17%] min-[768px]:w-[67.64%]">
+    <div class="mb-2.5 grid grid-cols-1 gap-x-[1.17%] gap-y-2.5 md:grid-cols-2 lg:grid-cols-3">
+      <div class="relative min-w-0 w-full">
         <span
-          class="icon icon-location-1 pointer-events-none absolute top-0 left-0 z-10 mt-1 h-10 w-[37px] text-center text-lg leading-[48px] text-[#464e7b]"
+          class="icon icon-user pointer-events-none absolute top-0 left-0 z-10 mt-1 h-10 w-[37px] text-center text-lg leading-[48px] text-[#464e7b]"
           aria-hidden="true"
         />
         <input
-          v-model="form.location"
+          v-model="form.name"
           type="text"
-          name="location"
-          placeholder="Event Location"
-          aria-label="Event location"
-          autocomplete="address-level2"
-          required
+          name="name"
+          placeholder="Your Name"
+          aria-label="Your name"
+          autocomplete="name"
           class="box-border h-[50px] w-full rounded border border-solid border-[#b8b8b8] bg-white py-[15px] pr-2.5 pl-[38px] text-base leading-5 text-[#333] outline-none"
         >
       </div>
 
-      <div class="relative inline-block w-full min-[768px]:w-[30.39%]">
+      <div class="relative min-w-0 w-full">
         <span
-          class="icon icon-calander-month pointer-events-none absolute top-0 left-0 z-10 mt-1 h-10 w-[37px] text-center text-lg leading-[48px] text-[#464e7b]"
+          class="icon icon-phone pointer-events-none absolute top-0 left-0 z-10 mt-1 h-10 w-[37px] text-center text-lg leading-[48px] text-[#464e7b]"
           aria-hidden="true"
         />
         <input
-          v-model="form.date"
-          type="date"
-          name="date"
-          aria-label="Event date"
-          required
+          v-model="form.mobile"
+          type="tel"
+          name="mobile"
+          placeholder="Phone Number"
+          aria-label="Phone number"
+          autocomplete="tel"
           class="box-border h-[50px] w-full rounded border border-solid border-[#b8b8b8] bg-white py-[15px] pr-2.5 pl-[38px] text-base leading-5 text-[#333] outline-none"
         >
       </div>
-    </div>
 
-    <div class="relative mb-2.5 inline-block w-full">
-      <span
-        class="icon icon-dollar pointer-events-none absolute top-0 left-0 z-10 mt-1 h-10 w-[37px] text-center text-lg leading-[48px] text-[#464e7b]"
-        aria-hidden="true"
-      />
-      <input
-        v-model="form.budget"
-        type="text"
-        name="budget"
-        placeholder="Budget (optional)"
-        aria-label="Budget optional"
-        class="box-border h-[50px] w-full rounded border border-solid border-[#b8b8b8] bg-white py-[15px] pr-2.5 pl-[38px] text-base leading-5 text-[#333] outline-none"
-      >
+      <div class="min-w-0 w-full">
+        <FormsAppEventTypeSelect
+          v-model="form.eventTypeId"
+          required
+        />
+      </div>
+
+      <div class="relative min-w-0 w-full">
+        <FormsAppLocationPicker
+          v-model="form.location"
+          required
+        />
+      </div>
+
+      <div class="relative min-w-0 w-full">
+        <FormsAppDatePicker
+          v-model="form.date"
+          required
+        />
+      </div>
+
+      <div class="relative min-w-0 w-full">
+        <span
+          class="icon icon-dollar pointer-events-none absolute top-0 left-0 z-10 mt-1 h-10 w-[37px] text-center text-lg leading-[48px] text-[#464e7b]"
+          aria-hidden="true"
+        />
+        <input
+          v-model="form.budget"
+          type="text"
+          name="budget"
+          placeholder="Budget (optional)"
+          aria-label="Budget optional"
+          class="box-border h-[50px] w-full rounded border border-solid border-[#b8b8b8] bg-white py-[15px] pr-2.5 pl-[38px] text-base leading-5 text-[#333] outline-none"
+        >
+      </div>
     </div>
 
     <p

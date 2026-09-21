@@ -2,9 +2,9 @@
 const { data: settings } = useSettings()
 
 useSeoMeta({
-  title: 'Careers | Balaji Events',
-  description: 'Join the Balaji Events team planning weddings and celebrations across Rajasthan.',
-  ogTitle: 'Careers | Balaji Events',
+  title: 'Careers | Balaji Royal Events',
+  description: 'Join the Balaji Royal Events team planning weddings and celebrations across Rajasthan.',
+  ogTitle: 'Careers | Balaji Royal Events',
   twitterCard: 'summary_large_image'
 })
 </script>
@@ -20,7 +20,7 @@ useSeoMeta({
       <section class="py-16">
         <UContainer class="mx-auto max-w-[800px] text-center">
           <p class="m-0 text-base leading-7 text-[#555]">
-            Balaji Events is growing across Jaipur, Udaipur, Jhunjhunu, and destination venues.
+            Balaji Royal Events is growing across Jaipur, Udaipur, Jhunjhunu, and destination venues.
             We welcome planners, décor stylists, coordinators, and hospitality professionals who care about detail.
           </p>
           <p class="mt-4 text-sm leading-6 text-[#666]">

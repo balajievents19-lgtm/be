@@ -34,8 +34,8 @@ class FaqSeeder extends Seeder
         $faqs = [
             [
                 'category' => 'General',
-                'question' => 'How can I contact Balaji Events?',
-                'answer' => '<p>You can call us at +91-9462577065, +91-8058780290. Email balajievents19@gmail.com.</p>',
+                'question' => 'How can I contact Balaji Royal Events?',
+                'answer' => '<p>You can call us at +91-9462577065. Email balajievents19@gmail.com.</p>',
                 'homepage' => true,
             ],
             [
@@ -53,7 +53,7 @@ class FaqSeeder extends Seeder
             [
                 'category' => 'Services',
                 'question' => 'Do you manage weddings in Rajasthan?',
-                'answer' => '<p>Balaji Events is a trusted wedding management company in India. We provide many different services in Rajasthan and help couples celebrate their special day in a grand way.</p>',
+                'answer' => '<p>Balaji Royal Events is a trusted wedding management company in India. We provide many different services in Rajasthan and help couples celebrate their special day in a grand way.</p>',
                 'homepage' => true,
             ],
             [
@@ -94,7 +94,7 @@ class FaqSeeder extends Seeder
                 'homepage_featured' => $item['homepage'],
                 'sort_order' => $index + 1,
                 'status' => true,
-                'seo_title' => $item['question'].' | Balaji Events FAQ',
+                'seo_title' => $item['question'].' | Balaji Royal Events FAQ',
                 'seo_description' => trim(strip_tags($item['answer'])),
             ]);
         }

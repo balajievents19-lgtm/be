@@ -50,7 +50,7 @@ export const overviewEvents: EventItem[] = [
     title: 'Event Planner',
     caption: 'Event Planner',
     image: '/images/event/event-img1.jpg',
-    description: 'Balaji Events is trusted wedding management company in india.We were Provide many differnt service in Rajasthan. We promise to set the perfect pitch for to-be and groom to celebrate their special day in grand way.',
+    description: 'Balaji Royal Events is trusted wedding management company in india.We were Provide many differnt service in Rajasthan. We promise to set the perfect pitch for to-be and groom to celebrate their special day in grand way.',
     to: '/services'
   },
   {
@@ -189,7 +189,7 @@ export const footerSocialLinks: SocialLink[] = [
 
 export const siteContact = {
   email: 'balajievents19@gmail.com',
-  phoneDisplay: '+91-94625-77065',
+  phoneDisplay: '+91-9462577065',
   phoneHref: 'tel:+919462577065',
   address: 'Golai Mode, Road No.3, Near : J.M Bajaj Bike Agency Jhunjhunu (Rajasthan)'
 } as const

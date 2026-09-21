@@ -1,6 +1,6 @@
 # Production Release — Git & SEO Pinning
 
-Concise release continuity guide for Balaji Events. Full server runbook: [DEPLOYMENT.md](./DEPLOYMENT.md).
+Concise release continuity guide for Balaji Royal Events. Full server runbook: [DEPLOYMENT.md](./DEPLOYMENT.md).
 
 ## Repository layout (do not flatten)
 

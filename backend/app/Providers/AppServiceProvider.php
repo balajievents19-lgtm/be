@@ -7,11 +7,14 @@ use App\Models\BlogCategory;
 use App\Models\BlogPost;
 use App\Models\CtaSection;
 use App\Models\EventOverview;
+use App\Models\EventType;
+use App\Models\ExternalMedia;
 use App\Models\Faq;
 use App\Models\FaqCategory;
 use App\Models\GalleryCategory;
 use App\Models\GalleryItem;
 use App\Models\HeroSlide;
+use App\Models\HomepageSection;
 use App\Models\NavigationItem;
 use App\Models\OfficeLocation;
 use App\Models\Redirect;
@@ -24,10 +27,12 @@ use App\Models\TeamMember;
 use App\Models\Testimonial;
 use App\Models\User;
 use App\Observers\ContentCacheObserver;
+use App\Observers\GalleryOriginalObserver;
 use App\Repositories\EloquentNavigationRepository;
 use App\Services\Seo\SeoService;
 use App\Support\Rbac\AdminModules;
 use App\Support\Rbac\AdminUserSecurity;
+use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -43,6 +48,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(SeoService::class);
         $this->app->bind(NavigationRepository::class, EloquentNavigationRepository::class);
+        $this->app->singleton(\App\Services\Customer\EmailVerificationService::class);
     }
 
     /**
@@ -50,6 +56,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // API customer routes must return 401 JSON, not redirect to a missing web "login" route.
+        Authenticate::redirectUsing(function (Request $request): ?string {
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return null;
+            }
+
+            return '/admin/login';
+        });
+
         Gate::before(function ($user, string $ability, array $arguments = []) {
             if (! $user instanceof User) {
                 return null;
@@ -95,18 +110,48 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(5)->by($request->ip());
         });
 
+        RateLimiter::for('geo', function (Request $request) {
+            return Limit::perMinute(20)->by($request->ip());
+        });
+
         RateLimiter::for('newsletter', function (Request $request) {
             return Limit::perMinute(5)->by($request->ip());
+        });
+
+        RateLimiter::for('customer-login', function (Request $request) {
+            return Limit::perMinute(5)->by($request->ip());
+        });
+
+        RateLimiter::for('customer-register', function (Request $request) {
+            return Limit::perMinute(5)->by($request->ip());
+        });
+
+        RateLimiter::for('customer-forgot-password', function (Request $request) {
+            return Limit::perMinute(5)->by($request->ip());
+        });
+
+        RateLimiter::for('customer-oauth', function (Request $request) {
+            return Limit::perMinute(10)->by($request->ip());
+        });
+
+        RateLimiter::for('customer-email-verify', function (Request $request) {
+            $email = strtolower((string) $request->input('email', $request->route('id', '')));
+
+            return Limit::perMinute(8)->by($request->ip().'|'.$email);
         });
 
         $observer = ContentCacheObserver::class;
 
         Setting::observe($observer);
         HeroSlide::observe($observer);
+        HomepageSection::observe($observer);
         NavigationItem::observe($observer);
         Service::observe($observer);
         GalleryItem::observe($observer);
+        GalleryItem::observe(GalleryOriginalObserver::class);
         GalleryCategory::observe($observer);
+        ExternalMedia::observe($observer);
+        EventType::observe($observer);
         BlogPost::observe($observer);
         BlogCategory::observe($observer);
         Faq::observe($observer);

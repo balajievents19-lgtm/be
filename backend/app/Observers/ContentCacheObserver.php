@@ -6,11 +6,14 @@ use App\Models\BlogCategory;
 use App\Models\BlogPost;
 use App\Models\CtaSection;
 use App\Models\EventOverview;
+use App\Models\EventType;
+use App\Models\ExternalMedia;
 use App\Models\Faq;
 use App\Models\FaqCategory;
 use App\Models\GalleryCategory;
 use App\Models\GalleryItem;
 use App\Models\HeroSlide;
+use App\Models\HomepageSection;
 use App\Models\NavigationItem;
 use App\Models\OfficeLocation;
 use App\Models\Redirect;
@@ -52,13 +55,20 @@ class ContentCacheObserver
         match ($class) {
             Setting::class => ContentCache::flush(ContentCache::SETTINGS),
             HeroSlide::class => ContentCache::flush(ContentCache::HERO),
+            HomepageSection::class => ContentCache::flush(),
             NavigationItem::class => ContentCache::flush(
                 ContentCache::NAVIGATION_HEADER,
                 ContentCache::NAVIGATION_FOOTER
             ),
             Service::class => ContentCache::flush(ContentCache::SERVICES),
             GalleryItem::class,
-            GalleryCategory::class => ContentCache::flush(ContentCache::GALLERY, ContentCache::GALLERY_CATEGORIES),
+            GalleryCategory::class => ContentCache::flush(
+                ContentCache::GALLERY,
+                ContentCache::GALLERY_CATEGORIES,
+                ContentCache::SERVICES
+            ),
+            ExternalMedia::class => ContentCache::flush(ContentCache::EXTERNAL_MEDIA),
+            EventType::class => ContentCache::flush(ContentCache::EVENT_TYPES),
             BlogPost::class,
             BlogCategory::class => ContentCache::flush(ContentCache::BLOG),
             Faq::class,

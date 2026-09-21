@@ -6,6 +6,10 @@ import { galleryItemAlt, galleryItemSrc } from '~/types/gallery'
 const { data: items, pending, failed } = useGallery()
 
 const images = computed(() => (items.value ?? []).map(galleryItemSrc).filter(Boolean))
+const itemIds = computed(() => (items.value ?? []).map(item => item.id))
+const downloadAvailable = computed(() =>
+  (items.value ?? []).map(item => Boolean(item.download_available ?? true))
+)
 const isLightboxOpen = ref(false)
 const activeIndex = ref(0)
 
@@ -86,6 +90,8 @@ const openLightbox = (index: number) => {
       v-model:open="isLightboxOpen"
       v-model:index="activeIndex"
       :images="images"
+      :item-ids="itemIds"
+      :download-available="downloadAvailable"
       :alt="activeAlt"
     />
   </section>

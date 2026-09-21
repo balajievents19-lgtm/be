@@ -1,4 +1,4 @@
-# Balaji Events — Production Deployment Guide
+# Balaji Royal Events — Production Deployment Guide
 
 Version **1.0** production runbook for the Laravel API/admin and Nuxt SSR website.
 
@@ -33,10 +33,11 @@ Suggested layout:
   frontend/    # Nuxt repo
 ```
 
-Suggested hostnames:
+Suggested hostnames (same public origin):
 
-- `api.example.com` → Laravel (`APP_URL`)
-- `www.example.com` → Nuxt (`SITE_URL` / `FRONTEND_URL`)
+- `https://www.balajiroyalevents.com` → Nuxt SSR (`SITE_URL` / `FRONTEND_URL`)
+- `https://www.balajiroyalevents.com/api` → Laravel API (`APP_URL` + `/api`)
+- `https://www.balajiroyalevents.com/admin` → Filament
 
 ---
 
@@ -74,9 +75,9 @@ php artisan key:generate
 
 Set at minimum:
 
-- `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://api.example.com`
+- `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://www.balajiroyalevents.com`
 - `DB_*` credentials
-- `SITE_URL` = public **website** origin (Nuxt). **Required** so canonical/OG/JSON-LD/sitemap `<loc>` are not the API host
+- `SITE_URL` / `FRONTEND_URL` = `https://www.balajiroyalevents.com` (canonical/OG/JSON-LD/sitemap)
 - `FRONTEND_URL` = optional alias if `SITE_URL` unset
 - `ADMIN_EMAILS` = comma-separated Filament login emails (**required in production**)
 - `MAIL_*` for outbound mail
@@ -92,7 +93,7 @@ cd /var/www/balaji-events/frontend
 cp .env.production.example .env
 ```
 
-Set `NUXT_PUBLIC_API_BASE=https://api.example.com/api` **before** `pnpm build` (public runtime config is baked at build time).
+Set `NUXT_PUBLIC_API_BASE=https://www.balajiroyalevents.com/api` **before** `pnpm build` (public runtime config is baked at build time).
 
 ---
 
@@ -143,7 +144,7 @@ sudo nginx -t && sudo systemctl reload nginx
 
 # SSL (after DNS points here)
 sudo apt install -y certbot python3-certbot-nginx
-sudo certbot --nginx -d api.example.com -d www.example.com -d example.com
+sudo certbot --nginx -d www.balajiroyalevents.com -d balajiroyalevents.com
 ```
 
 Cloudflare tip: set SSL mode to **Full (strict)** once origin certificates exist; cache HTML carefully for SSR pages.
@@ -180,7 +181,7 @@ sudo cp deploy/cron/laravel-scheduler /etc/cron.d/balaji-events-scheduler
 sudo chmod 644 /etc/cron.d/balaji-events-scheduler
 ```
 
-Laravel health endpoint (built-in): `GET https://api.example.com/up`
+Laravel health endpoint (built-in): `GET https://www.balajiroyalevents.com/up`
 
 ---
 
@@ -199,11 +200,11 @@ Laravel health endpoint (built-in): `GET https://api.example.com/up`
 ### Health checks
 
 ```bash
-curl -fsS https://api.example.com/up
-curl -fsS -o /dev/null -w "%{http_code}\n" https://www.example.com/
-curl -fsS https://api.example.com/api/home | head -c 200
-curl -fsS https://api.example.com/robots.txt
-curl -fsS https://api.example.com/sitemap.xml | head
+curl -fsS https://www.balajiroyalevents.com/up
+curl -fsS -o /dev/null -w "%{http_code}\n" https://www.balajiroyalevents.com/
+curl -fsS https://www.balajiroyalevents.com/api/home | head -c 200
+curl -fsS https://www.balajiroyalevents.com/robots.txt
+curl -fsS https://www.balajiroyalevents.com/sitemap.xml | head
 ```
 
 ### Cache clear (when content looks stale)
@@ -262,7 +263,7 @@ Configure in Filament → System → SEO / Website Settings:
 - Facebook Pixel (optional)
 - Canonical URL / robots
 
-Submit `https://api.example.com/sitemap.xml` in Search Console (or proxy it on the public host if preferred).
+Submit `https://www.balajiroyalevents.com/sitemap.xml` in Search Console.
 
 ---
 

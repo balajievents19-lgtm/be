@@ -78,6 +78,10 @@ class SeoController extends Controller
                 Faq::query()->active()->where('slug', $slug)->firstOrFail()
             ),
             'contact' => $this->seo->forContact(),
+            'events' => $this->seo->forEvents(),
+            'media' => $this->seo->forMedia(),
+            'privacy' => $this->seo->forPrivacy(),
+            'terms' => $this->seo->forTerms(),
             'static' => $this->seo->forStaticPage($path, $title, $request->query('description')),
             default => abort(422, 'Unsupported SEO type.'),
         };

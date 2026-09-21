@@ -27,7 +27,7 @@ class SettingsApiTest extends TestCase
 
         $this->getJson('/api/settings')
             ->assertOk()
-            ->assertJsonPath('data.company.name', 'Balaji Events')
+            ->assertJsonPath('data.company.name', 'Balaji Royal Events')
             ->assertJsonPath('data.contact.email', 'hello@balaji.test')
             ->assertJsonStructure([
                 'data' => [
@@ -40,5 +40,16 @@ class SettingsApiTest extends TestCase
                     'footer',
                 ],
             ]);
+    }
+
+    public function test_settings_rewrites_outdated_company_name(): void
+    {
+        $this->seedSettings([
+            'company_name' => 'Balaji Events',
+        ]);
+
+        $this->getJson('/api/settings')
+            ->assertOk()
+            ->assertJsonPath('data.company.name', 'Balaji Royal Events');
     }
 }

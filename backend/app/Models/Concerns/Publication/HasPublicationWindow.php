@@ -8,16 +8,18 @@ trait HasPublicationWindow
 {
     public function scopeWithinPublicationWindow(Builder $query): Builder
     {
+        $table = $query->getModel()->getTable();
+
         return $query
-            ->where(function (Builder $builder): void {
+            ->where(function (Builder $builder) use ($table): void {
                 $builder
-                    ->whereNull('publish_at')
-                    ->orWhere('publish_at', '<=', now());
+                    ->whereNull($table.'.publish_at')
+                    ->orWhere($table.'.publish_at', '<=', now());
             })
-            ->where(function (Builder $builder): void {
+            ->where(function (Builder $builder) use ($table): void {
                 $builder
-                    ->whereNull('unpublish_at')
-                    ->orWhere('unpublish_at', '>', now());
+                    ->whereNull($table.'.unpublish_at')
+                    ->orWhere($table.'.unpublish_at', '>', now());
             });
     }
 }

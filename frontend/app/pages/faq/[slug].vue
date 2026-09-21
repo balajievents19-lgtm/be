@@ -2,9 +2,10 @@
 const route = useRoute()
 const slug = computed(() => String(route.params.slug || ''))
 
+const seo = usePageSeo({ type: 'faq-detail', slug: slug.value })
 const { data: faq, pending, failed } = await useFaq(slug.value)
 const { data: settings } = useSettings()
-await usePageSeo({ type: 'faq-detail', slug: slug.value })
+await seo
 
 const breadcrumbs = computed(() => [
   { label: 'Home', to: '/' },

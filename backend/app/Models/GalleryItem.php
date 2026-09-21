@@ -7,6 +7,7 @@ use App\Models\Concerns\Publication\HasPublicationWindow;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
@@ -22,6 +23,8 @@ class GalleryItem extends Model
         'slug',
         'description',
         'image',
+        'original_path',
+        'original_disk',
         'thumbnail',
         'alt_text',
         'caption',
@@ -84,14 +87,43 @@ class GalleryItem extends Model
         return $this->belongsTo(GalleryCategory::class, 'gallery_category_id');
     }
 
+    public function services(): BelongsToMany
+    {
+        return $this->belongsToMany(Service::class, 'gallery_item_service')
+            ->withTimestamps();
+    }
+
     public function scopeActive(Builder $query): Builder
     {
-        return $query->where('status', true)->withinPublicationWindow();
+        $table = $query->getModel()->getTable();
+
+        return $query->where($table.'.status', true)->withinPublicationWindow();
+    }
+
+    /**
+     * Public listings must have a thumbnail or a non-private, non-studio image path.
+     */
+    public function scopeWithPublicPreview(Builder $query): Builder
+    {
+        $table = $query->getModel()->getTable();
+
+        return $query->where(function (Builder $outer) use ($table): void {
+            $outer->where(function (Builder $q) use ($table): void {
+                $q->whereNotNull($table.'.thumbnail')->where($table.'.thumbnail', '!=', '');
+            })->orWhere(function (Builder $q) use ($table): void {
+                $q->whereNotNull($table.'.image')
+                    ->where($table.'.image', '!=', '')
+                    ->where($table.'.image', 'not like', '%studio/uploads/%')
+                    ->where($table.'.image', 'not like', 'gallery/images/%');
+            });
+        });
     }
 
     public function scopeOrdered(Builder $query): Builder
     {
-        return $query->orderBy('sort_order')->orderBy('id');
+        $table = $query->getModel()->getTable();
+
+        return $query->orderBy($table.'.sort_order')->orderBy($table.'.id');
     }
 
     public function scopeHomepage(Builder $query): Builder

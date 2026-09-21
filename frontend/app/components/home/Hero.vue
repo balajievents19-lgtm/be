@@ -4,20 +4,17 @@ import { Swiper, SwiperSlide } from 'swiper/vue'
 import { A11y, Autoplay, EffectFade, Keyboard, Navigation } from 'swiper/modules'
 import HeroSearch from '~/components/home/HeroSearch.vue'
 import type { HeroSlide } from '~/types/home'
-import type { Service } from '~/types/service'
 
 import 'swiper/css'
 import 'swiper/css/effect-fade'
 import 'swiper/css/navigation'
 
-const props = withDefaults(defineProps<{
+withDefaults(defineProps<{
   slides?: HeroSlide[]
-  services?: Service[]
   pending?: boolean
   failed?: boolean
 }>(), {
   slides: () => [],
-  services: () => [],
   pending: false,
   failed: false
 })
@@ -28,22 +25,6 @@ const heroSearchEnabled = computed(() => settings.value?.hero_search?.enabled !=
 const modules = [A11y, Autoplay, EffectFade, Keyboard, Navigation]
 const prefersReducedMotion = ref(false)
 const swiperRef = ref<{ slideNext: () => void, slidePrev: () => void } | null>(null)
-const activeIndex = ref(0)
-
-const activeSlide = computed(() => props.slides[activeIndex.value] ?? props.slides[0] ?? null)
-
-const titleAlignClass = computed(() => {
-  const alignment = activeSlide.value?.text_alignment || 'center'
-  if (alignment === 'left') {
-    return 'text-left'
-  }
-  if (alignment === 'right') {
-    return 'text-right'
-  }
-  return 'text-center'
-})
-
-const isExternalUrl = (url: string) => /^https?:\/\//i.test(url) || url.startsWith('mailto:') || url.startsWith('tel:')
 
 const overlayStyleFor = (opacity: number | null | undefined) => {
   const value = Math.min(100, Math.max(0, Number(opacity ?? 35))) / 100
@@ -56,13 +37,8 @@ const updateReducedMotionPreference = () => {
   prefersReducedMotion.value = mediaQuery?.matches ?? false
 }
 
-const onSwiper = (swiper: { slideNext: () => void, slidePrev: () => void, realIndex?: number, activeIndex?: number }) => {
+const onSwiper = (swiper: { slideNext: () => void, slidePrev: () => void }) => {
   swiperRef.value = swiper
-  activeIndex.value = swiper.realIndex ?? swiper.activeIndex ?? 0
-}
-
-const onSlideChange = (swiper: { realIndex?: number, activeIndex?: number }) => {
-  activeIndex.value = swiper.realIndex ?? swiper.activeIndex ?? 0
 }
 
 const goNext = () => {
@@ -86,13 +62,16 @@ onUnmounted(() => {
 
 <template>
   <section
-    class="banner relative w-full max-[1199px]:inline-block"
+    class="banner relative isolate block w-full overflow-hidden bg-[#1a1a2e]"
     aria-label="Featured events"
   >
-    <div class="relative w-full">
+    <div
+      class="pointer-events-none absolute inset-0 z-0"
+      aria-hidden="true"
+    >
       <p
         v-if="pending && !slides.length"
-        class="py-20 text-center text-sm text-[#666]"
+        class="flex h-full items-center justify-center text-sm text-white/70"
         role="status"
       >
         Loading…
@@ -100,7 +79,7 @@ onUnmounted(() => {
 
       <p
         v-else-if="failed && !slides.length"
-        class="py-20 text-center text-sm text-[#666]"
+        class="flex h-full items-center justify-center text-sm text-white/70"
         role="alert"
       >
         Unable to load slides.
@@ -125,24 +104,24 @@ onUnmounted(() => {
             disableOnInteraction: false,
             pauseOnMouseEnter: true
           }"
-        class="w-full"
+        class="h-full w-full"
         @swiper="onSwiper"
-        @slide-change="onSlideChange"
       >
         <SwiperSlide
           v-for="(slide, index) in slides"
           :key="slide.id"
+          class="!h-full"
         >
-          <div class="relative max-h-[850px] w-full overflow-hidden">
+          <div class="relative h-full min-h-full w-full overflow-hidden">
             <video
               v-if="slide.video_url"
               :src="slide.video_url"
-              class="block h-auto max-h-[850px] w-full object-cover"
+              class="absolute inset-0 block h-full w-full object-cover"
               autoplay
               muted
               loop
               playsinline
-              :aria-label="slide.title || 'Balaji Events'"
+              :aria-label="slide.title || 'Balaji Royal Events'"
             />
             <picture v-else>
               <source
@@ -152,95 +131,75 @@ onUnmounted(() => {
               >
               <img
                 :src="slide.desktop_image"
-                :alt="slide.title || 'Balaji Events'"
+                :alt="slide.title || 'Balaji Royal Events'"
                 :fetchpriority="index === 0 ? 'high' : 'auto'"
                 :loading="index === 0 ? 'eager' : 'lazy'"
                 decoding="async"
                 width="1600"
                 height="700"
-                class="block h-auto max-h-[850px] w-full object-cover"
+                class="absolute inset-0 block h-full w-full object-cover"
               >
             </picture>
             <div
-              class="pointer-events-none absolute inset-0 max-[991px]:hidden"
+              class="pointer-events-none absolute inset-0"
               :style="overlayStyleFor(slide.overlay_opacity)"
-              aria-hidden="true"
             />
           </div>
         </SwiperSlide>
       </Swiper>
-
-      <button
-        v-if="slides.length > 1"
-        type="button"
-        class="absolute top-1/2 left-[2%] z-[9] mt-[-23px] flex h-[47px] w-[47px] items-center justify-center rounded-full border-2 border-[rgba(255,255,255,0.2)] text-xl text-[rgba(255,255,255,0.2)] transition-colors hover:border-white hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white max-[991px]:hidden"
-        aria-label="Previous slide"
-        @click="goPrev"
-      >
-        <span
-          class="icon icon-arrow-left inline-block w-10 text-center leading-[49px]"
-          aria-hidden="true"
-        />
-      </button>
-      <button
-        v-if="slides.length > 1"
-        type="button"
-        class="absolute top-1/2 right-[2%] z-[9] mt-[-23px] flex h-[47px] w-[47px] items-center justify-center rounded-full border-2 border-[rgba(255,255,255,0.2)] text-xl text-[rgba(255,255,255,0.2)] transition-colors hover:border-white hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white max-[991px]:hidden"
-        aria-label="Next slide"
-        @click="goNext"
-      >
-        <span
-          class="icon icon-arrow-right inline-block w-11 text-center leading-[49px]"
-          aria-hidden="true"
-        />
-      </button>
     </div>
 
-    <div
-      class="banner-text z-[5] w-full max-[991px]:relative max-[991px]:static min-[992px]:absolute min-[992px]:top-0 min-[992px]:left-0"
+    <button
+      v-if="slides.length > 1"
+      type="button"
+      class="absolute top-1/2 left-[2%] z-[9] mt-[-23px] hidden h-[47px] w-[47px] items-center justify-center rounded-full border-2 border-[rgba(255,255,255,0.2)] text-xl text-[rgba(255,255,255,0.2)] transition-colors hover:border-white hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white min-[992px]:flex"
+      aria-label="Previous slide"
+      @click="goPrev"
     >
-      <UContainer class="mx-auto max-w-[1170px]">
-        <div
-          class="search-title w-full max-[991px]:bg-none max-[991px]:p-0 max-[991px]:m-0 min-[992px]:mt-[15px] min-[992px]:bg-[url('/images/heading-blackBgimg.png')] min-[992px]:bg-bottom min-[992px]:bg-no-repeat min-[992px]:pb-5 min-[1400px]:mt-[66px] min-[1400px]:pb-[46px]"
-          :class="titleAlignClass"
-        >
+      <span
+        class="icon icon-arrow-left inline-block w-10 text-center leading-[49px]"
+        aria-hidden="true"
+      />
+    </button>
+    <button
+      v-if="slides.length > 1"
+      type="button"
+      class="absolute top-1/2 right-[2%] z-[9] mt-[-23px] hidden h-[47px] w-[47px] items-center justify-center rounded-full border-2 border-[rgba(255,255,255,0.2)] text-xl text-[rgba(255,255,255,0.2)] transition-colors hover:border-white hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white min-[992px]:flex"
+      aria-label="Next slide"
+      @click="goNext"
+    >
+      <span
+        class="icon icon-arrow-right inline-block w-11 text-center leading-[49px]"
+        aria-hidden="true"
+      />
+    </button>
+
+    <div class="banner-text relative z-[5] w-full">
+      <UContainer class="mx-auto max-w-[1170px] px-4 pt-8 pb-10 max-[991px]:pt-6 max-[991px]:pb-8 min-[992px]:pt-12 min-[992px]:pb-12 min-[1400px]:pt-16 min-[1400px]:pb-14">
+        <div class="search-title w-full text-center">
           <h1
-            class="m-0 font-light text-black max-[639px]:text-[30px] max-[639px]:leading-10 max-[991px]:text-[40px] max-[991px]:leading-[56px] min-[768px]:max-[991px]:text-[36px] min-[768px]:max-[991px]:leading-[46px] min-[992px]:text-[40px] min-[992px]:leading-[56px] min-[992px]:text-white min-[1400px]:text-[48px] min-[1400px]:leading-[70px]"
+            class="m-0 font-light text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)] max-[639px]:text-[30px] max-[639px]:leading-10 max-[991px]:text-[36px] max-[991px]:leading-[48px] min-[992px]:text-[40px] min-[992px]:leading-[56px] min-[1400px]:text-[48px] min-[1400px]:leading-[70px]"
           >
-            {{ activeSlide?.title || 'Every Event Should be Perfect' }}
+            Unforgettable Moments
           </h1>
           <p
-            v-if="activeSlide?.subtitle"
-            class="m-0 mt-3 text-base leading-6 text-[#333] min-[992px]:text-lg min-[992px]:leading-7 min-[992px]:text-white/90"
+            class="m-0 mt-3 text-base leading-6 text-white/90 drop-shadow-[0_1px_4px_rgba(0,0,0,0.35)] min-[992px]:text-lg min-[992px]:leading-7"
           >
-            {{ activeSlide.subtitle }}
+            Decor, catering, entertainment — all under one roof
           </p>
-          <div
-            v-if="activeSlide?.button_text && activeSlide?.button_url"
-            class="mt-4"
-          >
-            <a
-              v-if="isExternalUrl(activeSlide.button_url)"
-              :href="activeSlide.button_url"
-              class="inline-block rounded-[3px] border border-solid border-brand-500 bg-brand-500 px-6 py-3 text-base leading-5 text-white transition-colors hover:border-brand-600 hover:bg-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
-            >
-              {{ activeSlide.button_text }}
-            </a>
-            <NuxtLink
-              v-else
-              :to="activeSlide.button_url"
-              class="inline-block rounded-[3px] border border-solid border-brand-500 bg-brand-500 px-6 py-3 text-base leading-5 text-white transition-colors hover:border-brand-600 hover:bg-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
-            >
-              {{ activeSlide.button_text }}
-            </NuxtLink>
-          </div>
         </div>
 
         <HeroSearch
           v-if="heroSearchEnabled"
-          :services="services"
         />
       </UContainer>
     </div>
   </section>
 </template>
+
+<style scoped>
+.banner :deep(.swiper) {
+  height: 100%;
+  width: 100%;
+}
+</style>

@@ -7,14 +7,17 @@ use App\Http\Resources\Api\HomeResource;
 use App\Models\BlogPost;
 use App\Models\CtaSection;
 use App\Models\EventOverview;
+use App\Models\EventType;
+use App\Models\ExternalMedia;
 use App\Models\Faq;
-use App\Models\GalleryItem;
+use App\Models\GalleryCategory;
 use App\Models\HeroSlide;
+use App\Models\HomepageSection;
 use App\Models\OfficeLocation;
 use App\Models\Service;
 use App\Models\Statistic;
-use App\Models\TeamMember;
 use App\Models\Testimonial;
+use App\Services\Google\GoogleReviewsService;
 use App\Services\WebsiteCmsService;
 use App\Support\ContentCache;
 use Illuminate\Http\JsonResponse;
@@ -23,6 +26,7 @@ class HomeController extends Controller
 {
     public function __construct(
         private readonly WebsiteCmsService $websiteCmsService,
+        private readonly GoogleReviewsService $googleReviews,
     ) {}
 
     public function show(): JsonResponse
@@ -69,29 +73,39 @@ class HomeController extends Controller
                     'sort_order',
                     'status',
                 ])
+                ->take(6)
                 ->get();
 
-            $featuredGallery = GalleryItem::query()
-                ->with('category:id,name,slug')
+            $galleryCategories = GalleryCategory::query()
+                ->active()
+                ->ordered()
+                ->withCount(['items' => fn ($query) => $query->active()->withPublicPreview()])
+                ->with(['items' => function ($query): void {
+                    $query->active()
+                        ->withPublicPreview()
+                        ->ordered()
+                        ->select([
+                            'id',
+                            'gallery_category_id',
+                            'image',
+                            'thumbnail',
+                            'sort_order',
+                            'status',
+                        ])
+                        ->limit(1);
+                }])
+                ->take(4)
+                ->get();
+
+            $homepageExternalMedia = ExternalMedia::query()
                 ->active()
                 ->homepage()
                 ->ordered()
-                ->select([
-                    'id',
-                    'gallery_category_id',
-                    'title',
-                    'slug',
-                    'image',
-                    'thumbnail',
-                    'alt_text',
-                    'caption',
-                    'youtube_url',
-                    'vimeo_url',
-                    'featured',
-                    'homepage_featured',
-                    'sort_order',
-                    'status',
-                ])
+                ->get();
+
+            $eventTypes = EventType::query()
+                ->active()
+                ->ordered()
                 ->get();
 
             $testimonials = Testimonial::query()
@@ -141,7 +155,6 @@ class HomeController extends Controller
             $featuredBlog = BlogPost::query()
                 ->with('category:id,name,slug')
                 ->published()
-                ->homepage()
                 ->ordered()
                 ->select([
                     'id',
@@ -160,6 +173,7 @@ class HomeController extends Controller
                     'tags',
                     'status',
                 ])
+                ->take(4)
                 ->get();
 
             $featuredFaqs = Faq::query()
@@ -192,11 +206,6 @@ class HomeController extends Controller
                 ->ordered()
                 ->get();
 
-            $teamMembers = TeamMember::query()
-                ->active()
-                ->ordered()
-                ->get();
-
             $officeLocations = OfficeLocation::query()
                 ->active()
                 ->ordered()
@@ -209,15 +218,20 @@ class HomeController extends Controller
                 'hero' => $hero,
                 'featured_services' => $featuredServices,
                 'events_overview' => $eventsOverview,
-                'featured_gallery' => $featuredGallery,
+                'featured_gallery' => collect(),
+                'gallery_categories' => $galleryCategories,
+                'external_media' => $homepageExternalMedia,
+                'event_types' => $eventTypes,
                 'testimonials' => $testimonials,
                 'success_stories' => $successStories,
                 'featured_blog' => $featuredBlog,
                 'featured_faqs' => $featuredFaqs,
                 'statistics' => $statistics,
                 'cta_sections' => $ctaSections,
-                'team_members' => $teamMembers,
+                'team_members' => collect(),
                 'office_locations' => $officeLocations,
+                'google_reviews' => $this->googleReviews->publicPayload(),
+                'sections' => HomepageSection::visibilityMap(),
             ]))->response()->getData(true);
         });
 

@@ -17,6 +17,9 @@ class ContactInquiryInfolist
                 Section::make('Customer')
                     ->columns(2)
                     ->schema([
+                        TextEntry::make('customer.email')
+                            ->label('Customer account')
+                            ->placeholder('Guest / not linked'),
                         TextEntry::make('name')
                             ->placeholder('—'),
                         TextEntry::make('mobile')

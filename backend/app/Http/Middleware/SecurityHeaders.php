@@ -25,7 +25,7 @@ class SecurityHeaders
         $response->headers->set('X-XSS-Protection', '0', false);
         $response->headers->set(
             'Permissions-Policy',
-            'camera=(), microphone=(), geolocation=()',
+            'camera=(), microphone=(), geolocation=(self)',
             false
         );
 

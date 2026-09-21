@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { galleryBreadcrumbs, galleryPageHeader } from '~/data/gallery'
 
+const seo = usePageSeo({ type: 'gallery' })
 const { data: settings } = useSettings()
-
-usePageSeo({ type: 'gallery' })
+await seo
 </script>
 
 <template>

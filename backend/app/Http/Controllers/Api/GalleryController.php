@@ -18,6 +18,7 @@ class GalleryController extends Controller
             $items = GalleryItem::query()
                 ->with('category:id,name,slug')
                 ->active()
+                ->withPublicPreview()
                 ->ordered()
                 ->select([
                     'id',
@@ -25,6 +26,7 @@ class GalleryController extends Controller
                     'title',
                     'slug',
                     'image',
+                    'original_path',
                     'thumbnail',
                     'alt_text',
                     'caption',
@@ -49,9 +51,10 @@ class GalleryController extends Controller
             $categories = GalleryCategory::query()
                 ->active()
                 ->ordered()
-                ->withCount(['items' => fn ($query) => $query->active()])
+                ->withCount(['items' => fn ($query) => $query->active()->withPublicPreview()])
                 ->with(['items' => function ($query): void {
                     $query->active()
+                        ->withPublicPreview()
                         ->ordered()
                         ->select([
                             'id',
@@ -82,6 +85,7 @@ class GalleryController extends Controller
             $items = GalleryItem::query()
                 ->with('category:id,name,slug')
                 ->active()
+                ->withPublicPreview()
                 ->where('gallery_category_id', $category->id)
                 ->ordered()
                 ->select([
@@ -90,6 +94,7 @@ class GalleryController extends Controller
                     'title',
                     'slug',
                     'image',
+                    'original_path',
                     'thumbnail',
                     'alt_text',
                     'caption',
@@ -124,6 +129,7 @@ class GalleryController extends Controller
             $item = GalleryItem::query()
                 ->with('category:id,name,slug')
                 ->active()
+                ->withPublicPreview()
                 ->where('slug', $slug)
                 ->firstOrFail();
 

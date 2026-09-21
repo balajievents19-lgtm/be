@@ -2,13 +2,13 @@
 import { computed } from 'vue'
 
 const route = useRoute()
+const seo = usePageSeo({ type: 'services' })
 const { data: settings } = useSettings()
+await seo
 
 const filterQuery = computed(() =>
   String(route.query.search ?? route.query.event_type ?? '')
 )
-
-usePageSeo({ type: 'services' })
 
 const breadcrumbs = [
   { label: 'Home', to: '/' },

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\BlogPosts\Schemas;
 
 use App\Filament\Support\WebsitePublishFields;
+use App\Support\Brand;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
@@ -61,7 +62,7 @@ class BlogPostForm
                                         WebsitePublishFields::previewPlaceholder('/blog'),
                                         TextInput::make('author')
                                             ->maxLength(255)
-                                            ->default('Balaji Events'),
+                                            ->default(Brand::NAME),
                                         Textarea::make('excerpt')
                                             ->rows(3)
                                             ->columnSpanFull()

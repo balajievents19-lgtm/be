@@ -14,8 +14,10 @@ const FALLBACK_HEADER: NavLink[] = [
   { label: 'Home', to: '/' },
   { label: 'About Us', to: '/about' },
   { label: 'Services', to: '/services', children: true },
+  { label: 'Events', to: '/events' },
   { label: 'Gallery', to: '/gallery' },
   { label: 'Packages', to: '/packages' },
+  { label: 'Blog', to: '/blog' },
   { label: 'FAQ’s', to: '/faq' },
   { label: 'Contact us', to: '/contact' }
 ]
@@ -24,6 +26,7 @@ const FALLBACK_FOOTER: NavLink[] = [
   { label: 'Home', to: '/' },
   { label: 'About', to: '/about' },
   { label: 'Services', to: '/services' },
+  { label: 'Events', to: '/events' },
   { label: 'Gallery', to: '/gallery' },
   { label: 'Packages', to: '/packages' },
   { label: 'FAQ', to: '/faq' },

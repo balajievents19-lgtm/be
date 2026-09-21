@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { reactive, ref, watch } from 'vue'
+import FormsAppDatePicker from '~/components/forms/AppDatePicker.vue'
 
 const props = defineProps<{
   serviceTitle: string
 }>()
 
 const { submitContact } = usePublicForms()
+const { customer, loaded, openLogin, openRegister } = useCustomerAuth()
 
 const form = reactive({
   name: '',
@@ -20,6 +22,29 @@ const sent = ref(false)
 const submitting = ref(false)
 const apiError = ref('')
 
+const applyCustomer = () => {
+  const current = customer.value
+  if (!current) {
+    form.name = ''
+    form.email = ''
+    form.phone = ''
+    return
+  }
+  form.name = current.name || ''
+  form.email = current.email || ''
+  form.phone = current.phone || ''
+}
+
+watch([customer, loaded], applyCustomer, { immediate: true })
+
+const canSubmitInquiry = computed(() => {
+  return Boolean(
+    customer.value
+    && customer.value.email_verified
+    && isExactTenDigitMobile(customer.value.phone || '')
+  )
+})
+
 const onSubmit = async (event: Event) => {
   event.preventDefault()
   sent.value = false
@@ -29,17 +54,28 @@ const onSubmit = async (event: Event) => {
     return
   }
 
-  if (!form.name.trim() || !form.phone.trim()) {
-    apiError.value = 'Name and phone are required.'
+  if (!customer.value) {
+    apiError.value = 'Sign in with a verified account to send an inquiry.'
+    openLogin()
+    return
+  }
+
+  if (!customer.value.email_verified) {
+    apiError.value = 'Verify your email address before sending an inquiry.'
+    return
+  }
+
+  if (!isExactTenDigitMobile(customer.value.phone || '')) {
+    apiError.value = 'Add a registered 10-digit mobile number on your account before sending an inquiry.'
     return
   }
 
   submitting.value = true
   try {
     await submitContact({
-      name: form.name.trim(),
-      mobile: form.phone.trim(),
-      email: form.email.trim() || null,
+      name: customer.value.name || form.name.trim(),
+      mobile: customer.value.phone || '',
+      email: customer.value.email,
       subject: `Service inquiry: ${props.serviceTitle}`,
       message: form.message.trim() || `Inquiry for ${props.serviceTitle}`,
       service_interested: props.serviceTitle,
@@ -48,9 +84,6 @@ const onSubmit = async (event: Event) => {
       website: ''
     })
     sent.value = true
-    form.name = ''
-    form.email = ''
-    form.phone = ''
     form.date = ''
     form.message = ''
     form.website = ''
@@ -85,6 +118,43 @@ const onSubmit = async (event: Event) => {
         aria-hidden="true"
       >
 
+      <p
+        v-if="loaded && !customer"
+        class="mb-2.5 text-[13px] leading-[20px] text-[#555]"
+        role="status"
+      >
+        Sign in with a verified account to send this inquiry.
+        <button
+          type="button"
+          class="text-brand-500 underline"
+          @click="openLogin()"
+        >
+          Login
+        </button>
+        or
+        <button
+          type="button"
+          class="text-brand-500 underline"
+          @click="openRegister()"
+        >
+          Register
+        </button>
+      </p>
+      <p
+        v-else-if="customer && !customer.email_verified"
+        class="mb-2.5 text-[13px] leading-[20px] text-[#555]"
+        role="status"
+      >
+        Verify your email before sending an inquiry.
+      </p>
+      <p
+        v-else-if="customer && !isExactTenDigitMobile(customer.phone || '')"
+        class="mb-2.5 text-[13px] leading-[20px] text-[#555]"
+        role="status"
+      >
+        Add a 10-digit mobile number on your account before sending an inquiry.
+      </p>
+
       <div class="input-box mb-2.5 block w-full">
         <label
           class="sr-only"
@@ -96,7 +166,8 @@ const onSubmit = async (event: Event) => {
           type="text"
           placeholder="Your Name"
           required
-          class="box-border h-[38px] w-full rounded-[3px] border border-solid border-[#cccccc] px-2.5 py-[5px] text-[13px] leading-[26px] text-[#333] italic outline-none"
+          readonly
+          class="box-border h-[38px] w-full rounded-[3px] border border-solid border-[#cccccc] bg-[#fafafa] px-2.5 py-[5px] text-[13px] leading-[26px] text-[#333] italic outline-none"
         >
       </div>
       <div class="input-box mb-2.5 block w-full">
@@ -109,7 +180,8 @@ const onSubmit = async (event: Event) => {
           v-model="form.email"
           type="email"
           placeholder="Email"
-          class="box-border h-[38px] w-full rounded-[3px] border border-solid border-[#cccccc] px-2.5 py-[5px] text-[13px] leading-[26px] text-[#333] italic outline-none"
+          readonly
+          class="box-border h-[38px] w-full rounded-[3px] border border-solid border-[#cccccc] bg-[#fafafa] px-2.5 py-[5px] text-[13px] leading-[26px] text-[#333] italic outline-none"
         >
       </div>
       <div class="input-box mb-2.5 block w-full">
@@ -123,21 +195,23 @@ const onSubmit = async (event: Event) => {
           type="text"
           placeholder="Phone"
           required
-          class="box-border h-[38px] w-full rounded-[3px] border border-solid border-[#cccccc] px-2.5 py-[5px] text-[13px] leading-[26px] text-[#333] italic outline-none"
+          readonly
+          maxlength="10"
+          inputmode="numeric"
+          class="box-border h-[38px] w-full rounded-[3px] border border-solid border-[#cccccc] bg-[#fafafa] px-2.5 py-[5px] text-[13px] leading-[26px] text-[#333] italic outline-none"
         >
       </div>
-      <div class="input-box mb-2.5 block w-full">
+      <div class="input-box relative mb-2.5 block w-full">
         <label
           class="sr-only"
           for="inquiry-date"
         >Event Date</label>
-        <input
+        <FormsAppDatePicker
           id="inquiry-date"
           v-model="form.date"
-          type="date"
-          placeholder="Event Date"
-          class="box-border h-[38px] w-full rounded-[3px] border border-solid border-[#cccccc] px-2.5 py-[5px] text-[13px] leading-[26px] text-[#333] italic outline-none"
-        >
+          compact
+          placeholder="Select Date"
+        />
       </div>
       <div class="input-box mb-2.5 block w-full">
         <label
@@ -155,7 +229,7 @@ const onSubmit = async (event: Event) => {
       <div class="submit-box mt-0.5 block">
         <button
           type="submit"
-          :disabled="submitting"
+          :disabled="submitting || (loaded && !canSubmitInquiry)"
           class="h-[38px] w-full cursor-pointer rounded-[3px] border border-solid border-brand-500 bg-brand-500 text-sm text-white transition-colors hover:bg-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 disabled:opacity-60"
         >
           Send Inquiry

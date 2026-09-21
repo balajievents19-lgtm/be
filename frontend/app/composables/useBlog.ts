@@ -1,4 +1,5 @@
 import type { BlogPostItem } from '~/types/home'
+import { isNotFoundError } from '~/utils/httpError'
 
 interface BlogListApiResponse {
   data: BlogPostItem[]
@@ -48,7 +49,10 @@ export const useBlogPost = async (slug: string) => {
         const response = await laravelFetch<BlogDetailApiResponse>(`${base}/blog/${slug}`)
         failed.value = false
         return response.data ?? null
-      } catch {
+      } catch (error) {
+        if (isNotFoundError(error)) {
+          throw createError({ statusCode: 404, statusMessage: 'Blog post not found', fatal: true })
+        }
         failed.value = true
         return null
       }

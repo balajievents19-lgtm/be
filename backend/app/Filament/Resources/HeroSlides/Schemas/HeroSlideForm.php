@@ -29,6 +29,11 @@ class HeroSlideForm
                                         TextInput::make('title')
                                             ->maxLength(255)
                                             ->columnSpanFull(),
+                                        TextInput::make('title_highlight')
+                                            ->label('Highlighted phrase')
+                                            ->helperText('Optional words from the title to emphasize in gold. Leave blank to emphasize the last word.')
+                                            ->maxLength(255)
+                                            ->columnSpanFull(),
                                         TextInput::make('subtitle')
                                             ->maxLength(255)
                                             ->columnSpanFull(),
@@ -36,6 +41,13 @@ class HeroSlideForm
                                             ->maxLength(100),
                                         TextInput::make('button_url')
                                             ->label('Button URL')
+                                            ->maxLength(255)
+                                            ->nullable(),
+                                        TextInput::make('secondary_button_text')
+                                            ->label('Secondary button text')
+                                            ->maxLength(100),
+                                        TextInput::make('secondary_button_url')
+                                            ->label('Secondary button URL')
                                             ->maxLength(255)
                                             ->nullable(),
                                         TextInput::make('video_url')

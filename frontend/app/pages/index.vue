@@ -1,5 +1,9 @@
 <script setup lang="ts">
+import { defaultHomepageSections } from '~/types/home'
+
+const seo = usePageSeo({ type: 'home' })
 const { data: home, pending, failed } = await useHome()
+await seo
 
 provide('home', home)
 
@@ -10,8 +14,14 @@ const eventsOverview = computed(() => home.value?.events_overview ?? [])
 const testimonials = computed(() => home.value?.testimonials ?? [])
 const successStories = computed(() => home.value?.success_stories ?? [])
 const featuredBlog = computed(() => home.value?.featured_blog ?? [])
-
-usePageSeo({ type: 'home' })
+const featuredFaqs = computed(() => home.value?.featured_faqs ?? [])
+const statistics = computed(() => home.value?.statistics ?? [])
+const ctaSections = computed(() => home.value?.cta_sections ?? [])
+const googleReviews = computed(() => home.value?.google_reviews ?? null)
+const sections = computed(() => ({
+  ...defaultHomepageSections(),
+  ...(home.value?.sections ?? {})
+}))
 </script>
 
 <template>
@@ -27,12 +37,19 @@ usePageSeo({ type: 'home' })
 
     <main id="main-content">
       <HomeHero
+        v-if="sections.slider"
         :slides="hero"
-        :services="featuredServices"
         :pending="pending"
         :failed="failed"
       />
+      <HomeStats :items="statistics" />
+      <HomeAbout
+        v-if="sections.about"
+        :description="settings?.about?.description"
+        :image="settings?.about?.image"
+      />
       <HomeServices
+        v-if="sections.services"
         :services="featuredServices"
         :pending="pending"
         :failed="failed"
@@ -42,17 +59,40 @@ usePageSeo({ type: 'home' })
         :pending="pending"
         :failed="failed"
       />
-      <HomeGallery />
+      <HomeGallery v-if="sections.gallery" />
+      <MediaExternalMediaGrid
+        decorated
+        homepage-only
+        :limit="3"
+        heading="Videos & Media"
+      />
+      <HomeGoogleReviews
+        :reviews="googleReviews"
+        :pending="pending"
+        :failed="failed"
+      />
       <HomeTestimonials
+        v-if="sections.testimonials"
         :testimonials="testimonials"
         :success-stories="successStories"
         :pending="pending"
         :failed="failed"
       />
+      <HomeFaqPreview
+        v-if="sections.faq"
+        :items="featuredFaqs"
+        :pending="pending"
+        :failed="failed"
+      />
       <HomeLatestNews
+        v-if="sections.blog && (pending || featuredBlog.length > 0)"
         :posts="featuredBlog"
         :pending="pending"
         :failed="failed"
+      />
+      <HomeFinalCta
+        v-if="sections.contact"
+        :items="ctaSections"
       />
     </main>
 

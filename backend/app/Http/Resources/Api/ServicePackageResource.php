@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Api;
 
 use App\Models\ServicePackage;
+use App\Support\Brand;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -16,10 +17,10 @@ class ServicePackageResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name' => $this->name,
+            'name' => Brand::rewrite($this->name),
             'slug' => $this->slug,
-            'summary' => $this->summary,
-            'description' => $this->description,
+            'summary' => Brand::rewrite($this->summary),
+            'description' => Brand::rewrite($this->description),
             'price_label' => $this->price_label,
             'price_amount' => $this->price_amount,
             'currency' => $this->currency,
@@ -30,8 +31,8 @@ class ServicePackageResource extends JsonResource
             'service_category_id' => $this->service_category_id,
             'sort_order' => $this->sort_order,
             'seo' => [
-                'title' => $this->seo_title,
-                'description' => $this->seo_description,
+                'title' => Brand::rewrite($this->seo_title),
+                'description' => Brand::rewrite($this->seo_description),
             ],
         ];
     }

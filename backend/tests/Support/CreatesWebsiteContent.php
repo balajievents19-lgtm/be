@@ -21,13 +21,13 @@ trait CreatesWebsiteContent
         Setting::query()->delete();
 
         return Setting::query()->create(array_merge([
-            'company_name' => 'Balaji Events',
+            'company_name' => 'Balaji Royal Events',
             'company_description' => 'Wedding and event management.',
             'primary_color' => '#f15b22',
             'secondary_color' => '#0e1123',
             'theme_mode' => 'light',
             'robots' => 'index, follow',
-            'meta_title' => 'Balaji Events',
+            'meta_title' => 'Balaji Royal Events',
             'meta_description' => 'Every event should be perfect.',
             'canonical_url' => 'https://example.test',
         ], $overrides));

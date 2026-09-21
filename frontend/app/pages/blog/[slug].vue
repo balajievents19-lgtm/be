@@ -4,9 +4,10 @@ import { formatBlogDate } from '~/utils/content'
 const route = useRoute()
 const slug = computed(() => String(route.params.slug || ''))
 
-usePageSeo({ type: 'blog', slug: slug.value })
+const seo = usePageSeo({ type: 'blog', slug: slug.value })
 const { data: post, pending, failed } = await useBlogPost(slug.value)
 const { data: settings } = useSettings()
+await seo
 
 const breadcrumbs = computed(() => [
   { label: 'Home', to: '/' },

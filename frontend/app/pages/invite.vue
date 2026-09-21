@@ -2,9 +2,9 @@
 const { data: settings } = useSettings()
 
 useSeoMeta({
-  title: 'Invite Friends | Balaji Events',
-  description: 'Invite friends and family to plan their celebration with Balaji Events.',
-  ogTitle: 'Invite Friends | Balaji Events',
+  title: 'Invite Friends | Balaji Royal Events',
+  description: 'Invite friends and family to plan their celebration with Balaji Royal Events.',
+  ogTitle: 'Invite Friends | Balaji Royal Events',
   twitterCard: 'summary_large_image'
 })
 </script>
@@ -21,7 +21,7 @@ useSeoMeta({
         <UContainer class="mx-auto max-w-[800px] text-center">
           <p class="m-0 text-base leading-7 text-[#555]">
             Know someone planning a wedding, reception, or corporate celebration in Rajasthan?
-            Introduce them to Balaji Events and help them start with a complimentary consultation.
+            Introduce them to Balaji Royal Events and help them start with a complimentary consultation.
           </p>
           <NuxtLink
             to="/contact"

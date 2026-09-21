@@ -1,11 +1,22 @@
 <script setup lang="ts">
 const { data: settings } = useSettings()
+const { openRegister, customer, loaded, refresh } = useCustomerAuth()
 
 useSeoMeta({
-  title: 'Registration | Balaji Events',
-  description: 'Register your interest with Balaji Events for weddings, celebrations, and vendor partnerships.',
-  ogTitle: 'Registration | Balaji Events',
-  twitterCard: 'summary_large_image'
+  title: 'Registration | Balaji Royal Events',
+  description: 'Create a Balaji Royal Events customer account.',
+  robots: 'noindex, nofollow'
+})
+
+onMounted(async () => {
+  if (!loaded.value) {
+    await refresh()
+  }
+  if (customer.value) {
+    await navigateTo('/account')
+    return
+  }
+  openRegister()
 })
 </script>
 
@@ -20,15 +31,15 @@ useSeoMeta({
       <section class="py-16">
         <UContainer class="mx-auto max-w-[800px] text-center">
           <p class="m-0 text-base leading-7 text-[#555]">
-            Public self-registration will launch with the customer and vendor portals.
-            Until then, register your celebration or partnership interest through our enquiry form.
+            Create your customer account to download gallery originals and manage your profile.
           </p>
-          <NuxtLink
-            to="/contact"
-            class="mt-8 inline-block rounded-[3px] border border-solid border-brand-500 bg-brand-500 px-5 py-3 text-white no-underline hover:bg-brand-600"
+          <button
+            type="button"
+            class="mt-8 inline-block rounded-[3px] border border-solid border-brand-500 bg-brand-500 px-5 py-3 text-white hover:bg-brand-600"
+            @click="openRegister()"
           >
-            Register Interest
-          </NuxtLink>
+            Open Registration
+          </button>
         </UContainer>
       </section>
     </main>

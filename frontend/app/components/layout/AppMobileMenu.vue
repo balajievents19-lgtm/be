@@ -18,10 +18,12 @@ const route = useRoute()
 const router = useRouter()
 const { data: services } = useServices({ server: false })
 const { data: settings } = useSettings()
+const { customer, openLogin, openRegister, logout } = useCustomerAuth()
 const home = inject<Ref<HomePayload | null> | null>('home', null)
 const logoSrc = computed(
   () => settings.value?.brand?.logo || home?.value?.settings?.brand?.logo || '/images/logo.png'
 )
+const brandName = computed(() => settings.value?.company?.name?.trim() || 'Balaji Royal Events')
 
 const isActive = (item: NavLink) => {
   if (!item.to || item.external) {
@@ -53,6 +55,22 @@ const submitSearch = async () => {
   })
   close()
 }
+
+const onLogin = () => {
+  close()
+  openLogin()
+}
+
+const onRegister = () => {
+  close()
+  openRegister()
+}
+
+const onLogout = async () => {
+  close()
+  await logout()
+  await navigateTo('/')
+}
 </script>
 
 <template>
@@ -69,16 +87,15 @@ const submitSearch = async () => {
         <div class="flex items-center justify-between border-b border-[#e5e5e5] px-5 py-4">
           <NuxtLink
             to="/"
-            aria-label="Balaji Events home"
+            :aria-label="`${brandName} home`"
             @click="close"
           >
             <img
               :src="logoSrc"
-              alt="Balaji Events"
+              :alt="brandName"
               width="140"
               height="56"
-              loading="eager"
-              fetchpriority="high"
+              loading="lazy"
               decoding="async"
               class="h-14 w-auto"
             >
@@ -191,6 +208,44 @@ const submitSearch = async () => {
               {{ item.label }}
             </NuxtLink>
           </template>
+
+          <div class="mt-6 border-t border-[#f0f0f0] pt-4">
+            <p class="mb-3 text-xs font-semibold tracking-wide text-[#888] uppercase">
+              Account
+            </p>
+            <template v-if="customer">
+              <NuxtLink
+                to="/account"
+                class="block border-b border-[#f0f0f0] py-4 text-lg font-normal uppercase text-[#202020] transition-colors hover:text-brand-500"
+                @click="close"
+              >
+                Account
+              </NuxtLink>
+              <button
+                type="button"
+                class="block w-full border-b border-[#f0f0f0] py-4 text-left text-lg font-normal uppercase text-[#202020] transition-colors hover:text-brand-500"
+                @click="onLogout"
+              >
+                Logout
+              </button>
+            </template>
+            <template v-else>
+              <button
+                type="button"
+                class="block w-full border-b border-[#f0f0f0] py-4 text-left text-lg font-normal uppercase text-[#202020] transition-colors hover:text-brand-500"
+                @click="onLogin"
+              >
+                Login
+              </button>
+              <button
+                type="button"
+                class="block w-full border-b border-[#f0f0f0] py-4 text-left text-lg font-normal uppercase text-[#202020] transition-colors hover:text-brand-500"
+                @click="onRegister"
+              >
+                Registration
+              </button>
+            </template>
+          </div>
         </nav>
       </div>
     </template>

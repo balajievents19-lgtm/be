@@ -75,4 +75,28 @@ class GalleryApiTest extends TestCase
 
         $this->getJson('/api/gallery/reception-hall')->assertNotFound();
     }
+
+    public function test_gallery_omits_items_without_a_public_preview(): void
+    {
+        $this->createGalleryItem();
+        $this->createGalleryItem([
+            'title' => 'Studio leftover',
+            'slug' => 'studio-leftover',
+            'image' => 'studio/uploads/qa-a.png',
+            'thumbnail' => null,
+        ]);
+
+        $this->getJson('/api/gallery')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.slug', 'reception-hall');
+
+        $this->getJson('/api/gallery/studio-leftover')->assertNotFound();
+
+        $slug = $this->getJson('/api/gallery/categories')->json('data.0.slug');
+        $this->getJson('/api/gallery/categories/'.$slug)
+            ->assertOk()
+            ->assertJsonCount(1, 'data.items')
+            ->assertJsonPath('data.items.0.slug', 'reception-hall');
+    }
 }

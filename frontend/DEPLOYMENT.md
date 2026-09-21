@@ -1,4 +1,4 @@
-# Frontend deployment notes — Balaji Events 1.0
+# Frontend deployment notes — Balaji Royal Events 1.0
 
 This document covers the **Nuxt SSR** app only. For Ubuntu packages, Nginx, SSL, MySQL, queue, cron, and full-stack procedure, use the backend **[DEPLOYMENT.md](../backend/DEPLOYMENT.md)**.
 
@@ -18,7 +18,7 @@ cp .env.production.example .env
 
 | Variable | Example | Notes |
 |----------|---------|-------|
-| `NUXT_PUBLIC_API_BASE` | `https://api.example.com/api` | Baked at **build** time |
+| `NUXT_PUBLIC_API_BASE` | `https://www.balajiroyalevents.com/api` | Baked at **build** time |
 | `HOST` / `NITRO_HOST` | `127.0.0.1` | Bind local; Nginx proxies |
 | `PORT` / `NITRO_PORT` | `3000` | Must match Nginx upstream |
 | `NODE_ENV` | `production` | |
@@ -41,7 +41,7 @@ node .output/server/index.mjs
 
 ## Nginx
 
-Frontend is reverse-proxied; sample server block is in backend `deploy/nginx/balaji-events.conf` (`www.example.com` → `127.0.0.1:3000`).
+Frontend is reverse-proxied; sample server block is in backend `deploy/nginx/balaji-events.conf` (`www.balajiroyalevents.com` → Nuxt on `127.0.0.1:3000`, `/api` → Laravel).
 
 ## Validation before release
 

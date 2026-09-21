@@ -30,6 +30,8 @@ class Setting extends Model
         'support_email',
         'address',
         'google_map_embed',
+        'google_place_id',
+        'google_reviews_url',
         'facebook',
         'instagram',
         'youtube',
@@ -106,7 +108,7 @@ class Setting extends Model
         }
 
         return static::query()->create([
-            'company_name' => 'Balaji Events',
+            'company_name' => \App\Support\Brand::NAME,
             'primary_color' => '#f15b22',
             'secondary_color' => '#0e1123',
             'theme_mode' => 'light',

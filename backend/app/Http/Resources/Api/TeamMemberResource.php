@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Api;
 
 use App\Models\TeamMember;
+use App\Support\Brand;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -18,7 +19,7 @@ class TeamMemberResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'role' => $this->role,
-            'bio' => $this->bio,
+            'bio' => Brand::rewrite($this->bio),
             'photo' => $this->imageUrl($this->photo),
             'email' => $this->email,
             'phone' => $this->phone,

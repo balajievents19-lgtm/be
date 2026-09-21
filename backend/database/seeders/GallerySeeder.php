@@ -28,7 +28,7 @@ class GallerySeeder extends Seeder
             ['name' => 'Corporate Events', 'description' => 'Corporate gatherings and business celebrations.'],
             ['name' => 'Mehndi', 'description' => 'Mehndi night setups and festive moments.'],
             ['name' => 'Sangeet', 'description' => 'Sangeet night stages, lighting, and performances.'],
-            ['name' => 'Other Events', 'description' => 'Additional celebrations managed by Balaji Events.'],
+            ['name' => 'Other Events', 'description' => 'Additional celebrations managed by Balaji Royal Events.'],
         ];
 
         $categoryModels = [];
@@ -74,7 +74,7 @@ class GallerySeeder extends Seeder
                 'gallery_category_id' => $category->id,
                 'title' => $title,
                 'slug' => Str::slug($title),
-                'description' => $title.' captured by Balaji Events for celebrations across Rajasthan.',
+                'description' => $title.' captured by Balaji Royal Events for celebrations across Rajasthan.',
                 'image' => $image,
                 'thumbnail' => $image,
                 'alt_text' => $title,
@@ -85,8 +85,8 @@ class GallerySeeder extends Seeder
                 'homepage_featured' => $index < 10,
                 'sort_order' => $index + 1,
                 'status' => true,
-                'seo_title' => $title.' | Balaji Events Gallery',
-                'seo_description' => 'View '.$title.' from Balaji Events gallery.',
+                'seo_title' => $title.' | Balaji Royal Events Gallery',
+                'seo_description' => 'View '.$title.' from Balaji Royal Events gallery.',
                 'opengraph_image' => $image,
             ]);
         }

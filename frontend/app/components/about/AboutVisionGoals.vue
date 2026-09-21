@@ -26,7 +26,7 @@ const sections = computed(() => {
   <section
     v-if="sections.length"
     class="visionGoals py-[67px] pb-[60px]"
-    aria-label="About Balaji Events"
+    aria-label="About Balaji Royal Events"
   >
     <UContainer class="mx-auto max-w-[1170px]">
       <div class="-mx-[15px] flex flex-wrap">

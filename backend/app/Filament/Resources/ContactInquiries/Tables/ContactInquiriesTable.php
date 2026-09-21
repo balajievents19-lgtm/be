@@ -35,6 +35,11 @@ class ContactInquiriesTable
     {
         return $table
             ->columns([
+                TextColumn::make('customer.email')
+                    ->label('Customer')
+                    ->searchable()
+                    ->placeholder('Guest')
+                    ->toggleable(),
                 TextColumn::make('name')
                     ->searchable()
                     ->sortable()

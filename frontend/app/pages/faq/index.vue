@@ -2,9 +2,10 @@
 import { faqBreadcrumbs, faqPageHeader } from '~/data/faq'
 
 // Start independent SSR fetches together (no sequential await waterfall).
+const seo = usePageSeo({ type: 'faq' })
 const { data: faqs } = useFaqs()
 const { data: settings } = useSettings()
-usePageSeo({ type: 'faq' })
+await seo
 </script>
 
 <template>

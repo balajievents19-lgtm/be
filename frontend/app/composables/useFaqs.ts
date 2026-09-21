@@ -1,4 +1,5 @@
 import type { FaqItem } from '~/types/home'
+import { isNotFoundError } from '~/utils/httpError'
 
 interface FaqsApiResponse {
   data: FaqItem[]
@@ -58,7 +59,10 @@ export const useFaq = async (slug: string) => {
         failed.value = false
         schema.value = response.schema ?? null
         return response.data ?? null
-      } catch {
+      } catch (error) {
+        if (isNotFoundError(error)) {
+          throw createError({ statusCode: 404, statusMessage: 'FAQ not found', fatal: true })
+        }
         failed.value = true
         return null
       }

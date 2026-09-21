@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
 import type { BlogPostItem, SiteSettings } from '~/types/home'
+import { isPublicProfileUrl } from '~/utils/socialUrl'
 
 const props = defineProps<{
   settings?: SiteSettings | null
@@ -58,7 +59,7 @@ const socialLinks = computed(() => {
   return (Object.keys(socialIconMap) as Array<keyof typeof socialIconMap>)
     .map((key) => {
       const href = social[key as keyof typeof social]
-      if (!href) {
+      if (!isPublicProfileUrl(href)) {
         return null
       }
       return {
@@ -71,15 +72,41 @@ const socialLinks = computed(() => {
     .filter((link): link is NonNullable<typeof link> => link !== null)
 })
 
-const latestUpdates = computed(() => (props.updates ?? []).slice(0, 3))
+const { updates: sharedUpdates } = useLatestUpdates()
+
+const latestUpdates = computed(() => {
+  if (props.updates && props.updates.length > 0) {
+    return props.updates.slice(0, 3)
+  }
+  return sharedUpdates.value
+})
 
 const updateImage = (post: BlogPostItem) => post.thumbnail || post.featured_image || ''
 
-const updateText = (post: BlogPostItem) => post.excerpt || post.title
+const excerptMaxLength = 160
+
+const stripHtml = (value: string) => value.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+
+const updateExcerpt = (post: BlogPostItem) => {
+  const raw = stripHtml(post.excerpt || '')
+  if (!raw || raw === post.title) {
+    return ''
+  }
+
+  if (raw.length <= excerptMaxLength) {
+    return raw
+  }
+
+  const sliced = raw.slice(0, excerptMaxLength)
+  const lastSpace = sliced.lastIndexOf(' ')
+  const clipped = (lastSpace > 80 ? sliced.slice(0, lastSpace) : sliced).trim()
+
+  return `${clipped}…`
+}
 
 const copyrightText = computed(() =>
   props.settings?.footer?.copyright_text
-  || `Copyright © ${copyrightYear} - BalajiEvents | All Rights Reserved`
+  || `Copyright © ${copyrightYear} - Balaji Royal Events | All Rights Reserved`
 )
 
 const onNewsletterSubmit = async (event: Event) => {
@@ -138,30 +165,34 @@ const onNewsletterSubmit = async (event: Event) => {
             <div
               v-for="item in latestUpdates"
               :key="item.id"
-              class="relative my-[3px] mb-[7px] inline-block min-h-14 w-full"
-              :class="{ 'pl-[70px]': !!updateImage(item) }"
+              class="latest-update-item my-[3px] mb-[7px] flex w-full items-start gap-3"
             >
-              <div
+              <img
                 v-if="updateImage(item)"
-                class="absolute top-0 left-0 w-[60px] border border-solid border-[#b69c9c]"
+                :src="updateImage(item)"
+                :alt="item.alt_text || item.title"
+                class="latest-update-image h-[55px] w-[75px] shrink-0 border border-solid border-[#b69c9c] object-cover"
+                width="75"
+                height="55"
+                loading="lazy"
+                decoding="async"
               >
-                <img
-                  :src="updateImage(item)"
-                  :alt="item.alt_text || item.title"
-                  class="block h-auto w-full"
-                  width="60"
-                  height="60"
-                  loading="lazy"
-                  decoding="async"
+              <div class="latest-update-content min-w-0 flex-1">
+                <p
+                  v-if="item.title"
+                  class="m-0 line-clamp-2 text-xs leading-[18px] text-white"
                 >
-              </div>
-              <div>
-                <p class="m-0 text-xs leading-[18px] text-[#83879b]">
-                  {{ updateText(item) }}
+                  {{ item.title }}
+                </p>
+                <p
+                  v-if="updateExcerpt(item)"
+                  class="latest-update-description m-0 mt-0.5 line-clamp-3 overflow-hidden text-xs leading-[18px] text-[#83879b]"
+                >
+                  {{ updateExcerpt(item) }}
                 </p>
                 <NuxtLink
                   :to="`/blog/${item.slug}`"
-                  class="text-[13px] leading-[18px] text-brand-600 no-underline transition-colors hover:text-[#fffffe] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
+                  class="mt-0.5 inline-block text-[13px] leading-[18px] text-brand-600 no-underline transition-colors hover:text-[#fffffe] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
                 >
                   Read More
                 </NuxtLink>
@@ -395,6 +426,21 @@ const onNewsletterSubmit = async (event: Event) => {
       <UContainer class="mx-auto max-w-[1170px]">
         <p class="m-0 text-center text-[13px] leading-[30px] text-[#85889b]">
           {{ copyrightText }}
+        </p>
+        <p class="m-0 mt-1 text-center text-[12px] leading-6 text-[#85889b]">
+          <NuxtLink
+            to="/privacy-policy"
+            class="underline-offset-2 hover:text-white hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
+          >
+            Privacy Policy
+          </NuxtLink>
+          <span aria-hidden="true"> · </span>
+          <NuxtLink
+            to="/terms"
+            class="underline-offset-2 hover:text-white hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
+          >
+            Terms &amp; Conditions
+          </NuxtLink>
         </p>
       </UContainer>
     </div>

@@ -27,6 +27,9 @@ const categoryIcon = (slug: string) => CATEGORY_ICON_BY_SLUG[slug] || 'icon-thum
 
 const photoLabel = (category: GalleryCategoryCard) => {
   const count = category.image_count ?? 0
+  if (count === 0) {
+    return 'Photos not added yet'
+  }
   return count === 1 ? '1 photo' : `${count} photos`
 }
 </script>
@@ -89,14 +92,14 @@ const photoLabel = (category: GalleryCategoryCard) => {
             :key="category.id"
             class="mb-8 w-full px-[12px] max-[767px]:w-full min-[768px]:w-1/2 min-[992px]:w-1/4"
           >
-            <div class="h-full overflow-hidden rounded-[10px] border border-solid border-[#ececec] bg-white shadow-[0_8px_24px_rgba(16,15,15,0.08)]">
+            <div class="group h-full overflow-hidden rounded-[10px] border border-solid border-[#ececec] bg-white shadow-[0_8px_24px_rgba(16,15,15,0.08)] transition-shadow duration-300 hover:shadow-[0_12px_30px_rgba(241,91,34,0.18)]">
               <div class="relative">
                 <div class="relative aspect-[4/3] overflow-hidden bg-[#e1e8ed]">
                   <img
                     v-if="category.cover_image"
                     :src="category.cover_image"
                     :alt="category.name"
-                    class="h-full w-full object-cover"
+                    class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                     width="400"
                     height="300"
                     loading="lazy"

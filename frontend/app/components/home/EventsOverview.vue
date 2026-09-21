@@ -154,9 +154,9 @@ const eventLink = (item: EventOverviewItem) => item.link_url || '/services'
 
                 <NuxtLink
                   :to="eventLink(event)"
-                  class="mt-0 block text-sm leading-6 text-[#f15b25] hover:text-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
+                  class="mt-1 inline-block text-sm font-medium leading-6 text-brand-500 no-underline transition-colors hover:text-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
                 >
-                  Readmore
+                  Read More
                 </NuxtLink>
               </article>
             </div>

@@ -35,4 +35,64 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Customer OAuth (Socialite) — credentials from env only
+    |--------------------------------------------------------------------------
+    */
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env(
+            'GOOGLE_REDIRECT_URI',
+            rtrim((string) env('APP_URL', 'http://localhost:8000'), '/').'/api/customer/oauth/google/callback'
+        ),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Google Places (Business reviews on the website)
+    |--------------------------------------------------------------------------
+    | Server-only. Never expose GOOGLE_PLACES_API_KEY to Nuxt public runtime.
+    */
+    'google_places' => [
+        'api_key' => env('GOOGLE_PLACES_API_KEY'),
+        'place_id' => env('GOOGLE_PLACE_ID'),
+        'reviews_url' => env('GOOGLE_REVIEWS_URL'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Google Business Profile (review replies — optional, OAuth)
+    |--------------------------------------------------------------------------
+    | Replies stay disabled until these are set and the OAuth flow is completed.
+    */
+    'google_business_profile' => [
+        'client_id' => env('GOOGLE_GBP_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_GBP_CLIENT_SECRET'),
+        'redirect' => env('GOOGLE_GBP_REDIRECT_URI'),
+        'account_id' => env('GOOGLE_GBP_ACCOUNT_ID'),
+        'location_id' => env('GOOGLE_GBP_LOCATION_ID'),
+    ],
+
+    'facebook' => [
+        'client_id' => env('FACEBOOK_CLIENT_ID'),
+        'client_secret' => env('FACEBOOK_CLIENT_SECRET'),
+        'redirect' => env(
+            'FACEBOOK_REDIRECT_URI',
+            rtrim((string) env('APP_URL', 'http://localhost:8000'), '/').'/api/customer/oauth/facebook/callback'
+        ),
+    ],
+
+    /*
+    | Instagram consumer login is not implemented.
+    | Meta does not currently offer a supported general customer-login flow
+    | equivalent to Google/Facebook Login (Business/Creator APIs are not used here).
+    */
+    'instagram' => [
+        'client_id' => env('INSTAGRAM_CLIENT_ID'),
+        'client_secret' => env('INSTAGRAM_CLIENT_SECRET'),
+        'redirect' => env('INSTAGRAM_REDIRECT_URI'),
+    ],
+
 ];

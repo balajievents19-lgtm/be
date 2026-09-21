@@ -8,6 +8,8 @@ use App\Models\GalleryCategory;
 use App\Models\GalleryItem;
 use App\Models\Service;
 use App\Models\Setting;
+use App\Support\Brand;
+use App\Support\ContentCache;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
@@ -103,25 +105,27 @@ class SeoService
      */
     public function forHome(): array
     {
-        $faqs = Faq::query()->active()->homepage()->ordered()->get();
-        $settings = $this->settings();
+        return ContentCache::remember(ContentCache::SEO_HOME, function () {
+            $faqs = Faq::query()->active()->homepage()->ordered()->get();
+            $settings = $this->settings();
 
-        return [
-            'meta' => $this->meta()->build([
-                'title' => $settings->homepage_seo_title,
-                'description' => $settings->homepage_seo_description,
-                'keywords' => $settings->homepage_seo_keywords,
-                'canonical' => '/',
-                'type' => 'website',
-            ]),
-            'schema' => [
-                ...$this->globalSchemas(),
-                $this->schema()->breadcrumb([
-                    ['name' => 'Home', 'url' => '/'],
+            return [
+                'meta' => $this->meta()->build([
+                    'title' => $settings->homepage_seo_title,
+                    'description' => $settings->homepage_seo_description,
+                    'keywords' => $settings->homepage_seo_keywords,
+                    'canonical' => '/',
+                    'type' => 'website',
                 ]),
-                $this->schema()->faqPage($faqs),
-            ],
-        ];
+                'schema' => array_values(array_filter([
+                    ...$this->globalSchemas(),
+                    $this->schema()->breadcrumb([
+                        ['name' => 'Home', 'url' => '/'],
+                    ]),
+                    $this->schema()->faqPage($faqs),
+                ])),
+            ];
+        });
     }
 
     /**
@@ -147,7 +151,7 @@ class SeoService
         return $this->forStaticPage(
             '/services',
             'Services',
-            'Explore Balaji Events wedding and event services across Rajasthan.'
+            'Explore '.$this->brand().' wedding and event services across Rajasthan.'
         );
     }
 
@@ -160,7 +164,7 @@ class SeoService
 
         return [
             'meta' => $this->meta()->build([
-                'title' => $service->seo_title ?: ($service->name.' | '.($this->settings()->company_name ?: 'Balaji Events')),
+                'title' => $service->seo_title ?: ($service->name.' | '.(Brand::name($this->settings()->company_name))),
                 'description' => $service->seo_description ?: $service->short_description,
                 'keywords' => $service->seo_keywords,
                 'canonical' => $path,
@@ -188,7 +192,7 @@ class SeoService
         return $this->forStaticPage(
             '/packages',
             'Packages',
-            'Explore Balaji Events wedding and celebration packages across Rajasthan.'
+            'Explore '.$this->brand().' wedding and celebration packages across Rajasthan.'
         );
     }
 
@@ -200,7 +204,7 @@ class SeoService
         return $this->forStaticPage(
             '/gallery',
             'Gallery',
-            'Browse Balaji Events gallery photos from weddings and celebrations by category.'
+            'Browse '.$this->brand().' gallery photos from weddings and celebrations by category.'
         );
     }
 
@@ -212,7 +216,7 @@ class SeoService
     public function forGalleryCategory(GalleryCategory $category): array
     {
         $path = '/gallery/'.$category->slug;
-        $company = $this->settings()->company_name ?: 'Balaji Events';
+        $company = Brand::name($this->settings()->company_name);
 
         $cover = $category->relationLoaded('items')
             ? $category->items->first()
@@ -256,7 +260,7 @@ class SeoService
 
         return [
             'meta' => $this->meta()->build([
-                'title' => $item->seo_title ?: ($item->title.' | Gallery | '.($this->settings()->company_name ?: 'Balaji Events')),
+                'title' => $item->seo_title ?: ($item->title.' | Gallery | '.(Brand::name($this->settings()->company_name))),
                 'description' => $item->seo_description ?: ($item->caption ?: $item->description),
                 'canonical' => $path,
                 'image' => $item->imageUrl($item->opengraph_image) ?: $image,
@@ -282,7 +286,7 @@ class SeoService
         return $this->forStaticPage(
             '/blog',
             'Blog',
-            'Latest news and updates from Balaji Events.'
+            'Latest news and updates from '.$this->brand().'.'
         );
     }
 
@@ -295,7 +299,7 @@ class SeoService
 
         return [
             'meta' => $this->meta()->build([
-                'title' => $post->seo_title ?: ($post->title.' | '.($this->settings()->company_name ?: 'Balaji Events')),
+                'title' => $post->seo_title ?: ($post->title.' | '.(Brand::name($this->settings()->company_name))),
                 'description' => $post->seo_description ?: $post->excerpt,
                 'keywords' => $post->seo_keywords
                     ?: (is_array($post->tags) ? implode(', ', $post->tags) : null),
@@ -326,19 +330,19 @@ class SeoService
 
         return [
             'meta' => $this->meta()->build([
-                'title' => 'FAQ’s | '.($this->settings()->company_name ?: 'Balaji Events'),
-                'description' => 'Frequently asked questions about Balaji Events services, location, and contact details.',
+                'title' => 'FAQ’s | '.(Brand::name($this->settings()->company_name)),
+                'description' => 'Frequently asked questions about '.$this->brand().' services, location, and contact details.',
                 'canonical' => '/faq',
                 'type' => 'website',
             ]),
-            'schema' => [
+            'schema' => array_values(array_filter([
                 ...$this->globalSchemas(),
                 $this->schema()->breadcrumb([
                     ['name' => 'Home', 'url' => '/'],
                     ['name' => 'FAQ’s', 'url' => '/faq'],
                 ]),
                 $this->schema()->faqPage($faqs),
-            ],
+            ])),
         ];
     }
 
@@ -348,7 +352,7 @@ class SeoService
     public function forFaqDetail(Faq $faq): array
     {
         $path = '/faq/'.$faq->slug;
-        $company = $this->settings()->company_name ?: 'Balaji Events';
+        $company = Brand::name($this->settings()->company_name);
         $answer = $faq->plainAnswer();
 
         return [
@@ -358,7 +362,7 @@ class SeoService
                 'canonical' => $path,
                 'type' => 'website',
             ]),
-            'schema' => [
+            'schema' => array_values(array_filter([
                 ...$this->globalSchemas(),
                 $this->schema()->breadcrumb([
                     ['name' => 'Home', 'url' => '/'],
@@ -366,7 +370,7 @@ class SeoService
                     ['name' => $faq->question, 'url' => $path],
                 ]),
                 $this->schema()->faqPage([$faq]),
-            ],
+            ])),
         ];
     }
 
@@ -382,7 +386,55 @@ class SeoService
             'Contact Us',
             $settings->meta_description
                 ?: $settings->company_description
-                ?: 'Contact Balaji Events. Phone, address, email, and contact form.'
+                ?: 'Contact '.$this->brand().'. Phone, address, email, and contact form.'
+        );
+    }
+
+    /**
+     * @return array{meta: array<string, mixed>, schema: list<array<string, mixed>>}
+     */
+    public function forEvents(): array
+    {
+        return $this->forStaticPage(
+            '/events',
+            'Events',
+            'Wedding and celebration event highlights from '.$this->brand().' across Rajasthan.'
+        );
+    }
+
+    /**
+     * @return array{meta: array<string, mixed>, schema: list<array<string, mixed>>}
+     */
+    public function forMedia(): array
+    {
+        return $this->forStaticPage(
+            '/media',
+            'Videos & Media',
+            'Watch '.$this->brand().' event highlights on YouTube and social platforms.'
+        );
+    }
+
+    /**
+     * @return array{meta: array<string, mixed>, schema: list<array<string, mixed>>}
+     */
+    public function forPrivacy(): array
+    {
+        return $this->forStaticPage(
+            '/privacy-policy',
+            'Privacy Policy',
+            'How '.$this->brand().' uses enquiry and customer information.'
+        );
+    }
+
+    /**
+     * @return array{meta: array<string, mixed>, schema: list<array<string, mixed>>}
+     */
+    public function forTerms(): array
+    {
+        return $this->forStaticPage(
+            '/terms',
+            'Terms & Conditions',
+            'Website terms for using '.$this->brand().' online services and enquiry forms.'
         );
     }
 
@@ -402,7 +454,7 @@ class SeoService
 
         return [
             'meta' => $this->meta()->build([
-                'title' => $title.' | '.($this->settings()->company_name ?: 'Balaji Events'),
+                'title' => $title.' | '.(Brand::name($this->settings()->company_name)),
                 'description' => $description,
                 'canonical' => $normalized === '/' ? $this->siteUrl() : $normalized,
                 'image' => $image,
@@ -466,6 +518,7 @@ class SeoService
     {
         Cache::forget(self::SITEMAP_CACHE_KEY);
         Cache::forget(self::GLOBAL_SCHEMA_CACHE_KEY);
+        Cache::forget(ContentCache::SEO_HOME);
         $this->settings = null;
         $this->metaBuilder = null;
         $this->schemaBuilder = null;
@@ -552,5 +605,10 @@ class SeoService
         $xml[] = '</urlset>';
 
         return implode("\n", $xml)."\n";
+    }
+
+    private function brand(): string
+    {
+        return Brand::name($this->settings()->company_name);
     }
 }

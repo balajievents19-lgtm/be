@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Api;
 
+use App\Support\Brand;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -15,12 +16,12 @@ class ServiceResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name' => $this->name,
+            'name' => Brand::rewrite($this->name),
             'slug' => $this->slug,
-            'short_description' => $this->short_description,
+            'short_description' => Brand::rewrite($this->short_description),
             'full_description' => $this->when(
                 $request->routeIs('api.services.show'),
-                $this->full_description
+                Brand::rewrite($this->full_description)
             ),
             'featured_image' => $this->imageUrl($this->featured_image),
             'banner_image' => $this->when(
@@ -31,14 +32,20 @@ class ServiceResource extends JsonResource
                 $request->routeIs('api.services.show'),
                 $this->galleryImageUrls()
             ),
+            'related_gallery' => $this->when(
+                $request->routeIs('api.services.show'),
+                fn () => GalleryItemResource::collection(
+                    $this->relationLoaded('galleryItems') ? $this->galleryItems : collect()
+                )
+            ),
             'icon' => $this->icon,
             'featured' => $this->featured,
             'show_on_homepage' => $this->show_on_homepage,
             'sort_order' => $this->sort_order,
             'seo' => $this->when($request->routeIs('api.services.show'), [
-                'title' => $this->seo_title,
-                'description' => $this->seo_description,
-                'keywords' => $this->seo_keywords,
+                'title' => Brand::rewrite($this->seo_title),
+                'description' => Brand::rewrite($this->seo_description),
+                'keywords' => Brand::rewrite($this->seo_keywords),
                 'opengraph_image' => $this->imageUrl($this->opengraph_image),
             ]),
         ];

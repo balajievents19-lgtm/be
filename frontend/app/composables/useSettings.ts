@@ -1,6 +1,7 @@
 import type { ComputedRef, Ref } from 'vue'
 import type { HomePayload, SiteSettings } from '~/types/home'
 import { emptySettings } from '~/types/home'
+import { laravelGetCachedData, laravelFetch, useLaravelFetchDefaults } from '~/composables/useLaravelApi'
 
 interface SettingsApiResponse {
   data: SiteSettings
@@ -31,18 +32,12 @@ export interface UseSettingsResult {
  * Graceful fallback on upstream failure (no NuxtError payload).
  */
 export const useSettings = (): UseSettingsResult => {
+  const route = useRoute()
   const home = useNuxtData<HomePayload>('home')
   const base = useApiBase()
   const failed = useState('settings-api-failed', () => false)
-
-  if (homeSettingsReady(home.data.value?.settings)) {
-    return {
-      data: computed(() => home.data.value!.settings),
-      pending: computed(() => false),
-      error: ref<Error | null>(null),
-      failed: computed(() => false)
-    }
-  }
+  const onHomepage = route.path === '/'
+  const homeReady = homeSettingsReady(home.data.value?.settings)
 
   const asyncData = useAsyncData<SiteSettings>(
     'settings',
@@ -59,7 +54,16 @@ export const useSettings = (): UseSettingsResult => {
     {
       ...useLaravelFetchDefaults<SiteSettings>(),
       server: true,
-      default: (): SiteSettings => emptySettings()
+      // Homepage SSR already awaits /api/home, which includes settings.
+      immediate: !onHomepage && !homeReady,
+      default: (): SiteSettings => emptySettings(),
+      getCachedData: (key, nuxtApp) => {
+        const fromHome = (nuxtApp.payload.data.home as HomePayload | undefined)?.settings
+        if (homeSettingsReady(fromHome)) {
+          return fromHome
+        }
+        return laravelGetCachedData<SiteSettings>(key, nuxtApp)
+      }
     }
   )
 
@@ -71,7 +75,12 @@ export const useSettings = (): UseSettingsResult => {
       }
       return asyncData.data.value ?? emptySettings()
     }),
-    pending: asyncData.pending,
+    pending: computed(() => {
+      if (homeSettingsReady(home.data.value?.settings)) {
+        return false
+      }
+      return Boolean(asyncData.pending.value)
+    }),
     error: asyncData.error as Ref<Error | null>,
     failed
   }

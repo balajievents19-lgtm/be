@@ -22,13 +22,9 @@ class ResponsiveImageBuilder
 
         $base = Storage::disk('public')->url($path);
 
-        $srcset = collect($widths)
-            ->map(fn (int $width): string => $base.'?w='.$width.' '.$width.'w')
-            ->implode(', ');
-
         return [
             'src' => $base,
-            'srcset' => $srcset,
+            'srcset' => null,
             'widths' => $widths,
         ];
     }

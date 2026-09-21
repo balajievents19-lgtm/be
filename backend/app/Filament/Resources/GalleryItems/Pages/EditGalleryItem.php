@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\GalleryItems\Pages;
 
 use App\Filament\Resources\GalleryItems\GalleryItemResource;
+use App\Support\ContentCache;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
@@ -15,9 +16,17 @@ class EditGalleryItem extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
-            ForceDeleteAction::make(),
-            RestoreAction::make(),
+            DeleteAction::make()
+                ->after(fn () => ContentCache::flush(ContentCache::GALLERY, ContentCache::GALLERY_CATEGORIES, ContentCache::SERVICES)),
+            ForceDeleteAction::make()
+                ->after(fn () => ContentCache::flush(ContentCache::GALLERY, ContentCache::GALLERY_CATEGORIES, ContentCache::SERVICES)),
+            RestoreAction::make()
+                ->after(fn () => ContentCache::flush(ContentCache::GALLERY, ContentCache::GALLERY_CATEGORIES, ContentCache::SERVICES)),
         ];
+    }
+
+    protected function afterSave(): void
+    {
+        ContentCache::flush(ContentCache::GALLERY, ContentCache::GALLERY_CATEGORIES, ContentCache::SERVICES);
     }
 }

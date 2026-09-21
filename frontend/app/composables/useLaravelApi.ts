@@ -55,5 +55,5 @@ export const laravelFetch = <T>(
   return $fetch<T>(url, {
     ...opts,
     headers
-  })
+  }) as Promise<T>
 }

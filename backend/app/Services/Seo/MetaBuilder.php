@@ -3,6 +3,7 @@
 namespace App\Services\Seo;
 
 use App\Models\Setting;
+use App\Support\Brand;
 
 class MetaBuilder
 {
@@ -25,26 +26,25 @@ class MetaBuilder
      */
     public function build(array $overrides = []): array
     {
-        $title = $this->firstFilled(
+        $title = Brand::rewrite((string) $this->firstFilled(
             $overrides['title'] ?? null,
             $this->settings->meta_title,
-            $this->settings->company_name,
-            'Balaji Events'
-        );
+            Brand::name($this->settings->company_name)
+        )) ?: Brand::NAME;
 
-        $description = $this->firstFilled(
+        $description = Brand::rewrite((string) $this->firstFilled(
             $overrides['description'] ?? null,
             $this->settings->meta_description,
             $this->settings->company_description,
             $this->settings->company_tagline,
             ''
-        );
+        ));
 
-        $keywords = $this->firstFilled(
+        $keywords = Brand::rewrite($this->firstFilled(
             $overrides['keywords'] ?? null,
             $this->settings->meta_keywords,
             null
-        );
+        ));
 
         $canonical = $this->absolute(
             $overrides['canonical'] ?? null
@@ -78,7 +78,7 @@ class MetaBuilder
                 'description' => $description,
                 'url' => $canonical,
                 'type' => $type,
-                'site_name' => $this->settings->company_name ?: 'Balaji Events',
+                'site_name' => Brand::name($this->settings->company_name),
                 'image' => $image,
                 'locale' => 'en_IN',
             ],

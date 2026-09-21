@@ -23,7 +23,9 @@ class GalleryVideoResource extends Resource
 
     protected static ?string $cluster = GalleryCluster::class;
 
-    protected static ?string $navigationLabel = 'Videos';
+    protected static bool $shouldRegisterNavigation = false;
+
+    protected static ?string $navigationLabel = 'Videos (legacy)';
 
     protected static ?string $modelLabel = 'Video';
 

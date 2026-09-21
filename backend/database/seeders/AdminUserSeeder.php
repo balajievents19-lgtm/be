@@ -10,6 +10,12 @@ class AdminUserSeeder extends Seeder
 {
     public function run(): void
     {
+        if (app()->environment('production')) {
+            $this->command?->warn('Skipping AdminUserSeeder in production. Create an admin with php artisan make:filament-user and assign Super Admin.');
+
+            return;
+        }
+
         User::query()->updateOrCreate(
             ['email' => 'admin@balajievents.test'],
             [

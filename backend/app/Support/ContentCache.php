@@ -33,6 +33,10 @@ class ContentCache
 
     public const TESTIMONIALS = 'api.content.testimonials';
 
+    public const EXTERNAL_MEDIA = 'api.content.external_media';
+
+    public const EVENT_TYPES = 'api.content.event_types';
+
     public const TEAM = 'api.content.team';
 
     public const STATISTICS = 'api.content.statistics';
@@ -46,6 +50,8 @@ class ContentCache
     public const PACKAGES = 'api.content.service_packages';
 
     public const REDIRECTS = 'api.content.redirects';
+
+    public const SEO_HOME = 'api.content.seo.home';
 
     /**
      * @template T
@@ -103,6 +109,8 @@ class ContentCache
             self::NAVIGATION_FOOTER,
             self::EVENT_OVERVIEWS,
             self::TESTIMONIALS,
+            self::EXTERNAL_MEDIA,
+            self::EVENT_TYPES,
             self::TEAM,
             self::STATISTICS,
             self::CTA,
@@ -110,6 +118,7 @@ class ContentCache
             self::CATEGORIES,
             self::PACKAGES,
             self::REDIRECTS,
+            self::SEO_HOME,
         ] as $key) {
             Cache::forget($key);
         }
@@ -129,9 +138,14 @@ class ContentCache
     public static function flush(string ...$keys): void
     {
         Cache::forget(self::HOME);
+        Cache::forget(self::SEO_HOME);
 
         foreach ($keys as $key) {
             Cache::forget($key);
+
+            if ($key === self::EXTERNAL_MEDIA) {
+                Cache::forget(self::EXTERNAL_MEDIA.'.homepage');
+            }
 
             $module = match ($key) {
                 self::SERVICES => 'services',

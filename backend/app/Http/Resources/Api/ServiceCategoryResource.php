@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Api;
 
 use App\Models\ServiceCategory;
+use App\Support\Brand;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -16,15 +17,15 @@ class ServiceCategoryResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name' => $this->name,
+            'name' => Brand::rewrite($this->name),
             'slug' => $this->slug,
-            'description' => $this->description,
+            'description' => Brand::rewrite($this->description),
             'image' => $this->imageUrl($this->image),
             'icon' => $this->icon,
             'sort_order' => $this->sort_order,
             'seo' => [
-                'title' => $this->seo_title,
-                'description' => $this->seo_description,
+                'title' => Brand::rewrite($this->seo_title),
+                'description' => Brand::rewrite($this->seo_description),
                 'opengraph_image' => $this->imageUrl($this->opengraph_image),
             ],
         ];

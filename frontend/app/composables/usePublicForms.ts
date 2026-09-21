@@ -7,6 +7,7 @@ export interface ContactPayload {
   service_interested?: string | null
   event_date?: string | null
   event_location?: string | null
+  event_type_id?: number | null
   company?: string | null
   budget?: string | null
   source?: string | null
@@ -20,12 +21,10 @@ export interface NewsletterPayload {
   website?: string
 }
 
-/** Shared public write helpers — single API base, no duplicate clients. */
+/** Shared public write helpers — Sanctum CSRF + cookies, same as customer auth. */
 export const usePublicForms = () => {
-  const base = useApiBase()
-
   const submitContact = (payload: ContactPayload) =>
-    $fetch(`${base}/contact`, {
+    customerFetch('/contact', {
       method: 'POST',
       body: {
         ...payload,
@@ -34,7 +33,7 @@ export const usePublicForms = () => {
     })
 
   const submitNewsletter = (payload: NewsletterPayload) =>
-    $fetch(`${base}/newsletter`, {
+    customerFetch('/newsletter', {
       method: 'POST',
       body: {
         ...payload,

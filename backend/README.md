@@ -1,6 +1,6 @@
-# Balaji Events — Backend (API & Admin)
+# Balaji Royal Events — Backend (API & Admin)
 
-Laravel **13** + Filament **4** CMS and public JSON API for the Balaji Events website.
+Laravel **13** + Filament **4** CMS and public JSON API for the Balaji Royal Events website.
 
 Public site (Nuxt SSR) lives in the sibling **frontend** repository.
 
@@ -34,6 +34,8 @@ Set `ADMIN_EMAILS` for Filament access outside local (required when `APP_ENV=pro
 | GET | `/api/settings` | Site settings |
 | GET | `/api/services`, `/api/services/{slug}` | Services |
 | GET | `/api/gallery`, `/api/blog`, `/api/faqs` | Content lists (+ slug detail where applicable) |
+| GET | `/api/google-reviews` | Cached Google reviews (empty until Places is configured) |
+| GET | `/api/event-overviews` | Events listing |
 | POST | `/api/contact` | Contact enquiry (throttle 5/min) |
 | POST | `/api/newsletter` | Newsletter (throttle 5/min) |
 | GET | `/up` | Health check |
@@ -48,6 +50,8 @@ vendor/bin/pint
 
 ## Production
 
+Google reviews: **[docs/GOOGLE_REVIEWS.md](./docs/GOOGLE_REVIEWS.md)**.
+
 See **[DEPLOYMENT.md](./DEPLOYMENT.md)** and **[PRODUCTION_CHECKLIST.md](./PRODUCTION_CHECKLIST.md)**.
 
 Configs:
@@ -60,4 +64,4 @@ Configs:
 
 ## License
 
-Proprietary — Balaji Events.
+Proprietary — Balaji Royal Events.

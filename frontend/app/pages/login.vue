@@ -1,11 +1,41 @@
 <script setup lang="ts">
+const route = useRoute()
 const { data: settings } = useSettings()
+const { customer, loaded, refresh, openLogin } = useCustomerAuth()
 
 useSeoMeta({
-  title: 'Login | Balaji Events',
-  description: 'Account access for Balaji Events customers and partners.',
-  ogTitle: 'Login | Balaji Events',
-  twitterCard: 'summary_large_image'
+  title: 'Login | Balaji Royal Events',
+  description: 'Account access for Balaji Royal Events customers and partners.',
+  robots: 'noindex, nofollow'
+})
+
+const verifiedNotice = computed(() => String(route.query.verified || '') === '1'
+  ? 'Your email is verified. Sign in with your password.'
+  : '')
+
+const oauthError = computed(() => {
+  const code = String(route.query.oauth || '')
+  if (!code || code === 'success') {
+    return ''
+  }
+  if (code === 'not_configured') {
+    return 'Social login is not configured on the server yet.'
+  }
+  if (code === 'email_required') {
+    return 'That social account did not provide a verified email. Register with email first, then connect it from My Account.'
+  }
+  return 'Social login could not be completed. Please try again or use email login.'
+})
+
+onMounted(async () => {
+  if (!loaded.value) {
+    await refresh()
+  }
+  if (customer.value) {
+    await navigateTo('/account')
+    return
+  }
+  openLogin()
 })
 </script>
 
@@ -20,17 +50,29 @@ useSeoMeta({
       <section class="py-16">
         <UContainer class="mx-auto max-w-[800px] text-center">
           <p class="m-0 text-base leading-7 text-[#555]">
-            Customer and vendor account login will open with the Balaji Events portal.
-            Administrators can already access the control panel separately.
+            Use the login dialog to access your Balaji Royal Events customer account.
+            Administrators continue to use the separate control panel.
           </p>
-          <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <NuxtLink
-              to="/contact"
-              class="inline-block rounded-[3px] border border-solid border-brand-500 bg-brand-500 px-5 py-3 text-white no-underline hover:bg-brand-600"
-            >
-              Need Help? Contact Us
-            </NuxtLink>
-          </div>
+          <p
+            v-if="verifiedNotice"
+            class="mt-4 text-sm text-brand-500"
+          >
+            {{ verifiedNotice }}
+          </p>
+          <p
+            v-if="oauthError"
+            class="mt-4 text-sm text-red-600"
+            role="alert"
+          >
+            {{ oauthError }}
+          </p>
+          <button
+            type="button"
+            class="mt-8 inline-block rounded-[3px] border border-solid border-brand-500 bg-brand-500 px-5 py-3 text-white hover:bg-brand-600"
+            @click="openLogin()"
+          >
+            Open Login
+          </button>
         </UContainer>
       </section>
     </main>

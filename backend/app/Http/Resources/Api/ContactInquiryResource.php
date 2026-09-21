@@ -16,6 +16,7 @@ class ContactInquiryResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'customer_id' => $this->customer_id,
             'name' => $this->name,
             'mobile' => $this->mobile,
             'email' => $this->email,

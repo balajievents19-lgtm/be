@@ -42,28 +42,28 @@ class WebsiteCmsDemoSeeder extends Seeder
         $setting = Setting::singleton();
 
         $setting->fill([
-            'company_name' => $setting->company_name ?: 'Balaji Events',
+            'company_name' => $setting->company_name ?: 'Balaji Royal Events',
             'company_tagline' => $setting->company_tagline ?: 'Trusted wedding & event management in Rajasthan',
-            'company_description' => $setting->company_description ?: 'Balaji Events is a trusted wedding management company in India. We provide many different services in Rajasthan and promise to set the perfect pitch for bride and groom to celebrate their special day in a grand way.',
+            'company_description' => $setting->company_description ?: 'Balaji Royal Events is a trusted wedding management company in India. We provide many different services in Rajasthan and promise to set the perfect pitch for bride and groom to celebrate their special day in a grand way.',
             'phone' => $setting->phone ?: '+91-9462577065',
-            'alternate_phone' => $setting->alternate_phone ?: '+91-8058780290',
+            'alternate_phone' => $setting->alternate_phone ?: null,
             'whatsapp' => $setting->whatsapp ?: '+91-9462577065',
             'email' => $setting->email ?: 'balajievents19@gmail.com',
             'support_email' => $setting->support_email ?: 'balajievents19@gmail.com',
             'address' => $setting->address ?: 'Shop No.15, Road No.3, Opposite : Jamuna Resort Jhunjhunu (Rajasthan)',
-            'facebook' => $setting->facebook ?: 'https://facebook.com/',
-            'instagram' => $setting->instagram ?: 'https://instagram.com/',
-            'youtube' => $setting->youtube ?: 'https://youtube.com/',
-            'linkedin' => $setting->linkedin ?: 'https://linkedin.com/',
-            'twitter' => $setting->twitter ?: 'https://x.com/',
+            'facebook' => $setting->facebook ?: null,
+            'instagram' => $setting->instagram,
+            'youtube' => $setting->youtube,
+            'linkedin' => $setting->linkedin,
+            'twitter' => $setting->twitter,
             'working_hours' => $setting->working_hours ?: "Monday – Saturday: 10:00 AM – 7:00 PM\nSunday: By appointment",
             'holiday_text' => $setting->holiday_text ?: 'Closed on major public holidays. Please call ahead to confirm.',
             'emergency_contact' => $setting->emergency_contact ?: '+91-9462577065',
-            'footer_about' => $setting->footer_about ?: 'Balaji Events — trusted wedding and event management in Rajasthan.',
-            'copyright_text' => $setting->copyright_text ?: 'Copyright © '.date('Y').' - BalajiEvents | All Rights Reserved',
+            'footer_about' => $setting->footer_about ?: 'Balaji Royal Events — trusted wedding and event management in Rajasthan.',
+            'copyright_text' => $setting->copyright_text ?: 'Copyright © '.date('Y').' - Balaji Royal Events | All Rights Reserved',
             'about_vision' => 'To be Rajasthan’s most trusted wedding and event partner, crafting celebrations that feel royal, warm, and unforgettable.',
             'about_mission' => 'We plan and execute weddings, destination celebrations, corporate gatherings, and family ceremonies with meticulous detail, honest pricing, and hospitality rooted in Rajasthani tradition.',
-            'about_journey' => "Balaji Events began in Jhunjhunu with a simple promise: every celebration deserves grandeur without chaos.\n\nOver the years we have planned Royal Wedding Jaipur evenings, Destination Wedding Udaipur weekends, intimate Mehndi and Haldi ceremonies, sparkling Reception nights, Corporate Events, Birthday Celebrations, and Anniversary Events across Rajasthan.\n\nToday our team manages décor, catering, photography, DJ nights, and complete wedding planning under one roof.",
+            'about_journey' => "Balaji Royal Events began in Jhunjhunu with a simple promise: every celebration deserves grandeur without chaos.\n\nOver the years we have planned Royal Wedding Jaipur evenings, Destination Wedding Udaipur weekends, intimate Mehndi and Haldi ceremonies, sparkling Reception nights, Corporate Events, Birthday Celebrations, and Anniversary Events across Rajasthan.\n\nToday our team manages décor, catering, photography, DJ nights, and complete wedding planning under one roof.",
             'header_enabled' => true,
             'top_bar_enabled' => true,
             'sticky_header_enabled' => true,
@@ -73,11 +73,11 @@ class WebsiteCmsDemoSeeder extends Seeder
             'mobile_header_enabled' => true,
             'mobile_menu_style' => 'drawer',
             'hero_search_enabled' => true,
-            'hero_search_placeholder' => 'Search wedding services in Rajasthan',
-            'hero_search_button_label' => 'Find Services',
-            'homepage_seo_title' => 'Balaji Events | Wedding Planning, Décor & Destination Celebrations in Rajasthan',
-            'homepage_seo_description' => 'Plan Royal Wedding Jaipur, Destination Wedding Udaipur, Mehndi, Haldi, Reception, Luxury Catering, Photography and DJ Night with Balaji Events.',
-            'homepage_seo_keywords' => 'Balaji Events, wedding planner Rajasthan, destination wedding Udaipur, royal wedding Jaipur, event management Jhunjhunu',
+            'hero_search_placeholder' => 'Tell us about your celebration',
+            'hero_search_button_label' => 'Get a Free Quote',
+            'homepage_seo_title' => 'Balaji Royal Events | Wedding Planning, Décor & Destination Celebrations in Rajasthan',
+            'homepage_seo_description' => 'Plan Royal Wedding Jaipur, Destination Wedding Udaipur, Mehndi, Haldi, Reception, Luxury Catering, Photography and DJ Night with Balaji Royal Events.',
+            'homepage_seo_keywords' => 'Balaji Royal Events, wedding planner Rajasthan, destination wedding Udaipur, royal wedding Jaipur, event management Jhunjhunu',
             'footer_enabled' => true,
             'footer_newsletter_enabled' => true,
             'footer_social_enabled' => true,
@@ -127,7 +127,7 @@ class WebsiteCmsDemoSeeder extends Seeder
         foreach ($categories as $category) {
             ServiceCategory::query()->updateOrCreate(
                 ['slug' => $category['slug']],
-                [...$category, 'status' => true, 'is_visible' => true, 'seo_title' => $category['name'].' | Balaji Events']
+                [...$category, 'status' => true, 'is_visible' => true, 'seo_title' => $category['name'].' | Balaji Royal Events']
             );
         }
 
@@ -201,7 +201,7 @@ class WebsiteCmsDemoSeeder extends Seeder
                 [
                     'name' => $package['name'],
                     'summary' => $package['summary'],
-                    'description' => '<p>'.$package['summary'].' Crafted by Balaji Events for premium celebrations across Rajasthan.</p>',
+                    'description' => '<p>'.$package['summary'].' Crafted by Balaji Royal Events for premium celebrations across Rajasthan.</p>',
                     'price_label' => $package['price_label'],
                     'price_amount' => $package['price_amount'],
                     'currency' => 'INR',
@@ -212,7 +212,7 @@ class WebsiteCmsDemoSeeder extends Seeder
                     'is_visible' => true,
                     'service_category_id' => ServiceCategory::query()->where('slug', $package['category'])->value('id'),
                     'service_id' => Service::query()->where('slug', $package['service'])->value('id'),
-                    'seo_title' => $package['name'].' | Balaji Events',
+                    'seo_title' => $package['name'].' | Balaji Royal Events',
                     'seo_description' => $package['summary'],
                 ]
             );
@@ -256,7 +256,7 @@ class WebsiteCmsDemoSeeder extends Seeder
     private function seedTestimonials(): void
     {
         $reviews = [
-            ['name' => 'Ananya & Rohan', 'quote' => 'Our Destination Wedding Udaipur felt effortless. Balaji Events handled venues, décor and hospitality with true Rajasthani warmth.', 'rating' => 5],
+            ['name' => 'Ananya & Rohan', 'quote' => 'Our Destination Wedding Udaipur felt effortless. Balaji Royal Events handled venues, décor and hospitality with true Rajasthani warmth.', 'rating' => 5],
             ['name' => 'Kavita Sharma', 'quote' => 'From Mehndi Ceremony to Reception, every detail was elegant. The stage decorations and flower décor were breathtaking.', 'rating' => 5],
             ['name' => 'Vikram Jain', 'quote' => 'Professional team for our Corporate Event in Jaipur. Punctual, creative and transparent on pricing.', 'rating' => 5],
             ['name' => 'Sneha Rathore', 'quote' => 'Google Reviews cannot capture how smooth our Anniversary Event was. Photography and DJ Night were outstanding.', 'rating' => 4],
@@ -336,7 +336,7 @@ class WebsiteCmsDemoSeeder extends Seeder
         $ctas = [
             [
                 'key' => CtaSectionKey::HomeMid,
-                'title' => 'Plan Your Royal Wedding with Balaji Events',
+                'title' => 'Plan Your Royal Wedding with Balaji Royal Events',
                 'subtitle' => 'Trusted across Jhunjhunu, Jaipur and Udaipur',
                 'body' => 'Share your date and celebration style. Our planners will craft a clear roadmap for décor, catering, photography and hospitality.',
                 'button_text' => 'Talk to Planner',
@@ -400,7 +400,7 @@ class WebsiteCmsDemoSeeder extends Seeder
                 'address' => 'By appointment for Royal Wedding Jaipur planning meetings',
                 'city' => 'Jaipur',
                 'state' => 'Rajasthan',
-                'phone' => '+91-8058780290',
+                'phone' => '+91-9462577065',
                 'email' => 'balajievents19@gmail.com',
                 'is_primary' => false,
                 'sort_order' => 2,

@@ -14,6 +14,7 @@ export interface Service {
   featured_image: string | null
   banner_image?: string | null
   gallery_images?: string[]
+  related_gallery?: import('~/types/gallery').GalleryItem[]
   icon: string | null
   featured: boolean
   show_on_homepage: boolean

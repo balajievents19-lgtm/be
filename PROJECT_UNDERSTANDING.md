@@ -1,4 +1,6 @@
-# Balaji Events Platform — Project Understanding
+# Balaji Royal Events Platform — Project Understanding
+
+> **Updated 2026-09-20:** This file is a historical analysis (2026-08-04) and is **not** the current source of truth. See `AUDIT.md` for the live audit, `backend/docs/GOOGLE_REVIEWS.md` for Google Reviews setup, and the code in `frontend/` + `backend/`.
 
 **Generated:** 2026-08-04  
 **Repos:** `be/frontend` (Nuxt 4) + `be/backend` (Laravel 13 / Filament 4)  

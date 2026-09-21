@@ -1,4 +1,4 @@
-# Production checklist — Balaji Events 1.0
+# Production checklist — Balaji Royal Events 1.0
 
 Use before go-live and after each production deploy.
 
@@ -18,8 +18,8 @@ Use before go-live and after each production deploy.
 - [ ] `.env` from `.env.production.example`
 - [ ] `APP_ENV=production`, `APP_DEBUG=false`
 - [ ] `APP_KEY` set
-- [ ] `APP_URL` = HTTPS API origin
-- [ ] `SITE_URL` / `FRONTEND_URL` = public site origin
+- [ ] `APP_URL` = `https://www.balajiroyalevents.com`
+- [ ] `SITE_URL` / `FRONTEND_URL` = `https://www.balajiroyalevents.com`
 - [ ] `ADMIN_EMAILS` includes all Filament users
 - [ ] DB credentials verified
 - [ ] Mail SMTP tested (`php artisan tinker` / real contact)
@@ -28,7 +28,7 @@ Use before go-live and after each production deploy.
 
 ## Frontend env / build
 
-- [ ] `NUXT_PUBLIC_API_BASE` points at production API `/api`
+- [ ] `NUXT_PUBLIC_API_BASE=https://www.balajiroyalevents.com/api`
 - [ ] `pnpm build` succeeds on the server
 - [ ] Nuxt process listens on `127.0.0.1:3000` only
 - [ ] Nginx proxies public host to Nuxt

@@ -14,6 +14,7 @@ class HeroSlideSeeder extends Seeder
         $slides = [
             [
                 'title' => 'Celebrate Your Special Day',
+                'title_highlight' => 'Special Day',
                 'subtitle' => 'Trusted wedding & event management across Rajasthan',
                 'button_text' => 'Contact Us',
                 'button_url' => '/contact',
@@ -25,6 +26,7 @@ class HeroSlideSeeder extends Seeder
             ],
             [
                 'title' => 'Corporate & Private Events',
+                'title_highlight' => 'Events',
                 'subtitle' => 'Conferences, parties, and celebrations planned with care',
                 'button_text' => 'Our Services',
                 'button_url' => '/services',
@@ -36,6 +38,7 @@ class HeroSlideSeeder extends Seeder
             ],
             [
                 'title' => 'Unforgettable Moments',
+                'title_highlight' => 'Moments',
                 'subtitle' => 'Decor, catering, entertainment — all under one roof',
                 'button_text' => 'View Gallery',
                 'button_url' => '/gallery',

@@ -26,7 +26,7 @@ class LeadContactLinksTest extends TestCase
 
         $this->assertNotNull($url);
         $this->assertStringStartsWith('https://wa.me/919462577065?text=', $url);
-        $this->assertStringContainsString(rawurlencode('Hello Ravi Sharma, this is Balaji Events. We received your event enquiry. How can we help you?'), $url);
+        $this->assertStringContainsString(rawurlencode('Hello Ravi Sharma, this is Balaji Royal Events. We received your event enquiry. How can we help you?'), $url);
     }
 
     public function test_whatsapp_url_without_name_uses_generic_greeting(): void
@@ -39,7 +39,7 @@ class LeadContactLinksTest extends TestCase
         $url = LeadContactLinks::whatsappUrl($lead);
 
         $this->assertSame(
-            'https://wa.me/9462577065?text='.rawurlencode('Hello, this is Balaji Events. We received your event enquiry. How can we help you?'),
+            'https://wa.me/919462577065?text='.rawurlencode('Hello, this is Balaji Royal Events. We received your event enquiry. How can we help you?'),
             $url
         );
     }

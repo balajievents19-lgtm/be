@@ -14,10 +14,25 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        if (app()->environment('production')) {
+            $this->call([
+                RBACSeeder::class,
+                SettingSeeder::class,
+                EventTypeSeeder::class,
+                HomepageSectionSeeder::class,
+            ]);
+
+            $this->command?->warn('Production seed: demo CMS, demo leads, and default admin were skipped.');
+
+            return;
+        }
+
         $this->call([
             AdminUserSeeder::class,
             RBACSeeder::class,
             SettingSeeder::class,
+            EventTypeSeeder::class,
+            HomepageSectionSeeder::class,
             HeroSlideSeeder::class,
             ServiceSeeder::class,
             GallerySeeder::class,

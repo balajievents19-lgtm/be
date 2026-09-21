@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Api;
 
 use App\Models\EventOverview;
+use App\Support\Brand;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -16,9 +17,9 @@ class EventOverviewResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'title' => $this->title,
-            'caption' => $this->caption,
-            'description' => $this->description,
+            'title' => Brand::rewrite($this->title),
+            'caption' => Brand::rewrite($this->caption),
+            'description' => Brand::rewrite($this->description),
             'image' => $this->imageUrl($this->image),
             'link_url' => $this->link_url,
             'featured' => $this->featured,

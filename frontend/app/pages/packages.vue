@@ -1,7 +1,8 @@
 <script setup lang="ts">
-usePageSeo({ type: 'packages' })
+const seo = usePageSeo({ type: 'packages' })
 const { data: packages, pending, failed } = await usePackages()
 const { data: settings } = useSettings()
+await seo
 
 const breadcrumbs = [
   { label: 'Home', to: '/' },

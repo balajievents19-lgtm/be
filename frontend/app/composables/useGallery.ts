@@ -1,4 +1,6 @@
 import type { GalleryCategory, GalleryItem, GalleryListResponse } from '~/types/gallery'
+import type { HomePayload } from '~/types/home'
+import { isNotFoundError } from '~/utils/httpError'
 
 const emptyList: GalleryItem[] = []
 const emptyCategories: GalleryCategoryCard[] = []
@@ -52,8 +54,27 @@ export const useGallery = () => {
 
 /** Category-first gallery landing from GET /api/gallery/categories. */
 export const useGalleryCategories = () => {
-  const base = useApiBase()
+  const route = useRoute()
+  const homePayload = useNuxtData<HomePayload>('home')
+  const fromHome = homePayload.data.value?.gallery_categories
   const failed = useState('gallery-categories-api-failed', () => false)
+
+  if (route.path === '/' && Array.isArray(fromHome)) {
+    failed.value = false
+
+    return {
+      data: computed(() => homePayload.data.value?.gallery_categories ?? emptyCategories),
+      pending: computed(() => false),
+      error: ref(null),
+      status: computed(() => 'success' as const),
+      refresh: async () => {},
+      clear: () => {},
+      execute: async () => {},
+      failed
+    }
+  }
+
+  const base = useApiBase()
 
   const asyncData = useAsyncData(
     'gallery-categories',
@@ -80,18 +101,21 @@ export const useGalleryCategories = () => {
 }
 
 /** Category detail from GET /api/gallery/categories/{slug}. */
-export const useGalleryCategory = (slug: string) => {
+export const useGalleryCategory = async (slug: string) => {
   const base = useApiBase()
   const failed = useState(`gallery-category-api-failed-${slug}`, () => false)
 
-  const asyncData = useAsyncData(
+  const asyncData = await useAsyncData(
     `gallery-category-${slug}`,
     async () => {
       try {
         const response = await laravelFetch<GalleryCategoryDetailResponse>(`${base}/gallery/categories/${slug}`)
         failed.value = false
         return response.data ?? null
-      } catch {
+      } catch (error) {
+        if (isNotFoundError(error)) {
+          return null
+        }
         failed.value = true
         return null
       }
@@ -103,7 +127,8 @@ export const useGalleryCategory = (slug: string) => {
     }
   )
 
-  return Object.assign(asyncData, {
+  return {
+    ...asyncData,
     failed
-  }) as typeof asyncData & { failed: typeof failed }
+  }
 }

@@ -46,10 +46,16 @@ class FaqApiTest extends TestCase
             ]);
     }
 
-    public function test_faqs_show_404_when_inactive(): void
+    public function test_faqs_index_still_works_when_homepage_faq_section_is_off(): void
     {
-        $this->createFaq(['status' => false]);
+        $this->createFaq();
 
-        $this->getJson('/api/faqs/how-do-i-book')->assertNotFound();
+        $this->assertFalse(
+            (bool) \App\Models\HomepageSection::query()->where('section_key', 'faq')->value('is_active')
+        );
+
+        $this->getJson('/api/faqs')
+            ->assertOk()
+            ->assertJsonCount(1, 'data');
     }
 }

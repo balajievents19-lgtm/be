@@ -3,6 +3,7 @@ import { computed, reactive, ref, watch } from 'vue'
 
 const route = useRoute()
 const { submitContact } = usePublicForms()
+const { customer, loaded, openLogin, openRegister } = useCustomerAuth()
 
 const packageName = computed(() => {
   const value = route.query.package
@@ -72,12 +73,25 @@ const applyEnquiryContext = () => {
 
 watch(enquiryContext, applyEnquiryContext, { immediate: true })
 
+watch([customer, loaded, enquiryContext], () => {
+  if (!enquiryContext.value || !customer.value) {
+    return
+  }
+  form.name = customer.value.name || form.name
+  form.email = customer.value.email || form.email
+  form.mobile = customer.value.phone || form.mobile
+}, { immediate: true })
+
+const identityLocked = computed(() => Boolean(enquiryContext.value && customer.value))
+
 const validate = () => {
   errors.name = form.name.trim() ? '' : 'Name cannot be blank.'
-  errors.mobile = form.mobile.trim() ? '' : 'Phone cannot be blank.'
-  errors.email = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())
-    ? ''
-    : 'Incorrect e-mail address'
+  errors.mobile = enquiryContext.value
+    ? (isExactTenDigitMobile(form.mobile.trim()) ? '' : 'Enter exactly 10 digits with no +91, spaces, or punctuation.')
+    : (form.mobile.trim() ? '' : 'Phone cannot be blank.')
+  errors.email = !form.email.trim()
+    ? 'Email address is required.'
+    : (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim()) ? '' : 'Enter a valid email address.')
   errors.subject = form.subject.trim() ? '' : 'Subject cannot be blank.'
   errors.message = form.message.trim() ? '' : 'Message cannot be blank.'
   return !errors.name && !errors.mobile && !errors.email && !errors.subject && !errors.message
@@ -92,6 +106,17 @@ const onSubmit = async (event: Event) => {
     return
   }
 
+  if (enquiryContext.value && !customer.value) {
+    apiError.value = 'Sign in with a verified account to send this inquiry.'
+    openLogin()
+    return
+  }
+
+  if (enquiryContext.value && customer.value && !customer.value.email_verified) {
+    apiError.value = 'Verify your email address before sending an inquiry.'
+    return
+  }
+
   if (!validate()) {
     return
   }
@@ -99,9 +124,9 @@ const onSubmit = async (event: Event) => {
   submitting.value = true
   try {
     await submitContact({
-      name: form.name.trim(),
-      mobile: form.mobile.trim(),
-      email: form.email.trim(),
+      name: (enquiryContext.value ? customer.value?.name : null) || form.name.trim(),
+      mobile: (enquiryContext.value ? customer.value?.phone : null) || form.mobile.trim(),
+      email: (enquiryContext.value ? customer.value?.email : null) || form.email.trim(),
       subject: form.subject.trim(),
       message: form.message.trim(),
       service_interested: enquiryContext.value?.interested ?? null,
@@ -153,6 +178,28 @@ const onSubmit = async (event: Event) => {
         Service:
         <strong class="font-semibold text-[#333]">{{ enquiryContext.label }}</strong>
       </p>
+      <p
+        v-if="enquiryContext && loaded && !customer"
+        class="mb-6 text-sm text-[#555]"
+        role="status"
+      >
+        Sign in with a verified account to send this inquiry.
+        <button
+          type="button"
+          class="text-brand-500 underline"
+          @click="openLogin()"
+        >
+          Login
+        </button>
+        or
+        <button
+          type="button"
+          class="text-brand-500 underline"
+          @click="openRegister()"
+        >
+          Register
+        </button>
+      </p>
 
       <form
         class="-mx-[15px] flex flex-wrap"
@@ -183,7 +230,8 @@ const onSubmit = async (event: Event) => {
               type="text"
               name="name"
               autocomplete="name"
-              class="box-border h-[38px] w-full border border-solid border-[#e8e8e8] px-2.5 py-2.5 text-sm text-[#333] outline-none"
+              :readonly="identityLocked"
+              class="box-border h-[38px] w-full border border-solid border-[#e8e8e8] px-2.5 py-2.5 text-sm text-[#333] outline-none read-only:bg-[#fafafa]"
             >
             <p
               v-if="errors.name"
@@ -206,7 +254,10 @@ const onSubmit = async (event: Event) => {
               type="tel"
               name="mobile"
               autocomplete="tel"
-              class="box-border h-[38px] w-full border border-solid border-[#e8e8e8] px-2.5 py-2.5 text-sm text-[#333] outline-none"
+              :readonly="identityLocked"
+              maxlength="10"
+              inputmode="numeric"
+              class="box-border h-[38px] w-full border border-solid border-[#e8e8e8] px-2.5 py-2.5 text-sm text-[#333] outline-none read-only:bg-[#fafafa]"
             >
             <p
               v-if="errors.mobile"
@@ -229,7 +280,8 @@ const onSubmit = async (event: Event) => {
               type="text"
               name="email"
               autocomplete="email"
-              class="box-border h-[38px] w-full border border-solid border-[#e8e8e8] px-2.5 py-2.5 text-sm text-[#333] outline-none"
+              :readonly="identityLocked"
+              class="box-border h-[38px] w-full border border-solid border-[#e8e8e8] px-2.5 py-2.5 text-sm text-[#333] outline-none read-only:bg-[#fafafa]"
             >
             <p
               v-if="errors.email"

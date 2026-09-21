@@ -14,9 +14,12 @@ class HeroSlide extends Model
 
     protected $fillable = [
         'title',
+        'title_highlight',
         'subtitle',
         'button_text',
         'button_url',
+        'secondary_button_text',
+        'secondary_button_url',
         'desktop_image',
         'mobile_image',
         'video_url',

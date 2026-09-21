@@ -24,8 +24,14 @@ return Application::configure(basePath: dirname(__DIR__))
                 | Request::HEADER_X_FORWARDED_AWS_ELB
         );
 
+        // Sanctum SPA: cookie + CSRF for first-party Nuxt ↔ Laravel customer auth.
+        $middleware->statefulApi();
+
         $middleware->throttleApi('api');
         $middleware->append(SecurityHeaders::class);
+        $middleware->alias([
+            'customer.verified' => \App\Http\Middleware\EnsureCustomerEmailVerified::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

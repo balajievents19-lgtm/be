@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the Balaji Events frontend (Nuxt SSR).
+All notable changes to the Balaji Royal Events frontend (Nuxt SSR).
 
 ## [1.0.0] — 2026-08-04
 

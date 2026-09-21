@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import Lightbox from '~/components/shared/Lightbox.vue'
 import { galleryItemAlt, galleryItemSrc } from '~/types/gallery'
 
@@ -7,10 +7,12 @@ const props = defineProps<{
   slug: string
 }>()
 
-const { data, pending, failed } = useGalleryCategory(props.slug)
+const { data, pending, failed } = await useGalleryCategory(props.slug)
 
 const category = computed(() => data.value?.category ?? null)
-const items = computed(() => data.value?.items ?? [])
+const items = computed(() =>
+  (data.value?.items ?? []).filter(item => Boolean(galleryItemSrc(item)))
+)
 
 const pageSize = 12
 const page = ref(1)
@@ -22,11 +24,17 @@ const pagedItems = computed(() => {
   return items.value.slice(start, start + pageSize)
 })
 
-/** Full image URLs for the large viewer (category-scoped; sharper than thumbnails). */
+/** Full image URLs for the large viewer (category-scoped; safer public previews only). */
 const images = computed(() =>
   items.value
     .map(item => item.image || item.thumbnail || '')
     .filter(Boolean)
+)
+const itemIds = computed(() =>
+  items.value.map(item => (item.image || item.thumbnail ? item.id : null))
+)
+const downloadAvailable = computed(() =>
+  items.value.map(item => Boolean(item.download_available ?? true))
 )
 const isLightboxOpen = ref(false)
 const activeIndex = ref(0)
@@ -46,6 +54,12 @@ watch(totalPages, (pages) => {
     page.value = pages
   }
 })
+const onThumbError = (event: Event) => {
+  const el = event.target as HTMLImageElement | null
+  if (el) {
+    el.style.visibility = 'hidden'
+  }
+}
 </script>
 
 <template>
@@ -117,6 +131,7 @@ watch(totalPages, (pages) => {
             loading="lazy"
             decoding="async"
             draggable="false"
+            @error="onThumbError"
           >
 
           <span
@@ -162,6 +177,8 @@ watch(totalPages, (pages) => {
       v-model:open="isLightboxOpen"
       v-model:index="activeIndex"
       :images="images"
+      :item-ids="itemIds"
+      :download-available="downloadAvailable"
       :alt="activeAlt"
     />
   </section>

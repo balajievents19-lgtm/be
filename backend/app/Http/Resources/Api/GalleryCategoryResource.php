@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Api;
 
 use App\Models\GalleryCategory;
+use App\Support\Brand;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -20,13 +21,20 @@ class GalleryCategoryResource extends JsonResource
 
         return [
             'id' => $this->id,
-            'name' => $this->name,
+            'name' => Brand::rewrite($this->name),
             'slug' => $this->slug,
-            'description' => $this->description,
+            'description' => Brand::rewrite($this->description),
             'sort_order' => $this->sort_order,
             'image_count' => $this->when(isset($this->items_count), (int) $this->items_count),
             'cover_image' => $cover
-                ? ($cover->imageUrl($cover->thumbnail ?: $cover->image))
+                ? ($cover->imageUrl(
+                    $cover->thumbnail
+                        ?: (is_string($cover->image)
+                            && ! str_starts_with($cover->image, 'gallery/images/')
+                            && ! str_contains($cover->image, 'studio/uploads/')
+                            ? $cover->image
+                            : null)
+                ))
                 : null,
         ];
     }

@@ -1,6 +1,6 @@
-# Balaji Events — Frontend (Nuxt SSR)
+# Balaji Royal Events — Frontend (Nuxt SSR)
 
-Nuxt **4** + Vue 3 public website for Balaji Events. Consumes the Laravel API in the sibling **backend** repository.
+Nuxt **4** + Vue 3 public website for Balaji Royal Events. Consumes the Laravel API in the sibling **backend** repository.
 
 ## Stack
 
@@ -41,7 +41,7 @@ Full stack runbook (Nginx, Supervisor, SSL, backups): see the backend repo **[DE
 Frontend-specific:
 
 1. Copy [`.env.production.example`](./.env.production.example) → `.env`
-2. Set `NUXT_PUBLIC_API_BASE=https://api.example.com/api`
+2. Set `NUXT_PUBLIC_API_BASE=https://www.balajiroyalevents.com/api`
 3. `pnpm install --frozen-lockfile && pnpm build`
 4. Run `node .output/server/index.mjs` (Supervisor sample lives in backend `deploy/supervisor/balaji-events-nuxt.conf`)
 
@@ -49,4 +49,4 @@ Also see [PRODUCTION_CHECKLIST.md](./PRODUCTION_CHECKLIST.md) and [CHANGELOG.md]
 
 ## License
 
-Proprietary — Balaji Events.
+Proprietary — Balaji Royal Events.

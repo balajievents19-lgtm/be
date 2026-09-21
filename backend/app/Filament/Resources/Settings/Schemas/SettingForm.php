@@ -334,13 +334,15 @@ class SettingForm
     {
         return [
             Toggle::make('hero_search_enabled')
-                ->label('Show Search Box on Homepage')
+                ->label('Show enquiry form on homepage')
                 ->default(true),
             TextInput::make('hero_search_placeholder')
-                ->label('Search Box Placeholder')
+                ->label('Enquiry form hint')
                 ->maxLength(255),
             TextInput::make('hero_search_button_label')
-                ->label('Search Button Label')
+                ->label('Enquiry button label')
+                ->placeholder('Get a Free Quote')
+                ->helperText('Shown on the homepage enquiry panel. Do not use “Search Now” unless the form actually searches.')
                 ->maxLength(100),
         ];
     }

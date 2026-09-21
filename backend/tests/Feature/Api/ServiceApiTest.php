@@ -57,6 +57,7 @@ class ServiceApiTest extends TestCase
                     'full_description',
                     'banner_image',
                     'gallery_images',
+                    'related_gallery',
                     'seo' => ['title', 'description', 'keywords', 'opengraph_image'],
                 ],
             ]);

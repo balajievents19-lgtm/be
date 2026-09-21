@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\GalleryItems\Schemas;
 
 use App\Filament\Support\WebsitePublishFields;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -30,7 +31,7 @@ class GalleryItemForm
                                     ->columns(2)
                                     ->schema([
                                         Select::make('gallery_category_id')
-                                            ->label('Category')
+                                            ->label('Gallery Category')
                                             ->relationship(
                                                 name: 'category',
                                                 titleAttribute: 'name',
@@ -39,6 +40,18 @@ class GalleryItemForm
                                             ->searchable()
                                             ->preload()
                                             ->required(),
+                                        CheckboxList::make('services')
+                                            ->label('Show this photo in Services')
+                                            ->relationship(
+                                                name: 'services',
+                                                titleAttribute: 'name',
+                                                modifyQueryUsing: fn ($query) => $query->active()->ordered(),
+                                            )
+                                            ->searchable()
+                                            ->bulkToggleable()
+                                            ->columns(2)
+                                            ->columnSpanFull()
+                                            ->helperText('The photo is uploaded once. It will appear in this Gallery Category and on every selected Service page.'),
                                         TextInput::make('title')
                                             ->required()
                                             ->maxLength(255)
@@ -69,7 +82,7 @@ class GalleryItemForm
                                     ->columns(2)
                                     ->schema([
                                         FileUpload::make('image')
-                                            ->label('Image')
+                                            ->label('Image (public preview; original is secured privately)')
                                             ->image()
                                             ->disk('public')
                                             ->directory('gallery/images')
@@ -77,6 +90,7 @@ class GalleryItemForm
                                             ->imageEditor()
                                             ->required()
                                             ->maxSize(5120)
+                                            ->helperText('On save, the original is moved to private storage. Public gallery shows a safe preview.')
                                             ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif']),
                                         FileUpload::make('thumbnail')
                                             ->label('Thumbnail')
@@ -93,11 +107,12 @@ class GalleryItemForm
                                         TextInput::make('caption')
                                             ->maxLength(255),
                                         TextInput::make('youtube_url')
-                                            ->label('YouTube URL')
+                                            ->label('YouTube URL (external — no video upload)')
                                             ->url()
-                                            ->maxLength(255),
+                                            ->maxLength(255)
+                                            ->helperText('Prefer Gallery → External Media for social/Drive links. Do not upload video files.'),
                                         TextInput::make('vimeo_url')
-                                            ->label('Vimeo URL')
+                                            ->label('Vimeo URL (external — no video upload)')
                                             ->url()
                                             ->maxLength(255),
                                     ]),

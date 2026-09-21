@@ -42,6 +42,13 @@ class ServiceController extends Controller
             $service = Service::query()
                 ->active()
                 ->where('slug', $slug)
+                ->with(['galleryItems' => function ($query): void {
+                    $query->active()
+                        ->withPublicPreview()
+                        ->ordered()
+                        ->with('category:id,name,slug')
+                        ->limit(24);
+                }])
                 ->firstOrFail();
 
             return (new ServiceResource($service))->response()->getData(true);

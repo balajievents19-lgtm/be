@@ -32,7 +32,8 @@ class ManageBrandName extends EditWebsiteSettingPage
             TextInput::make('company_name')
                 ->label('Company Name')
                 ->required()
-                ->maxLength(255),
+                ->maxLength(255)
+                ->helperText('Public brand name (Balaji Royal Events). Do not change the logo file unless replacing an approved asset.'),
         ];
     }
 }

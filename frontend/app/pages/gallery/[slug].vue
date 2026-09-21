@@ -2,10 +2,14 @@
 const route = useRoute()
 const slug = computed(() => String(route.params.slug || ''))
 
-// Start all SSR fetches without blocking layout setup.
-const { data, pending, failed } = useGalleryCategory(slug.value)
+const seo = usePageSeo({ type: 'gallery-category', slug: slug.value })
+const { data, pending, failed } = await useGalleryCategory(slug.value)
 const { data: settings } = useSettings()
-usePageSeo({ type: 'gallery-category', slug: slug.value })
+await seo
+
+if (!data.value && !pending.value && !failed.value) {
+  throw createError({ statusCode: 404, statusMessage: 'Gallery category not found' })
+}
 
 const categoryName = computed(() => data.value?.category?.name || 'Gallery')
 

@@ -55,8 +55,12 @@ const emptyPayload = (): SeoResolvePayload => ({
 /**
  * Applies production SEO from GET /api/seo/resolve.
  * Shared key + dedupe:defer; graceful empty meta on upstream failure.
+ *
+ * Call this (without awaiting yet) before other setup awaits so Nuxt 4
+ * still has instance context for useSeoMeta/useHead/useAsyncData.
+ * Then `await` the returned promise so SSR HTML includes resolved meta.
  */
-export const usePageSeo = (options: UsePageSeoOptions) => {
+export const usePageSeo = async (options: UsePageSeoOptions) => {
   const base = useApiBase()
   const slug = options.slug ? String(options.slug) : ''
   const cacheKey = `seo-resolve:${options.type}:${slug}:${options.path || ''}:${options.title || ''}`
@@ -78,7 +82,7 @@ export const usePageSeo = (options: UsePageSeoOptions) => {
 
   // Register BEFORE fetch — Nuxt 4 loses instance context after async resume.
   useSeoMeta({
-    title: () => meta.value.title || undefined,
+    title: () => meta.value.title || 'Balaji Royal Events',
     description: () => meta.value.description || undefined,
     robots: () => meta.value.robots || undefined,
     ogTitle: () => meta.value.open_graph?.title || meta.value.title || undefined,
@@ -139,7 +143,7 @@ export const usePageSeo = (options: UsePageSeoOptions) => {
     query.description = options.description
   }
 
-  const asyncData = useAsyncData(
+  const asyncData = await useAsyncData(
     cacheKey,
     async () => {
       try {
@@ -158,11 +162,9 @@ export const usePageSeo = (options: UsePageSeoOptions) => {
     }
   )
 
-  watch(asyncData.data, (value) => {
-    if (value) {
-      payload.value = value
-    }
-  }, { immediate: true })
+  if (asyncData.data.value) {
+    payload.value = asyncData.data.value
+  }
 
   return Object.assign(asyncData, {
     meta,

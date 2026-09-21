@@ -33,7 +33,7 @@ class ManageFeaturedBlogsSection extends EditWebsiteSettingPage
         return [
             Placeholder::make('featured_blogs_help')
                 ->label('How this works')
-                ->content('The blog posts shown on the homepage are chosen from your Blog articles. Open Blog → Articles, edit a post, and turn on "Show on Homepage" for each one you want to feature.'),
+                ->content('Latest News on the homepage shows the most recently published Blog posts. Open Blog → Posts to create, edit, and publish articles. Use Homepage Sections to show or hide Latest News.'),
         ];
     }
 

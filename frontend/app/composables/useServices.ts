@@ -1,6 +1,7 @@
 import { computed, ref } from 'vue'
 import type { HomePayload } from '~/types/home'
 import type { Service, ServiceDetailResponse, ServiceListResponse } from '~/types/service'
+import { isNotFoundError } from '~/utils/httpError'
 
 const emptyList: Service[] = []
 
@@ -87,7 +88,10 @@ export const useService = async (slug: MaybeRefOrGetter<string>) => {
         const item = await fetchServiceBySlug(toValue(slug))
         failed.value = false
         return item
-      } catch {
+      } catch (error) {
+        if (isNotFoundError(error)) {
+          return null
+        }
         failed.value = true
         return null
       }

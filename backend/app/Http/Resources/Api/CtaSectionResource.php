@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Api;
 
 use App\Models\CtaSection;
+use App\Support\Brand;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -17,9 +18,9 @@ class CtaSectionResource extends JsonResource
         return [
             'id' => $this->id,
             'key' => $this->key?->value ?? $this->key,
-            'title' => $this->title,
-            'subtitle' => $this->subtitle,
-            'body' => $this->body,
+            'title' => Brand::rewrite($this->title),
+            'subtitle' => Brand::rewrite($this->subtitle),
+            'body' => Brand::rewrite($this->body),
             'button_text' => $this->button_text,
             'button_url' => $this->button_url,
             'secondary_button_text' => $this->secondary_button_text,

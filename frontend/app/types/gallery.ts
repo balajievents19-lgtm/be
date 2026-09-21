@@ -24,6 +24,7 @@ export interface GalleryItem {
   featured: boolean
   homepage_featured: boolean
   sort_order: number
+  download_available?: boolean
   category?: GalleryCategory | null
   seo?: GalleryItemSeo
 }

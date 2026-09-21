@@ -2,9 +2,9 @@
 const { data: settings } = useSettings()
 
 useSeoMeta({
-  title: 'Become a Vendor | Balaji Events',
-  description: 'Partner with Balaji Events as an approved vendor for weddings and celebrations across Rajasthan.',
-  ogTitle: 'Become a Vendor | Balaji Events',
+  title: 'Become a Vendor | Balaji Royal Events',
+  description: 'Partner with Balaji Royal Events as an approved vendor for weddings and celebrations across Rajasthan.',
+  ogTitle: 'Become a Vendor | Balaji Royal Events',
   twitterCard: 'summary_large_image'
 })
 </script>
@@ -20,7 +20,7 @@ useSeoMeta({
       <section class="py-16">
         <UContainer class="mx-auto max-w-[800px] text-center">
           <p class="m-0 text-base leading-7 text-[#555]">
-            Balaji Events works with trusted décor, catering, photography, DJ, and venue partners across Rajasthan.
+            Balaji Royal Events works with trusted décor, catering, photography, DJ, and venue partners across Rajasthan.
             Share your profile and portfolio with our team for admin review before any public listing.
           </p>
           <p class="mt-4 text-sm leading-6 text-[#666]">
