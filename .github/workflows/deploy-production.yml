@@ -67,7 +67,6 @@ jobs:
           key: ${{ secrets.BALAJI_VPS_SSH_KEY }}
           port: ${{ secrets.BALAJI_VPS_PORT }}
           command_timeout: 40m
-          script_stop: true
           script: |
             set -euo pipefail
             cd /var/www/balajiroyalevents/current
