@@ -70,7 +70,6 @@ fi
 [[ -L public/storage ]] || die "public/storage is not a symlink"
 LINK_TARGET="$(readlink -f public/storage)"
 [[ "$LINK_TARGET" == "$(readlink -f storage/app/public)" ]] || die "public/storage does not point at storage/app/public"
-as_app /usr/bin/php artisan cache:clear
 as_app /usr/bin/php artisan optimize
 
 log "Nuxt frontend build (frontend/ only)"

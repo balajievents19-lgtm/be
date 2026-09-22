@@ -1,3 +1,5 @@
+import { absolutizeSeoMediaUrls, toAbsoluteSeoMediaUrl } from '~/utils/publicMediaUrl'
+
 export interface SeoMetaPayload {
   title?: string | null
   description?: string | null
@@ -66,18 +68,33 @@ export const usePageSeo = async (options: UsePageSeoOptions) => {
   const cacheKey = `seo-resolve:${options.type}:${slug}:${options.path || ''}:${options.title || ''}`
   const failed = useState(`seo-resolve-failed-${cacheKey}`, () => false)
   const payload = useState<SeoResolvePayload>(`${cacheKey}:payload`, () => emptyPayload())
+  const requestOrigin = useRequestURL().origin
 
-  const meta = computed(() => payload.value.meta ?? {})
+  const seoOrigin = computed(() => {
+    const canonical = payload.value.meta?.canonical
+    if (typeof canonical === 'string' && /^https?:\/\//i.test(canonical)) {
+      try {
+        return new URL(canonical).origin
+      } catch {
+        return requestOrigin
+      }
+    }
+
+    return requestOrigin
+  })
+
+  const meta = computed(() => absolutizeSeoMediaUrls(payload.value.meta ?? {}, seoOrigin.value))
   const schemas = computed(() => {
     const list = payload.value.schema ?? []
     const omit = new Set(options.omitSchemaTypes ?? [])
-    if (!omit.size) {
-      return list
-    }
-    return list.filter((schema) => {
-      const type = schema['@type']
-      return typeof type !== 'string' || !omit.has(type)
-    })
+    const filtered = omit.size
+      ? list.filter((schema) => {
+          const type = schema['@type']
+          return typeof type !== 'string' || !omit.has(type)
+        })
+      : list
+
+    return absolutizeSeoMediaUrls(filtered, seoOrigin.value)
   })
 
   // Register BEFORE fetch — Nuxt 4 loses instance context after async resume.
@@ -92,7 +109,10 @@ export const usePageSeo = async (options: UsePageSeoOptions) => {
       const type = meta.value.open_graph?.type
       return type === 'article' ? 'article' : 'website'
     },
-    ogImage: () => meta.value.open_graph?.image || meta.value.image || undefined,
+    ogImage: () => {
+      const image = meta.value.open_graph?.image || meta.value.image || undefined
+      return image ? toAbsoluteSeoMediaUrl(image, seoOrigin.value) : undefined
+    },
     ogSiteName: () => meta.value.open_graph?.site_name || undefined,
     twitterCard: () => {
       const card = meta.value.twitter?.card
@@ -102,7 +122,10 @@ export const usePageSeo = async (options: UsePageSeoOptions) => {
     },
     twitterTitle: () => meta.value.twitter?.title || meta.value.title || undefined,
     twitterDescription: () => meta.value.twitter?.description || meta.value.description || undefined,
-    twitterImage: () => meta.value.twitter?.image || meta.value.image || undefined
+    twitterImage: () => {
+      const image = meta.value.twitter?.image || meta.value.image || undefined
+      return image ? toAbsoluteSeoMediaUrl(image, seoOrigin.value) : undefined
+    }
   })
 
   useHead(() => {

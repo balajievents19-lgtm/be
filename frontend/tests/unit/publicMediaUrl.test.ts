@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
-import { rewritePublicStorageUrls, toPublicMediaUrl } from '../../app/utils/publicMediaUrl.ts'
+import { rewritePublicStorageUrls, toAbsoluteSeoMediaUrl, toPublicMediaUrl } from '../../app/utils/publicMediaUrl.ts'
 
 describe('toPublicMediaUrl', () => {
   it('rewrites APP_URL storage links to same-origin paths', () => {
@@ -24,6 +24,25 @@ describe('toPublicMediaUrl', () => {
     assert.equal(
       toPublicMediaUrl('https://www.instagram.com/p/xyz/'),
       'https://www.instagram.com/p/xyz/'
+    )
+  })
+})
+
+describe('toAbsoluteSeoMediaUrl', () => {
+  it('prefixes origin-relative storage paths for OG and JSON-LD', () => {
+    assert.equal(
+      toAbsoluteSeoMediaUrl(
+        '/storage/settings/brand/logo.png',
+        'https://www.balajiroyalevents.com'
+      ),
+      'https://www.balajiroyalevents.com/storage/settings/brand/logo.png'
+    )
+    assert.equal(
+      toAbsoluteSeoMediaUrl(
+        'https://www.balajiroyalevents.com/storage/settings/brand/logo.png',
+        'https://www.balajiroyalevents.com'
+      ),
+      'https://www.balajiroyalevents.com/storage/settings/brand/logo.png'
     )
   })
 })

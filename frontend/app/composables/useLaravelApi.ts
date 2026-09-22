@@ -54,8 +54,16 @@ export const laravelFetch = <T>(
     ...(opts?.headers as Record<string, string> | undefined)
   }
 
+  const skipStorageRewrite = /\/seo(?:\/|\?|$)/.test(String(url))
+
   return $fetch<T>(url, {
     ...opts,
     headers
-  }).then(payload => rewritePublicStorageUrls(payload)) as Promise<T>
+  }).then((payload) => {
+    if (skipStorageRewrite) {
+      return payload
+    }
+
+    return rewritePublicStorageUrls(payload)
+  }) as Promise<T>
 }

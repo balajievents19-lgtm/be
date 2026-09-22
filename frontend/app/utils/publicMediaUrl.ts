@@ -53,3 +53,42 @@ export const rewritePublicStorageUrls = <T>(value: T): T => {
 
   return value
 }
+
+/**
+ * Open Graph / Twitter / JSON-LD image URLs must be absolute.
+ * Page <img> tags stay origin-relative via toPublicMediaUrl.
+ */
+export const toAbsoluteSeoMediaUrl = (value: string, origin: string): string => {
+  const trimmed = value.trim()
+  if (!trimmed) {
+    return value
+  }
+
+  const base = origin.replace(/\/$/, '')
+  if (trimmed.startsWith('/storage/') || trimmed.startsWith('/images/')) {
+    return `${base}${trimmed}`
+  }
+
+  return trimmed
+}
+
+export const absolutizeSeoMediaUrls = <T>(value: T, origin: string): T => {
+  if (typeof value === 'string') {
+    return toAbsoluteSeoMediaUrl(value, origin) as T
+  }
+
+  if (Array.isArray(value)) {
+    return value.map(item => absolutizeSeoMediaUrls(item, origin)) as T
+  }
+
+  if (value && typeof value === 'object') {
+    const out: Record<string, unknown> = {}
+    for (const [key, nested] of Object.entries(value as Record<string, unknown>)) {
+      out[key] = absolutizeSeoMediaUrls(nested, origin)
+    }
+
+    return out as T
+  }
+
+  return value
+}
