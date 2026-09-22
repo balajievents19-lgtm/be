@@ -51,12 +51,12 @@ class MetaBuilder
                 ?: ($this->settings->canonical_url ?: $this->siteUrl)
         );
 
-        $image = $this->firstFilled(
+        $image = $this->absoluteMedia($this->firstFilled(
             $overrides['image'] ?? null,
             $this->settings->imageUrl($this->settings->opengraph_image),
             $this->settings->imageUrl($this->settings->logo),
             null
-        );
+        ));
 
         $robots = $this->firstFilled(
             $overrides['robots'] ?? null,
@@ -102,6 +102,18 @@ class MetaBuilder
         }
 
         return rtrim($this->siteUrl, '/').'/'.ltrim($pathOrUrl, '/');
+    }
+
+    /**
+     * OG / Twitter / JSON-LD images must be absolute. Page <img> tags stay origin-relative.
+     */
+    public function absoluteMedia(mixed $pathOrUrl): ?string
+    {
+        if (! is_string($pathOrUrl) || $pathOrUrl === '') {
+            return null;
+        }
+
+        return $this->absolute($pathOrUrl);
     }
 
     private function firstFilled(mixed ...$values): mixed

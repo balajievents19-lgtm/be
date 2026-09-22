@@ -29,6 +29,7 @@ class SeoApiTest extends TestCase
             'company_name' => 'Balaji Royal Events',
             'company_description' => 'Wedding and event management.',
             'opengraph_image' => 'settings/seo/og.jpg',
+            'logo' => 'settings/brand/logo.png',
         ]);
         config(['seo.site_url' => 'https://frontend.test']);
     }
@@ -52,7 +53,18 @@ class SeoApiTest extends TestCase
             ->assertJsonPath('data.meta.title', 'Balaji Royal Events SEO')
             ->assertJsonPath('data.meta.description', 'SEO description')
             ->assertJsonPath('data.meta.canonical', 'https://frontend.test')
-            ->assertJsonPath('data.meta.open_graph.url', 'https://frontend.test');
+            ->assertJsonPath('data.meta.open_graph.url', 'https://frontend.test')
+            ->assertJsonPath('data.meta.image', 'https://frontend.test/storage/settings/seo/og.jpg')
+            ->assertJsonPath('data.meta.open_graph.image', 'https://frontend.test/storage/settings/seo/og.jpg')
+            ->assertJsonPath('data.meta.twitter.image', 'https://frontend.test/storage/settings/seo/og.jpg');
+
+        $organization = collect($this->getJson('/api/seo')->json('data.schema'))
+            ->firstWhere('@type', 'Organization');
+        $this->assertIsArray($organization);
+        $this->assertSame(
+            'https://frontend.test/storage/settings/brand/logo.png',
+            $organization['logo'] ?? null
+        );
     }
 
     public function test_seo_resolve_home_meta_canonical_og_and_faq_schema(): void

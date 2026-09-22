@@ -34,7 +34,7 @@ class SchemaBuilder
                 ?: Brand::rewrite($this->settings->meta_description),
         ];
 
-        if ($logo = $this->settings->imageUrl($this->settings->logo)) {
+        if ($logo = $this->meta->absoluteMedia($this->settings->imageUrl($this->settings->logo))) {
             $schema['logo'] = $logo;
             $schema['image'] = $logo;
         }
@@ -70,7 +70,7 @@ class SchemaBuilder
                 ?: Brand::rewrite($this->settings->meta_description),
         ];
 
-        if ($logo = $this->settings->imageUrl($this->settings->logo)) {
+        if ($logo = $this->meta->absoluteMedia($this->settings->imageUrl($this->settings->logo))) {
             $schema['image'] = $logo;
             $schema['logo'] = $logo;
         }
@@ -197,7 +197,7 @@ class SchemaBuilder
             ],
             'mainEntityOfPage' => $url,
             'url' => $url,
-            'image' => $image ? $this->imageObject($image, $post->title) : null,
+            'image' => $image ? $this->imageObject((string) $this->meta->absoluteMedia($image), $post->title) : null,
             'keywords' => is_array($post->tags) ? implode(', ', $post->tags) : $post->seo_keywords,
             'wordCount' => str_word_count(strip_tags((string) $post->content)),
             'articleSection' => $post->category?->name,
@@ -264,7 +264,7 @@ class SchemaBuilder
     public function service(Service $service): array
     {
         $url = $this->meta->absolute('/services/'.$service->slug);
-        $image = $service->imageUrl($service->featured_image);
+        $image = $this->meta->absoluteMedia($service->imageUrl($service->featured_image));
 
         return $this->filterNull([
             '@context' => 'https://schema.org',
@@ -288,7 +288,7 @@ class SchemaBuilder
      */
     public function galleryImage(GalleryItem $item): array
     {
-        $url = $item->imageUrl($item->image);
+        $url = $this->meta->absoluteMedia($item->imageUrl($item->image));
         $pageUrl = $this->meta->absolute('/gallery/'.$item->slug);
 
         return $this->filterNull([
@@ -337,7 +337,9 @@ class SchemaBuilder
             'eventAttendanceMode' => 'https://schema.org/OfflineEventAttendanceMode',
             'eventStatus' => 'https://schema.org/EventScheduled',
             'url' => isset($event['url']) ? $this->meta->absolute($event['url']) : $this->siteUrl,
-            'image' => $event['image'] ?? $this->settings->imageUrl($this->settings->opengraph_image),
+            'image' => $this->meta->absoluteMedia(
+                $event['image'] ?? $this->settings->imageUrl($this->settings->opengraph_image)
+            ),
             'location' => $location,
             'organizer' => [
                 '@id' => $this->siteUrl.'/#organization',
