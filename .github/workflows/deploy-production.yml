@@ -67,21 +67,16 @@ jobs:
             ''|*[!0-9]*) echo "BALAJI_VPS_PORT must be a number (got a non-numeric value)"; exit 1 ;;
           esac
 
-          KEY_FILE="${RUNNER_TEMP}/balaji_vps_key"
-          export KEY_FILE
-          python3 -c 'import os, pathlib; t=os.environ["KEY"].replace("\r\n","\n").replace("\r","\n").strip(); t=t.replace("\\n","\n") if "\n" not in t else t; p=pathlib.Path(os.environ["KEY_FILE"]); p.write_text(t+"\n", encoding="utf-8"); p.chmod(0o600)'
-
           echo "host=$host" >> "$GITHUB_OUTPUT"
           echo "username=$user" >> "$GITHUB_OUTPUT"
           echo "port=$port" >> "$GITHUB_OUTPUT"
-          echo "key_path=$KEY_FILE" >> "$GITHUB_OUTPUT"
 
       - name: SSH deploy (Balaji services only)
         uses: appleboy/ssh-action@v1.2.2
         with:
           host: ${{ steps.sshcfg.outputs.host }}
           username: ${{ steps.sshcfg.outputs.username }}
-          key_path: ${{ steps.sshcfg.outputs.key_path }}
+          key: ${{ secrets.BALAJI_VPS_SSH_KEY }}
           passphrase: ${{ secrets.BALAJI_VPS_SSH_PASSPHRASE }}
           port: ${{ steps.sshcfg.outputs.port }}
           protocol: tcp4
