@@ -22,6 +22,12 @@ return [
     ],
 
     /*
+    | Comma-separated Filament allowlist. Cached via config so production
+    | `php artisan optimize` still sees ADMIN_EMAILS (env() is empty then).
+    */
+    'admin_emails' => env('ADMIN_EMAILS', ''),
+
+    /*
     |--------------------------------------------------------------------------
     | Authentication Guards
     |--------------------------------------------------------------------------

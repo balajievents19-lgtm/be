@@ -263,6 +263,7 @@ class UsersSecurityTest extends TestCase
         putenv('ADMIN_EMAILS=admin@balaji.test');
         $_ENV['ADMIN_EMAILS'] = 'admin@balaji.test';
         $_SERVER['ADMIN_EMAILS'] = 'admin@balaji.test';
+        config(['auth.admin_emails' => 'admin@balaji.test']);
 
         $manager = $this->userWithRole(AdminModules::ROLE_LEAD_MANAGER, [
             'email' => 'panel.lead@example.com',
@@ -274,5 +275,6 @@ class UsersSecurityTest extends TestCase
         putenv('ADMIN_EMAILS=');
         $_ENV['ADMIN_EMAILS'] = '';
         $_SERVER['ADMIN_EMAILS'] = '';
+        config(['auth.admin_emails' => '']);
     }
 }

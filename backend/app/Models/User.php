@@ -35,7 +35,7 @@ class User extends Authenticatable implements FilamentUser
 
     public function canAccessPanel(Panel $panel): bool
     {
-        $allowlist = collect(explode(',', (string) env('ADMIN_EMAILS', '')))
+        $allowlist = collect(explode(',', (string) config('auth.admin_emails', '')))
             ->map(fn (string $email): string => strtolower(trim($email)))
             ->filter()
             ->values()

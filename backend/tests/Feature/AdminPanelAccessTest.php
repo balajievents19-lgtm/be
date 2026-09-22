@@ -19,6 +19,7 @@ class AdminPanelAccessTest extends TestCase
         putenv('ADMIN_EMAILS=');
         $_ENV['ADMIN_EMAILS'] = '';
         $_SERVER['ADMIN_EMAILS'] = '';
+        config(['auth.admin_emails' => '']);
 
         parent::tearDown();
     }
@@ -29,6 +30,7 @@ class AdminPanelAccessTest extends TestCase
         putenv('ADMIN_EMAILS=');
         $_ENV['ADMIN_EMAILS'] = '';
         $_SERVER['ADMIN_EMAILS'] = '';
+        config(['auth.admin_emails' => '']);
 
         $user = User::factory()->create(['email' => 'dev@example.com']);
         $panel = Mockery::mock(Panel::class);
@@ -41,6 +43,7 @@ class AdminPanelAccessTest extends TestCase
         putenv('ADMIN_EMAILS=admin@balaji.test,ops@balaji.test');
         $_ENV['ADMIN_EMAILS'] = 'admin@balaji.test,ops@balaji.test';
         $_SERVER['ADMIN_EMAILS'] = 'admin@balaji.test,ops@balaji.test';
+        config(['auth.admin_emails' => 'admin@balaji.test,ops@balaji.test']);
 
         $allowed = User::factory()->create(['email' => 'admin@balaji.test']);
         $denied = User::factory()->create(['email' => 'other@example.com']);
@@ -57,6 +60,7 @@ class AdminPanelAccessTest extends TestCase
         putenv('ADMIN_EMAILS=admin@balaji.test');
         $_ENV['ADMIN_EMAILS'] = 'admin@balaji.test';
         $_SERVER['ADMIN_EMAILS'] = 'admin@balaji.test';
+        config(['auth.admin_emails' => 'admin@balaji.test']);
 
         $manager = User::factory()->create(['email' => 'lead.manager@example.com']);
         $manager->assignRole(AdminModules::ROLE_LEAD_MANAGER);
