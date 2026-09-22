@@ -42,6 +42,7 @@ jobs:
     timeout-minutes: 45
     steps:
       - name: Require SSH secrets
+        id: sshcfg
         env:
           HOST: ${{ secrets.BALAJI_VPS_HOST }}
           USER: ${{ secrets.BALAJI_VPS_USER }}
@@ -59,14 +60,42 @@ jobs:
             exit 1
           fi
 
+          host="$(printf '%s' "$HOST" | tr -d '\r' | awk '{$1=$1;print}')"
+          user="$(printf '%s' "$USER" | tr -d '\r' | awk '{$1=$1;print}')"
+          port="$(printf '%s' "$PORT" | tr -d '\r' | awk '{$1=$1;print}')"
+          case "$port" in
+            ''|*[!0-9]*) echo "BALAJI_VPS_PORT must be a number (got a non-numeric value)"; exit 1 ;;
+          esac
+
+          KEY_FILE="${RUNNER_TEMP}/balaji_vps_key"
+          export KEY_FILE
+          python3 -c 'import os, pathlib
+raw = os.environ["KEY"].replace("\r\n", "\n").replace("\r", "\n").strip()
+if "BEGIN " not in raw and "\\n" in raw:
+    raw = raw.replace("\\n", "\n")
+if "BEGIN " not in raw:
+    raise SystemExit("BALAJI_VPS_SSH_KEY does not look like a private key")
+path = pathlib.Path(os.environ["KEY_FILE"])
+path.write_text(raw + "\n", encoding="utf-8")
+os.chmod(path, 0o600)
+'
+
+          echo "host=$host" >> "$GITHUB_OUTPUT"
+          echo "username=$user" >> "$GITHUB_OUTPUT"
+          echo "port=$port" >> "$GITHUB_OUTPUT"
+          echo "key_path=$KEY_FILE" >> "$GITHUB_OUTPUT"
+
       - name: SSH deploy (Balaji services only)
         uses: appleboy/ssh-action@v1.2.2
         with:
-          host: ${{ secrets.BALAJI_VPS_HOST }}
-          username: ${{ secrets.BALAJI_VPS_USER }}
-          key: ${{ secrets.BALAJI_VPS_SSH_KEY }}
-          port: ${{ secrets.BALAJI_VPS_PORT }}
+          host: ${{ steps.sshcfg.outputs.host }}
+          username: ${{ steps.sshcfg.outputs.username }}
+          key_path: ${{ steps.sshcfg.outputs.key_path }}
+          port: ${{ steps.sshcfg.outputs.port }}
+          protocol: tcp4
+          timeout: 1m
           command_timeout: 40m
+          request_pty: true
           script: |
             set -euo pipefail
             cd /var/www/balajiroyalevents/current
