@@ -1,0 +1,5 @@
+# Allow deploy to restart ONLY Balaji Royal Events services.
+# Install: visudo -c -f deploy/sudoers.balaji-deploy && cp deploy/sudoers.balaji-deploy /etc/sudoers.d/balaji-deploy
+# Do not grant nginx reload or Fageriya/other-site commands here.
+
+deploy ALL=(root) NOPASSWD: /usr/bin/systemctl restart balaji-laravel.service, /usr/bin/systemctl restart balaji-nuxt.service, /usr/bin/systemctl is-active balaji-laravel.service, /usr/bin/systemctl is-active balaji-nuxt.service, /usr/bin/systemctl status balaji-laravel.service, /usr/bin/systemctl status balaji-nuxt.service

@@ -1,0 +1,84 @@
+name: Deploy production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: balaji-production-deploy
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Validate Balaji layout
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Confirm frontend/ + backend/ + deploy script
+        run: |
+          set -euo pipefail
+          test -f frontend/package.json
+          test -f frontend/pnpm-lock.yaml
+          test -f frontend/nuxt.config.ts
+          test -f backend/artisan
+          test -f backend/composer.json
+          test -f deploy/deploy.sh
+          test -f deploy/sudoers.balaji-deploy
+          grep -q 'balaji-laravel.service' deploy/deploy.sh
+          grep -q 'balaji-nuxt.service' deploy/deploy.sh
+          grep -q 'fageriya-frontend' deploy/deploy.sh
+          grep -q '3001' deploy/deploy.sh
+          ! grep -q 'migrate:fresh' deploy/deploy.sh
+          ! grep -q 'db:wipe' deploy/deploy.sh
+
+  deploy:
+    name: Deploy Balaji VPS
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Require SSH secrets
+        env:
+          HOST: ${{ secrets.BALAJI_VPS_HOST }}
+          USER: ${{ secrets.BALAJI_VPS_USER }}
+          KEY: ${{ secrets.BALAJI_VPS_SSH_KEY }}
+          PORT: ${{ secrets.BALAJI_VPS_PORT }}
+        run: |
+          set -euo pipefail
+          missing=0
+          if [ -z "${HOST}" ]; then echo "Missing GitHub secret: BALAJI_VPS_HOST"; missing=1; fi
+          if [ -z "${USER}" ]; then echo "Missing GitHub secret: BALAJI_VPS_USER"; missing=1; fi
+          if [ -z "${KEY}" ]; then echo "Missing GitHub secret: BALAJI_VPS_SSH_KEY"; missing=1; fi
+          if [ -z "${PORT}" ]; then echo "Missing GitHub secret: BALAJI_VPS_PORT (set to 22 if unsure)"; missing=1; fi
+          if [ "$missing" -ne 0 ]; then
+            echo "Add the secrets under GitHub → Settings → Secrets and variables → Actions, then re-run this workflow."
+            exit 1
+          fi
+
+      - name: SSH deploy (Balaji services only)
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.BALAJI_VPS_HOST }}
+          username: ${{ secrets.BALAJI_VPS_USER }}
+          key: ${{ secrets.BALAJI_VPS_SSH_KEY }}
+          port: ${{ secrets.BALAJI_VPS_PORT }}
+          command_timeout: 40m
+          script_stop: true
+          script: |
+            set -euo pipefail
+            cd /var/www/balajiroyalevents/current
+            if [ "$(id -un)" = "root" ]; then
+              sudo -u deploy -H git fetch origin
+              sudo -u deploy -H git checkout main
+              sudo -u deploy -H git merge --ff-only origin/main
+              bash /var/www/balajiroyalevents/current/deploy/deploy.sh
+            else
+              git fetch origin
+              git checkout main
+              git merge --ff-only origin/main
+              bash /var/www/balajiroyalevents/current/deploy/deploy.sh
+            fi
