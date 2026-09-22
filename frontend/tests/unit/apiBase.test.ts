@@ -47,6 +47,18 @@ describe('resolveApiBase', () => {
       'http://localhost:8000/api'
     )
   })
+
+  it('uses same-origin /api in local dev when the proxy is configured', () => {
+    assert.equal(
+      resolveApiBase({
+        isServer: false,
+        isDev: true,
+        publicBase: '/api',
+        internalBase: 'http://127.0.0.1:8000/api'
+      }),
+      '/api'
+    )
+  })
 })
 
 describe('resolveLaravelWebOrigin', () => {

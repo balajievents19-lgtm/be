@@ -1,3 +1,12 @@
+// Local Laravel origin for `nuxt dev` proxies only (never baked into production client JS).
+const laravelDevOrigin = (process.env.NUXT_DEV_LARAVEL_ORIGIN || 'http://127.0.0.1:8000').replace(/\/$/, '')
+
+const laravelDevProxy = {
+  '/storage': { target: laravelDevOrigin, changeOrigin: true },
+  '/api': { target: laravelDevOrigin, changeOrigin: true },
+  '/sanctum': { target: laravelDevOrigin, changeOrigin: true }
+}
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   modules: [
@@ -17,6 +26,18 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
 
+  // Same-origin /storage, /api, and /sanctum during `nuxt dev` so the browser
+  // never has to load CMS images from a hardcoded 127.0.0.1:8000 origin.
+  vite: {
+    server: {
+      proxy: laravelDevProxy
+    }
+  },
+
+  nitro: {
+    devProxy: laravelDevProxy
+  },
+
   runtimeConfig: {
     // Server-only: Nuxt SSR → Laravel trusted read header (NUXT_SSR_INTERNAL_SECRET).
     // Must match backend SSR_INTERNAL_SECRET. Never put this under `public`.
@@ -26,8 +47,8 @@ export default defineNuxtConfig({
     apiInternalBase: '',
     public: {
       // Browser API prefix. Production always resolves to same-origin /api
-      // (Nginx → Laravel). Local .env.example may set http://localhost:8000/api
-      // for `nuxt dev`. Do not bake 127.0.0.1 into a production client bundle.
+      // (Nginx → Laravel). Local .env.example uses /api via the Nuxt dev proxy.
+      // Do not bake 127.0.0.1 into a production client bundle.
       apiBase: ''
     }
   },
