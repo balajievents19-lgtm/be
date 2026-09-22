@@ -2,8 +2,6 @@
 
 namespace App\Support\Media;
 
-use Illuminate\Support\Facades\Storage;
-
 class ResponsiveImageBuilder
 {
     /**
@@ -20,10 +18,8 @@ class ResponsiveImageBuilder
             ];
         }
 
-        $base = Storage::disk('public')->url($path);
-
         return [
-            'src' => $base,
+            'src' => PublicStorageUrl::make($path),
             'srcset' => null,
             'widths' => $widths,
         ];

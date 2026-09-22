@@ -1,3 +1,6 @@
+import { resolveLaravelWebOrigin } from '~/utils/apiBase'
+import { rewritePublicStorageUrls } from '~/utils/publicMediaUrl'
+
 export interface Customer {
   id: number
   name: string | null
@@ -39,10 +42,7 @@ export interface SocialAccountRow {
 export type AuthModalView = 'login' | 'register' | null
 
 /** Laravel origin without /api — used for Sanctum CSRF cookie. */
-export const useLaravelOrigin = () => {
-  const base = useApiBase()
-  return base.replace(/\/api\/?$/, '')
-}
+export const useLaravelOrigin = () => resolveLaravelWebOrigin(useApiBase())
 
 const ensureCsrfCookie = async () => {
   const origin = useLaravelOrigin()
@@ -82,11 +82,13 @@ export const customerFetch = async <T>(
     headers['X-XSRF-TOKEN'] = xsrf
   }
 
-  return $fetch<T>(`${base}${path.startsWith('/') ? path : `/${path}`}`, {
+  const payload = await $fetch<T>(`${base}${path.startsWith('/') ? path : `/${path}`}`, {
     ...opts,
     credentials: 'include',
     headers
-  }) as Promise<T>
+  })
+
+  return rewritePublicStorageUrls(payload)
 }
 
 export const useCustomerAuth = () => {

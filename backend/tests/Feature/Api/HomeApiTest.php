@@ -83,6 +83,10 @@ class HomeApiTest extends TestCase
         $response->assertJsonPath('data.team_members', []);
         $this->assertLessThanOrEqual(4, count($response->json('data.gallery_categories')));
         $this->assertSame('weddings', $response->json('data.gallery_categories.0.slug'));
+        $this->assertSame(
+            '/storage/services/wedding.jpg',
+            $response->json('data.featured_services.0.featured_image')
+        );
     }
 
     public function test_home_latest_news_uses_published_blog_posts_not_only_featured(): void

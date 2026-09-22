@@ -2,12 +2,18 @@
 
 namespace App\Models\Concerns;
 
-use Illuminate\Support\Facades\Storage;
+use App\Support\Media\PublicStorageUrl;
 
 trait HasPublicStorageUrl
 {
+    /**
+     * Public CMS image URL for the website.
+     *
+     * Same-site storage files are returned as origin-relative /storage/... paths so
+     * they work on IP previews and on the real domain. External URLs are unchanged.
+     */
     public function imageUrl(?string $path): ?string
     {
-        return $path ? Storage::disk('public')->url($path) : null;
+        return PublicStorageUrl::make($path);
     }
 }

@@ -21,10 +21,13 @@ export default defineNuxtConfig({
     // Server-only: Nuxt SSR → Laravel trusted read header (NUXT_SSR_INTERNAL_SECRET).
     // Must match backend SSR_INTERNAL_SECRET. Never put this under `public`.
     ssrInternalSecret: '',
+    // Server-only Laravel origin for SSR (NUXT_API_INTERNAL_BASE).
+    // Production: http://127.0.0.1:8000/api — never expose this to the browser.
+    apiInternalBase: '',
     public: {
-      // Override with NUXT_PUBLIC_API_BASE. Required for production (must not be localhost).
-      // Local .env.example sets http://localhost:8000/api. Empty here so production builds
-      // cannot silently bake a localhost API origin.
+      // Browser API prefix. Production always resolves to same-origin /api
+      // (Nginx → Laravel). Local .env.example may set http://localhost:8000/api
+      // for `nuxt dev`. Do not bake 127.0.0.1 into a production client bundle.
       apiBase: ''
     }
   },

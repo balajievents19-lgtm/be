@@ -86,7 +86,7 @@ const searchLocations = async (term: string) => {
 
   searching.value = true
   try {
-    const response = await $fetch<{ data: GeoSuggestion[] }>(`${base}/geo/search`, {
+    const response = await laravelFetch<{ data: GeoSuggestion[] }>(`${base}/geo/search`, {
       query: { q }
     })
     suggestions.value = response.data ?? []
@@ -121,7 +121,7 @@ const useCurrentLocation = () => {
       const lat = position.coords.latitude
       const lng = position.coords.longitude
       try {
-        const response = await $fetch<{ data: { label: string } }>(`${base}/geo/reverse`, {
+        const response = await laravelFetch<{ data: { label: string } }>(`${base}/geo/reverse`, {
           query: { lat, lng }
         })
         applyLocation(response.data?.label || `${lat.toFixed(5)}, ${lng.toFixed(5)}`)

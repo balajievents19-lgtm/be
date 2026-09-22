@@ -1,12 +1,14 @@
+import { resolveApiBase, resolveLaravelWebOrigin } from '~/utils/apiBase'
+
 /** Laravel web origin (sitemap/robots), not the /api prefix. */
 export const laravelWebOrigin = (): string => {
   const config = useRuntimeConfig()
-  const configured = String(config.public.apiBase || '').replace(/\/$/, '')
-  const fallback = import.meta.dev ? 'http://localhost:8000/api' : ''
-  const apiBase = configured || fallback
-  if (!apiBase) {
-    return ''
-  }
+  const apiBase = resolveApiBase({
+    isServer: true,
+    isDev: import.meta.dev,
+    publicBase: String(config.public.apiBase || ''),
+    internalBase: String(config.apiInternalBase || '')
+  })
 
-  return apiBase.replace(/\/api$/i, '')
+  return resolveLaravelWebOrigin(apiBase)
 }

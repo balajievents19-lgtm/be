@@ -3,6 +3,8 @@
  * Attaches X-SSR-Secret only on the server — never exposed to public runtimeConfig.
  */
 
+import { rewritePublicStorageUrls } from '~/utils/publicMediaUrl'
+
 export const SSR_SECRET_HEADER = 'X-SSR-Secret'
 
 /** Headers for trusted Nuxt → Laravel SSR reads (empty on client / when unset). */
@@ -55,5 +57,5 @@ export const laravelFetch = <T>(
   return $fetch<T>(url, {
     ...opts,
     headers
-  }) as Promise<T>
+  }).then(payload => rewritePublicStorageUrls(payload)) as Promise<T>
 }
