@@ -130,4 +130,21 @@ class GalleryItem extends Model
     {
         return $query->where('homepage_featured', true);
     }
+
+    /** Public card/lightbox path — thumbnail first, never studio leftovers. */
+    public function publicCoverPath(): ?string
+    {
+        foreach ([$this->thumbnail, $this->image] as $path) {
+            if (! is_string($path) || $path === '') {
+                continue;
+            }
+            if (str_contains($path, 'studio/uploads/')) {
+                continue;
+            }
+
+            return $path;
+        }
+
+        return null;
+    }
 }

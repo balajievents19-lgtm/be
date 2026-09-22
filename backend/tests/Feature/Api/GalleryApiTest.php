@@ -57,9 +57,12 @@ class GalleryApiTest extends TestCase
                         'name',
                         'slug',
                         'image_count',
+                        'cover_image',
                     ],
                 ],
-            ]);
+            ])
+            ->assertJsonPath('data.0.image_count', 1)
+            ->assertJsonPath('data.0.cover_image', '/storage/gallery/reception.jpg');
 
         $slug = $this->getJson('/api/gallery/categories')->json('data.0.slug');
 

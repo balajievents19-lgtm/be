@@ -27,14 +27,7 @@ class GalleryCategoryResource extends JsonResource
             'sort_order' => $this->sort_order,
             'image_count' => $this->when(isset($this->items_count), (int) $this->items_count),
             'cover_image' => $cover
-                ? ($cover->imageUrl(
-                    $cover->thumbnail
-                        ?: (is_string($cover->image)
-                            && ! str_starts_with($cover->image, 'gallery/images/')
-                            && ! str_contains($cover->image, 'studio/uploads/')
-                            ? $cover->image
-                            : null)
-                ))
+                ? $cover->imageUrl($cover->publicCoverPath())
                 : null,
         ];
     }
