@@ -90,11 +90,11 @@ ok_laravel=0
 ok_nuxt=0
 for _ in $(seq 1 30); do
     ok_laravel=0
-    if sys is-active --quiet balaji-laravel.service && curl -fsS -o /dev/null "http://127.0.0.1:${LARAVEL_PORT}/up" 2>/dev/null; then
+    if sys is-active balaji-laravel.service >/dev/null && curl -fsS -o /dev/null "http://127.0.0.1:${LARAVEL_PORT}/up" 2>/dev/null; then
       ok_laravel=1
     fi
     ok_nuxt=0
-    if sys is-active --quiet balaji-nuxt.service && curl -fsS -o /dev/null "http://127.0.0.1:${NUXT_PORT}/" 2>/dev/null; then
+    if sys is-active balaji-nuxt.service >/dev/null && curl -fsS -o /dev/null "http://127.0.0.1:${NUXT_PORT}/" 2>/dev/null; then
       ok_nuxt=1
     fi
   if [[ "$ok_laravel" == 1 && "$ok_nuxt" == 1 ]]; then
@@ -103,15 +103,13 @@ for _ in $(seq 1 30); do
   sleep 2
 done
 
-sys is-active --quiet balaji-laravel.service || die "balaji-laravel.service is not active"
-sys is-active --quiet balaji-nuxt.service || die "balaji-nuxt.service is not active"
+sys is-active balaji-laravel.service >/dev/null || die "balaji-laravel.service is not active"
+sys is-active balaji-nuxt.service >/dev/null || die "balaji-nuxt.service is not active"
 [[ "$ok_laravel" == 1 ]] || die "Laravel :${LARAVEL_PORT} health check failed"
 [[ "$ok_nuxt" == 1 ]] || die "Nuxt :${NUXT_PORT} health check failed"
 
 ss -lptn | grep -Fq ":${LARAVEL_PORT}" || die "nothing listening on ${LARAVEL_PORT}"
 ss -lptn | grep -Fq ":${NUXT_PORT}" || die "nothing listening on ${NUXT_PORT}"
-
-nginx -t >/dev/null
 
 API_CODE="$(curl -sS -o /tmp/balaji-api-home.json -w '%{http_code}' -H "Host: ${HOST_HEADER}" "${PUBLIC_HTTP}/api/home")"
 [[ "$API_CODE" == "200" ]] || die "/api/home via Nginx returned ${API_CODE}"
