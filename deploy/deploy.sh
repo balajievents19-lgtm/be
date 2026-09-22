@@ -8,6 +8,7 @@ APP_USER="deploy"
 HOST_HEADER="www.balajiroyalevents.com"
 # Local 127.0.0.1:80 is Fageriya's bind — do not use it for Balaji Nginx checks.
 PUBLIC_HTTP="http://187.127.166.231"
+PUBLIC_HTTPS="https://www.balajiroyalevents.com"
 LARAVEL_PORT="8000"
 NUXT_PORT="3002"
 PROTECTED_PORT="3001"
@@ -116,10 +117,10 @@ HOME_FILE="$(mktemp /tmp/balaji-home.XXXXXX.html)"
 trap 'rm -f "$API_FILE" "$HOME_FILE"' EXIT
 export API_FILE HOME_FILE
 
-API_CODE="$(curl -sS -o "$API_FILE" -w '%{http_code}' -H "Host: ${HOST_HEADER}" "${PUBLIC_HTTP}/api/home")"
+API_CODE="$(curl -sS -o "$API_FILE" -w '%{http_code}' "${PUBLIC_HTTPS}/api/home")"
 [[ "$API_CODE" == "200" ]] || die "/api/home via Nginx returned ${API_CODE}"
 
-HOME_CODE="$(curl -sS -o "$HOME_FILE" -w '%{http_code}' -H "Host: ${HOST_HEADER}" "${PUBLIC_HTTP}/")"
+HOME_CODE="$(curl -sS -o "$HOME_FILE" -w '%{http_code}' "${PUBLIC_HTTPS}/")"
 [[ "$HOME_CODE" == "200" ]] || die "homepage via Nginx returned ${HOME_CODE}"
 
 if grep -Eq 'https?://(127\.0\.0\.1|localhost):8000/storage/' "$HOME_FILE" "$API_FILE"; then
@@ -162,8 +163,8 @@ fail = []
 checked = []
 for path in uniq[:12]:
     req = urllib.request.Request(
-        "http://187.127.166.231" + path,
-        headers={"Host": "www.balajiroyalevents.com"},
+        "https://www.balajiroyalevents.com" + path,
+        headers={},
         method="GET",
     )
     try:
