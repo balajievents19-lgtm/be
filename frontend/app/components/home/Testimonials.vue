@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue'
+import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
 import { Swiper, SwiperSlide } from 'swiper/vue'
-import { A11y, Keyboard, Navigation } from 'swiper/modules'
+import { A11y, Autoplay, Keyboard, Pagination } from 'swiper/modules'
 import type { TestimonialItem } from '~/types/home'
 
 import 'swiper/css'
-import 'swiper/css/navigation'
+import 'swiper/css/pagination'
 
 const props = withDefaults(defineProps<{
   testimonials?: TestimonialItem[]
@@ -21,8 +21,50 @@ const props = withDefaults(defineProps<{
 
 const { submitContact } = usePublicForms()
 
-const modules = [A11y, Keyboard, Navigation]
+const modules = [A11y, Autoplay, Keyboard, Pagination]
+const prefersReducedMotion = ref(false)
 const swiperRef = ref<{ slideNext: () => void, slidePrev: () => void } | null>(null)
+
+let mediaQuery: MediaQueryList | undefined
+
+const updateReducedMotionPreference = () => {
+  prefersReducedMotion.value = mediaQuery?.matches ?? false
+}
+
+onMounted(() => {
+  mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+  updateReducedMotionPreference()
+  mediaQuery.addEventListener('change', updateReducedMotionPreference)
+})
+
+onUnmounted(() => {
+  mediaQuery?.removeEventListener('change', updateReducedMotionPreference)
+})
+
+const testimonialBreakpoints = {
+  768: {
+    slidesPerView: 2,
+    slidesPerGroup: 2,
+    spaceBetween: 20
+  },
+  1024: {
+    slidesPerView: 3,
+    slidesPerGroup: 3,
+    spaceBetween: 24
+  }
+}
+
+const autoplayOptions = computed(() => {
+  if (prefersReducedMotion.value || props.testimonials.length < 2) {
+    return false
+  }
+
+  return {
+    delay: 4500,
+    disableOnInteraction: false,
+    pauseOnMouseEnter: true
+  }
+})
 
 const shareForm = reactive({
   name: '',
@@ -172,49 +214,57 @@ const onShareSubmit = async (event: Event) => {
         <Swiper
           :modules="modules"
           :slides-per-view="1"
-          :speed="600"
-          :auto-height="true"
-          :keyboard="{ enabled: true }"
+          :slides-per-group="1"
+          :space-between="16"
+          :speed="700"
+          :auto-height="false"
+          :watch-overflow="true"
+          :rewind="true"
+          :breakpoints="testimonialBreakpoints"
+          :autoplay="autoplayOptions"
+          :pagination="{ clickable: true }"
+          :keyboard="{ enabled: true, onlyInViewport: true }"
           :a11y="{
             enabled: true,
-            prevSlideMessage: 'Previous testimonial',
-            nextSlideMessage: 'Next testimonial'
+            prevSlideMessage: 'Previous testimonials',
+            nextSlideMessage: 'Next testimonials'
           }"
-          class="w-full min-[768px]:px-10"
+          class="testimonials-swiper w-full min-[768px]:px-10"
           @swiper="onSwiper"
         >
           <SwiperSlide
             v-for="item in testimonials"
             :key="item.id"
+            class="!h-auto"
           >
-            <div
-              class="friends-info grid grid-cols-1 items-start justify-items-center gap-4 pb-2 min-[768px]:grid-cols-[minmax(0,278px)_minmax(0,1fr)] min-[768px]:justify-items-stretch min-[768px]:gap-x-8 min-[768px]:gap-y-0 min-[768px]:pb-4"
+            <article
+              class="friends-info flex h-full min-h-full flex-col items-center px-1 pb-10 text-center"
             >
-              <div class="friend-img relative w-full max-w-[278px] text-center">
-                <div class="relative mx-auto w-full max-w-[278px]">
+              <div class="friend-img relative w-full max-w-[168px]">
+                <div class="relative mx-auto w-full max-w-[168px]">
                   <img
                     src="/images/img-fream.png"
                     alt=""
-                    width="278"
-                    height="278"
-                    class="pointer-events-none relative z-[1] mx-auto block h-auto w-full max-w-[278px]"
+                    width="168"
+                    height="168"
+                    class="pointer-events-none relative z-[1] mx-auto block h-auto w-full max-w-[168px]"
                     loading="lazy"
                     decoding="async"
                     aria-hidden="true"
                   >
                   <img
-                    v-if="item.avatar"
-                    :src="item.avatar"
+                    v-if="item.avatar || item.image"
+                    :src="item.avatar || item.image || undefined"
                     :alt="item.name"
-                    width="178"
-                    height="178"
-                    class="absolute top-1/2 left-1/2 z-0 h-[64%] w-[64%] max-h-[178px] max-w-[178px] -translate-x-1/2 -translate-y-1/2 rounded-full object-cover"
+                    width="108"
+                    height="108"
+                    class="absolute top-1/2 left-1/2 z-0 h-[64%] w-[64%] max-h-[108px] max-w-[108px] -translate-x-1/2 -translate-y-1/2 rounded-full object-cover"
                     loading="lazy"
                     decoding="async"
                   >
                 </div>
                 <div
-                  class="name px-2 pt-3 text-center font-['Domine',Georgia,'Times_New_Roman',serif] text-base leading-6 text-white min-[768px]:pt-2 min-[768px]:text-lg min-[768px]:leading-[26px]"
+                  class="name px-2 pt-3 text-center font-['Domine',Georgia,'Times_New_Roman',serif] text-base leading-6 text-white min-[768px]:text-lg min-[768px]:leading-[26px]"
                 >
                   {{ item.name }}
                 </div>
@@ -227,42 +277,42 @@ const onShareSubmit = async (event: Event) => {
                 </p>
               </div>
 
-              <div class="text w-full max-w-full px-1 min-[768px]:px-0 min-[768px]:pt-10 min-[992px]:pt-[68px]">
+              <div class="text mt-4 flex w-full min-h-[168px] flex-1 flex-col justify-start px-1">
                 <p
-                  class="m-0 max-w-full text-center font-['Domine',Georgia,'Times_New_Roman',serif] text-[15px] leading-7 break-words text-white min-[768px]:text-lg min-[768px]:leading-8 min-[992px]:text-xl min-[992px]:leading-[42px]"
+                  class="m-0 max-w-full text-center font-['Domine',Georgia,'Times_New_Roman',serif] text-[15px] leading-7 break-words text-white min-[768px]:text-base min-[768px]:leading-7"
                 >
                   <img
                     src="/images/starting-point.png"
                     alt=""
                     width="24"
                     height="24"
-                    class="start-img mr-0 inline-block h-[18px] w-auto pr-2 align-middle min-[768px]:h-6 min-[768px]:pr-2.5"
+                    class="start-img mr-0 inline-block h-[18px] w-auto pr-2 align-middle"
                     loading="lazy"
                     decoding="async"
                     aria-hidden="true"
                   >
-                  {{ item.quote }}
+                  {{ item.quote || item.body }}
                   <img
                     src="/images/ending-point.png"
                     alt=""
                     width="24"
                     height="24"
-                    class="end-img ml-0 inline-block h-[18px] w-auto pl-2 align-middle min-[768px]:h-6 min-[768px]:pl-2.5"
+                    class="end-img ml-0 inline-block h-[18px] w-auto pl-2 align-middle"
                     loading="lazy"
                     decoding="async"
                     aria-hidden="true"
                   >
                 </p>
               </div>
-            </div>
+            </article>
           </SwiperSlide>
         </Swiper>
 
-        <div class="mt-6 flex items-center justify-center gap-10 min-[768px]:pointer-events-none min-[768px]:absolute min-[768px]:inset-y-0 min-[768px]:mt-0 min-[768px]:block min-[768px]:w-full">
+        <div class="mt-2 flex items-center justify-center gap-10 min-[768px]:pointer-events-none min-[768px]:absolute min-[768px]:inset-y-0 min-[768px]:mt-0 min-[768px]:block min-[768px]:w-full">
           <button
             type="button"
-            class="z-[9] inline-flex h-10 w-10 items-center justify-center rounded-full text-white transition-colors hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white min-[768px]:pointer-events-auto min-[768px]:absolute min-[768px]:top-1/2 min-[768px]:left-0 min-[768px]:h-[27px] min-[768px]:w-[27px] min-[768px]:-translate-y-1/2"
-            aria-label="Previous testimonial"
+            class="z-[9] inline-flex h-10 w-10 items-center justify-center rounded-full text-white transition-colors hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white min-[768px]:pointer-events-auto min-[768px]:absolute min-[768px]:top-[42%] min-[768px]:left-0 min-[768px]:h-[27px] min-[768px]:w-[27px] min-[768px]:-translate-y-1/2"
+            aria-label="Previous testimonials"
             @click="goPrev"
           >
             <span
@@ -273,8 +323,8 @@ const onShareSubmit = async (event: Event) => {
 
           <button
             type="button"
-            class="z-[9] inline-flex h-10 w-10 items-center justify-center rounded-full text-white transition-colors hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white min-[768px]:pointer-events-auto min-[768px]:absolute min-[768px]:top-1/2 min-[768px]:right-0 min-[768px]:h-[27px] min-[768px]:w-[27px] min-[768px]:-translate-y-1/2"
-            aria-label="Next testimonial"
+            class="z-[9] inline-flex h-10 w-10 items-center justify-center rounded-full text-white transition-colors hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white min-[768px]:pointer-events-auto min-[768px]:absolute min-[768px]:top-[42%] min-[768px]:right-0 min-[768px]:h-[27px] min-[768px]:w-[27px] min-[768px]:-translate-y-1/2"
+            aria-label="Next testimonials"
             @click="goNext"
           >
             <span
@@ -490,3 +540,34 @@ const onShareSubmit = async (event: Event) => {
     </UContainer>
   </section>
 </template>
+
+<style scoped>
+.testimonials-swiper {
+  padding-bottom: 2.75rem;
+}
+
+.testimonials-swiper :deep(.swiper-wrapper) {
+  align-items: stretch;
+}
+
+.testimonials-swiper :deep(.swiper-slide) {
+  display: flex;
+  height: auto;
+}
+
+.testimonials-swiper :deep(.swiper-pagination) {
+  bottom: 0;
+}
+
+.testimonials-swiper :deep(.swiper-pagination-bullet) {
+  width: 9px;
+  height: 9px;
+  background: #ffffff;
+  opacity: 0.4;
+}
+
+.testimonials-swiper :deep(.swiper-pagination-bullet-active) {
+  opacity: 1;
+  background: #ffffff;
+}
+</style>
