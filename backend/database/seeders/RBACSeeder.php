@@ -13,21 +13,43 @@ class RBACSeeder extends Seeder
 {
     public function run(): void
     {
-        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+        $registrar = app()[PermissionRegistrar::class];
+        $registrar->forgetCachedPermissions();
 
-        foreach (AdminModules::allPermissions() as $permission) {
-            Permission::findOrCreate($permission, AdminModules::GUARD);
+        $permissionsByName = [];
+
+        foreach (AdminModules::allPermissions() as $name) {
+            $permissionsByName[$name] = Permission::query()->firstOrCreate(
+                [
+                    'name' => $name,
+                    'guard_name' => AdminModules::GUARD,
+                ]
+            );
         }
 
-        $superAdmin = Role::findOrCreate(AdminModules::ROLE_SUPER_ADMIN, AdminModules::GUARD);
-        $contentManager = Role::findOrCreate(AdminModules::ROLE_CONTENT_MANAGER, AdminModules::GUARD);
-        $leadManager = Role::findOrCreate(AdminModules::ROLE_LEAD_MANAGER, AdminModules::GUARD);
-        $newsletterManager = Role::findOrCreate(AdminModules::ROLE_NEWSLETTER_MANAGER, AdminModules::GUARD);
+        $superAdmin = $this->role(AdminModules::ROLE_SUPER_ADMIN);
+        $contentManager = $this->role(AdminModules::ROLE_CONTENT_MANAGER);
+        $leadManager = $this->role(AdminModules::ROLE_LEAD_MANAGER);
+        $newsletterManager = $this->role(AdminModules::ROLE_NEWSLETTER_MANAGER);
 
-        $superAdmin->syncPermissions(AdminModules::allPermissions());
-        $contentManager->syncPermissions(AdminModules::websitePermissions());
-        $leadManager->syncPermissions(AdminModules::leadManagerPermissions());
-        $newsletterManager->syncPermissions(AdminModules::newsletterManagerPermissions());
+        // DatabaseSeeder uses WithoutModelEvents, so Spatie's saved/deleted cache
+        // listeners never run. Reload after writes so syncPermissions does not
+        // look up names against a snapshot taken before these rows existed.
+        $registrar->forgetCachedPermissions();
+
+        $superAdmin->syncPermissions(array_values($permissionsByName));
+        $contentManager->syncPermissions($this->resolvePermissions(
+            AdminModules::websitePermissions(),
+            $permissionsByName
+        ));
+        $leadManager->syncPermissions($this->resolvePermissions(
+            AdminModules::leadManagerPermissions(),
+            $permissionsByName
+        ));
+        $newsletterManager->syncPermissions($this->resolvePermissions(
+            AdminModules::newsletterManagerPermissions(),
+            $permissionsByName
+        ));
 
         $admin = User::query()->where('email', 'admin@balajievents.test')->first();
 
@@ -43,5 +65,28 @@ class RBACSeeder extends Seeder
         }
 
         $this->command?->info('RBACSeeder: permissions/roles synced; Super Admin assigned to admin@balajievents.test.');
+    }
+
+    private function role(string $name): Role
+    {
+        return Role::query()->firstOrCreate(
+            [
+                'name' => $name,
+                'guard_name' => AdminModules::GUARD,
+            ]
+        );
+    }
+
+    /**
+     * @param  list<string>  $names
+     * @param  array<string, Permission>  $permissionsByName
+     * @return list<Permission>
+     */
+    private function resolvePermissions(array $names, array $permissionsByName): array
+    {
+        return array_values(array_map(
+            fn (string $name): Permission => $permissionsByName[$name],
+            $names
+        ));
     }
 }
