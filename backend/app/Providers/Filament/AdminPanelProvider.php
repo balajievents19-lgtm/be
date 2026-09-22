@@ -4,6 +4,8 @@ namespace App\Providers\Filament;
 
 use App\Filament\Pages\Dashboard;
 use App\Http\Middleware\DenyCustomerAdminAccess;
+use App\Models\Setting;
+use App\Support\Media\PublicStorageUrl;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -30,6 +32,17 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->brandName(\App\Support\Brand::NAME)
+            ->favicon(function (): ?string {
+                try {
+                    $path = Setting::query()->value('favicon');
+                } catch (\Throwable) {
+                    return null;
+                }
+
+                return is_string($path) && $path !== ''
+                    ? PublicStorageUrl::make($path)
+                    : null;
+            })
             ->colors([
                 'primary' => Color::hex('#f15b22'),
             ])
