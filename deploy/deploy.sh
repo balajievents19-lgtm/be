@@ -79,7 +79,7 @@ export NUXT_API_INTERNAL_BASE="http://127.0.0.1:${LARAVEL_PORT}/api"
 as_app env NUXT_PUBLIC_API_BASE="/api" NUXT_API_INTERNAL_BASE="http://127.0.0.1:${LARAVEL_PORT}/api" \
   /usr/local/bin/pnpm install --frozen-lockfile
 as_app env NUXT_PUBLIC_API_BASE="/api" NUXT_API_INTERNAL_BASE="http://127.0.0.1:${LARAVEL_PORT}/api" \
-  /usr/local/bin/pnpm build
+  /usr/local/bin/pnpm build > /tmp/balaji-frontend-build.log 2>&1 || { tail -n 80 /tmp/balaji-frontend-build.log >&2; die "frontend pnpm build failed"; }
 [[ -f .output/server/index.mjs ]] || die "frontend/.output/server/index.mjs missing after build"
 
 log "Restart ONLY Balaji services"
@@ -90,11 +90,11 @@ ok_laravel=0
 ok_nuxt=0
 for _ in $(seq 1 30); do
     ok_laravel=0
-    if sys is-active balaji-laravel.service >/dev/null && curl -fsS -o /dev/null "http://127.0.0.1:${LARAVEL_PORT}/up" 2>/dev/null; then
+    if sys is-active balaji-laravel.service >/dev/null && curl -fsS --max-time 10 -o /dev/null "http://127.0.0.1:${LARAVEL_PORT}/up" >/dev/null 2>&1; then
       ok_laravel=1
     fi
     ok_nuxt=0
-    if sys is-active balaji-nuxt.service >/dev/null && curl -fsS -o /dev/null "http://127.0.0.1:${NUXT_PORT}/" 2>/dev/null; then
+    if sys is-active balaji-nuxt.service >/dev/null && curl -fsS --max-time 15 -o /dev/null "http://127.0.0.1:${NUXT_PORT}/" >/dev/null 2>&1; then
       ok_nuxt=1
     fi
   if [[ "$ok_laravel" == 1 && "$ok_nuxt" == 1 ]]; then

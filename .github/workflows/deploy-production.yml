@@ -82,7 +82,7 @@ jobs:
           protocol: tcp4
           timeout: 1m
           command_timeout: 40m
-          request_pty: true
+          request_pty: false
           script: |
             set -euo pipefail
             cd /var/www/balajiroyalevents/current
