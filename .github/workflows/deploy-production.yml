@@ -82,6 +82,7 @@ jobs:
           host: ${{ steps.sshcfg.outputs.host }}
           username: ${{ steps.sshcfg.outputs.username }}
           key_path: ${{ steps.sshcfg.outputs.key_path }}
+          passphrase: ${{ secrets.BALAJI_VPS_SSH_PASSPHRASE }}
           port: ${{ steps.sshcfg.outputs.port }}
           protocol: tcp4
           timeout: 1m
