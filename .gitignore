@@ -84,3 +84,8 @@ frontend/test-results/
 frontend/playwright-report/
 frontend/blob-report/
 frontend/playwright/.cache/
+
+# Root development dependencies / generated files
+/node_modules/
+/.nuxt/
+/.output/
