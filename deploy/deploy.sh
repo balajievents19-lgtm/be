@@ -6,6 +6,8 @@ set -euo pipefail
 APP_ROOT="/var/www/balajiroyalevents/current"
 APP_USER="deploy"
 HOST_HEADER="www.balajiroyalevents.com"
+# Local 127.0.0.1:80 is Fageriya's bind — do not use it for Balaji Nginx checks.
+PUBLIC_HTTP="http://187.127.166.231"
 LARAVEL_PORT="8000"
 NUXT_PORT="3002"
 PROTECTED_PORT="3001"
@@ -87,12 +89,14 @@ sys restart balaji-nuxt.service
 ok_laravel=0
 ok_nuxt=0
 for _ in $(seq 1 30); do
-  if sys is-active --quiet balaji-laravel.service && curl -fsS -o /dev/null "http://127.0.0.1:${LARAVEL_PORT}/up"; then
-    ok_laravel=1
-  fi
-  if sys is-active --quiet balaji-nuxt.service && curl -fsS -o /dev/null "http://127.0.0.1:${NUXT_PORT}/"; then
-    ok_nuxt=1
-  fi
+    ok_laravel=0
+    if sys is-active --quiet balaji-laravel.service && curl -fsS -o /dev/null "http://127.0.0.1:${LARAVEL_PORT}/up" 2>/dev/null; then
+      ok_laravel=1
+    fi
+    ok_nuxt=0
+    if sys is-active --quiet balaji-nuxt.service && curl -fsS -o /dev/null "http://127.0.0.1:${NUXT_PORT}/" 2>/dev/null; then
+      ok_nuxt=1
+    fi
   if [[ "$ok_laravel" == 1 && "$ok_nuxt" == 1 ]]; then
     break
   fi
@@ -109,10 +113,10 @@ ss -lptn | grep -Fq ":${NUXT_PORT}" || die "nothing listening on ${NUXT_PORT}"
 
 nginx -t >/dev/null
 
-API_CODE="$(curl -sS -o /tmp/balaji-api-home.json -w '%{http_code}' -H "Host: ${HOST_HEADER}" "http://127.0.0.1/api/home")"
+API_CODE="$(curl -sS -o /tmp/balaji-api-home.json -w '%{http_code}' -H "Host: ${HOST_HEADER}" "${PUBLIC_HTTP}/api/home")"
 [[ "$API_CODE" == "200" ]] || die "/api/home via Nginx returned ${API_CODE}"
 
-HOME_CODE="$(curl -sS -o /tmp/balaji-home.html -w '%{http_code}' -H "Host: ${HOST_HEADER}" "http://127.0.0.1/")"
+HOME_CODE="$(curl -sS -o /tmp/balaji-home.html -w '%{http_code}' -H "Host: ${HOST_HEADER}" "${PUBLIC_HTTP}/")"
 [[ "$HOME_CODE" == "200" ]] || die "homepage via Nginx returned ${HOME_CODE}"
 
 if grep -Eq 'https?://(127\.0\.0\.1|localhost):8000/storage/' /tmp/balaji-home.html /tmp/balaji-api-home.json; then
@@ -155,7 +159,7 @@ fail = []
 checked = []
 for path in uniq[:12]:
     req = urllib.request.Request(
-        "http://127.0.0.1" + path,
+        "http://187.127.166.231" + path,
         headers={"Host": "www.balajiroyalevents.com"},
         method="GET",
     )
