@@ -111,22 +111,27 @@ sys is-active balaji-nuxt.service >/dev/null || die "balaji-nuxt.service is not 
 ss -lptn | grep -Fq ":${LARAVEL_PORT}" || die "nothing listening on ${LARAVEL_PORT}"
 ss -lptn | grep -Fq ":${NUXT_PORT}" || die "nothing listening on ${NUXT_PORT}"
 
-API_CODE="$(curl -sS -o /tmp/balaji-api-home.json -w '%{http_code}' -H "Host: ${HOST_HEADER}" "${PUBLIC_HTTP}/api/home")"
+API_FILE="$(mktemp /tmp/balaji-api-home.XXXXXX.json)"
+HOME_FILE="$(mktemp /tmp/balaji-home.XXXXXX.html)"
+trap 'rm -f "$API_FILE" "$HOME_FILE"' EXIT
+export API_FILE HOME_FILE
+
+API_CODE="$(curl -sS -o "$API_FILE" -w '%{http_code}' -H "Host: ${HOST_HEADER}" "${PUBLIC_HTTP}/api/home")"
 [[ "$API_CODE" == "200" ]] || die "/api/home via Nginx returned ${API_CODE}"
 
-HOME_CODE="$(curl -sS -o /tmp/balaji-home.html -w '%{http_code}' -H "Host: ${HOST_HEADER}" "${PUBLIC_HTTP}/")"
+HOME_CODE="$(curl -sS -o "$HOME_FILE" -w '%{http_code}' -H "Host: ${HOST_HEADER}" "${PUBLIC_HTTP}/")"
 [[ "$HOME_CODE" == "200" ]] || die "homepage via Nginx returned ${HOME_CODE}"
 
-if grep -Eq 'https?://(127\.0\.0\.1|localhost):8000/storage/' /tmp/balaji-home.html /tmp/balaji-api-home.json; then
+if grep -Eq 'https?://(127\.0\.0\.1|localhost):8000/storage/' "$HOME_FILE" "$API_FILE"; then
   die "production HTML/API still points CMS images at loopback :8000"
 fi
 
 python3 - <<'PY'
-import json, re, sys, urllib.request
+import json, os, re, sys, urllib.request
 from pathlib import Path
 
-html = Path("/tmp/balaji-home.html").read_text(encoding="utf-8", errors="ignore")
-api = Path("/tmp/balaji-api-home.json").read_text(encoding="utf-8", errors="ignore")
+html = Path(os.environ["HOME_FILE"]).read_text(encoding="utf-8", errors="ignore")
+api = Path(os.environ["API_FILE"]).read_text(encoding="utf-8", errors="ignore")
 blob = html + "\n" + api.replace("\\/", "/")
 
 if "http://127.0.0.1:8000/storage/" in blob or "http://localhost:8000/storage/" in blob:
