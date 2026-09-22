@@ -69,7 +69,7 @@ jobs:
 
           KEY_FILE="${RUNNER_TEMP}/balaji_vps_key"
           export KEY_FILE
-          python3 -c 'import os, pathlib; raw = os.environ["KEY"].replace("\r\n", "\n").replace("\r", "\n").strip(); raw = raw.replace("\\n", "\n") if ("BEGIN " not in raw and "\\n" in raw) else raw; raise SystemExit("BALAJI_VPS_SSH_KEY does not look like a private key") if "BEGIN " not in raw else None; path = pathlib.Path(os.environ["KEY_FILE"]); path.write_text(raw + "\n", encoding="utf-8"); os.chmod(path, 0o600)'
+          python3 -c 'import os, pathlib; t=os.environ["KEY"].replace("\r\n","\n").replace("\r","\n").strip(); t=t.replace("\\n","\n") if "\n" not in t else t; p=pathlib.Path(os.environ["KEY_FILE"]); p.write_text(t+"\n", encoding="utf-8"); p.chmod(0o600)'
 
           echo "host=$host" >> "$GITHUB_OUTPUT"
           echo "username=$user" >> "$GITHUB_OUTPUT"
