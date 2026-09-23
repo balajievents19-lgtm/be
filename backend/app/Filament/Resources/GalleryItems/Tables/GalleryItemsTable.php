@@ -2,13 +2,14 @@
 
 namespace App\Filament\Resources\GalleryItems\Tables;
 
+use App\Enums\GalleryMediaType;
+use App\Filament\Tables\Columns\AdminPreviewImageColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
@@ -21,7 +22,7 @@ class GalleryItemsTable
     {
         return $table
             ->columns([
-                ImageColumn::make('image')
+                AdminPreviewImageColumn::make('image')
                     ->label('Preview')
                     ->disk('public')
                     ->height(48)
@@ -30,10 +31,10 @@ class GalleryItemsTable
                 TextColumn::make('media_type')
                     ->label('Type')
                     ->badge()
-                    ->formatStateUsing(fn ($state): string => $state instanceof \App\Enums\GalleryMediaType
+                    ->formatStateUsing(fn ($state): string => $state instanceof GalleryMediaType
                         ? $state->label()
                         : (string) $state)
-                    ->color(fn ($state): string => ($state instanceof \App\Enums\GalleryMediaType
+                    ->color(fn ($state): string => ($state instanceof GalleryMediaType
                         ? $state->value
                         : (string) $state) === 'video' ? 'warning' : 'gray'),
                 TextColumn::make('title')
@@ -83,7 +84,7 @@ class GalleryItemsTable
             ->filters([
                 SelectFilter::make('media_type')
                     ->label('Media Type')
-                    ->options(\App\Enums\GalleryMediaType::options()),
+                    ->options(GalleryMediaType::options()),
                 SelectFilter::make('gallery_category_id')
                     ->label('Gallery Category')
                     ->relationship('category', 'name')

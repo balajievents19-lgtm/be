@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\HeroSlides\Tables;
 
+use App\Filament\Tables\Columns\AdminPreviewImageColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
@@ -17,7 +17,7 @@ class HeroSlidesTable
     {
         return $table
             ->columns([
-                ImageColumn::make('desktop_image')
+                AdminPreviewImageColumn::make('desktop_image')
                     ->label('Desktop')
                     ->disk('public')
                     ->height(48)

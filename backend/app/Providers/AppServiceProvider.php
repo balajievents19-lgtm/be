@@ -29,9 +29,14 @@ use App\Models\User;
 use App\Observers\ContentCacheObserver;
 use App\Observers\GalleryOriginalObserver;
 use App\Repositories\EloquentNavigationRepository;
+use App\Services\Customer\EmailVerificationService;
 use App\Services\Seo\SeoService;
+use App\Support\Media\AdminPreviewMedia;
 use App\Support\Rbac\AdminModules;
 use App\Support\Rbac\AdminUserSecurity;
+use App\Support\SsrInternalAuth;
+use Filament\Forms\Components\BaseFileUpload;
+use Filament\Forms\Components\FileUpload;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -48,7 +53,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(SeoService::class);
         $this->app->bind(NavigationRepository::class, EloquentNavigationRepository::class);
-        $this->app->singleton(\App\Services\Customer\EmailVerificationService::class);
+        $this->app->singleton(EmailVerificationService::class);
     }
 
     /**
@@ -61,6 +66,12 @@ class AppServiceProvider extends ServiceProvider
         config([
             'livewire.temporary_file_upload.disk' => 'local',
         ]);
+
+        FileUpload::configureUsing(function (FileUpload $component): void {
+            $component->getUploadedFileUsing(function (BaseFileUpload $component, string $file, string|array|null $storedFileNames): ?array {
+                return AdminPreviewMedia::uploadedFilePayload($component, $file, $storedFileNames);
+            });
+        });
         // API customer routes must return 401 JSON, not redirect to a missing web "login" route.
         Authenticate::redirectUsing(function (Request $request): ?string {
             if ($request->is('api/*') || $request->expectsJson()) {
@@ -102,7 +113,7 @@ class AppServiceProvider extends ServiceProvider
         // POST contact/newsletter keep their own throttles below; they never
         // receive the SSR read exemption (isMethodSafe() required).
         RateLimiter::for('api', function (Request $request) {
-            if (\App\Support\SsrInternalAuth::isTrustedRead($request)) {
+            if (SsrInternalAuth::isTrustedRead($request)) {
                 $perMinute = max(1, (int) config('ssr.rate_limit_per_minute', 300));
 
                 return Limit::perMinute($perMinute)->by('ssr:'.$request->ip());

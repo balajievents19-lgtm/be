@@ -2,13 +2,13 @@
 
 namespace App\Filament\Resources\Services\Tables;
 
+use App\Filament\Tables\Columns\AdminPreviewImageColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Filters\TrashedFilter;
@@ -20,7 +20,7 @@ class ServicesTable
     {
         return $table
             ->columns([
-                ImageColumn::make('featured_image')
+                AdminPreviewImageColumn::make('featured_image')
                     ->label('Image')
                     ->disk('public')
                     ->height(48)

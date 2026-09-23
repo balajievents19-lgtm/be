@@ -2,13 +2,13 @@
 
 namespace App\Filament\Resources\ExternalMedia\Tables;
 
+use App\Filament\Tables\Columns\AdminPreviewImageColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
@@ -21,7 +21,7 @@ class ExternalMediaTable
     {
         return $table
             ->columns([
-                ImageColumn::make('thumbnail')
+                AdminPreviewImageColumn::make('thumbnail')
                     ->label('Thumb')
                     ->disk('public')
                     ->height(40)

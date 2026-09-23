@@ -2,13 +2,13 @@
 
 namespace App\Filament\Resources\EventOverviews\Tables;
 
+use App\Filament\Tables\Columns\AdminPreviewImageColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Filters\TrashedFilter;
@@ -20,7 +20,7 @@ class EventOverviewsTable
     {
         return $table
             ->columns([
-                ImageColumn::make('image')
+                AdminPreviewImageColumn::make('image')
                     ->disk('public')
                     ->height(48)
                     ->square(),
