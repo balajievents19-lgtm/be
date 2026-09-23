@@ -57,6 +57,8 @@ export default defineNuxtConfig({
   // cannot bake "temporarily unavailable" / empty sections into static HTML.
   routeRules: {
     '/': { prerender: false },
+    // Production Nginx sends unknown paths to Nuxt. Proxy display images to Laravel.
+    '/protected-media/**': { proxy: 'http://127.0.0.1:8000/protected-media/**' },
     '/**': {
       headers: {
         'X-Content-Type-Options': 'nosniff',

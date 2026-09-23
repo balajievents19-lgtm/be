@@ -62,6 +62,7 @@ fi
 log "Laravel composer + migrate + caches"
 cd "$APP_ROOT/backend"
 as_app /usr/bin/composer install --no-dev --optimize-autoloader --no-interaction
+as_app /usr/bin/php artisan optimize:clear
 as_app /usr/bin/php artisan migrate --force
 # Image protection: do not expose storage/app/public through a web symlink.
 # Laravel serves display images at /protected-media and gates /storage for admin.
@@ -128,7 +129,7 @@ if grep -Eq 'https?://(127\.0\.0\.1|localhost):8000/storage/' "$HOME_FILE" "$API
 fi
 
 python3 - <<'PY'
-import json, os, re, sys, urllib.request
+import os, re, sys, urllib.error, urllib.request
 from pathlib import Path
 
 html = Path(os.environ["HOME_FILE"]).read_text(encoding="utf-8", errors="ignore")
@@ -139,22 +140,18 @@ if "http://127.0.0.1:8000/storage/" in blob or "http://localhost:8000/storage/" 
     print("loopback storage URLs found", file=sys.stderr)
     sys.exit(1)
 
-paths = re.findall(r"/storage/[A-Za-z0-9_./-]+", blob)
-# Prefer real CMS images over query-string noise
+if "/storage/" in blob:
+    print("public payload still exposes /storage/ originals", file=sys.stderr)
+    sys.exit(1)
+
+paths = re.findall(r"/protected-media/[A-Za-z0-9._~-]+", blob)
 uniq = []
 for p in paths:
     if p not in uniq:
         uniq.append(p)
 
-required_needles = {
-    "hero": ("hero-slides",),
-    "logo": ("settings/brand",),
-    "gallery_cover": ("gallery/thumbnails", "gallery/previews"),
-    "service": ("services/",),
-}
-missing = [name for name, parts in required_needles.items() if not any(any(part in p for part in parts) for p in uniq)]
-if missing:
-    print("missing expected image kinds in payload:", ",".join(missing), file=sys.stderr)
+if len(uniq) < 4:
+    print("expected protected-media URLs in homepage payload", file=sys.stderr)
     print("found:", " ".join(uniq[:20]), file=sys.stderr)
     sys.exit(1)
 
@@ -179,13 +176,27 @@ for path in uniq[:12]:
         fail.append(f"{path} {exc}")
 
 if fail:
-    print("image HTTP failures:", file=sys.stderr)
+    print("protected-media HTTP failures:", file=sys.stderr)
     print("\n".join(fail), file=sys.stderr)
     sys.exit(1)
 if not checked:
-    print("no /storage images could be requested", file=sys.stderr)
+    print("no /protected-media images could be requested", file=sys.stderr)
     sys.exit(1)
-print("storage_ok", len(checked))
+
+# Guest originals must not be statically readable after the public/storage symlink is removed.
+try:
+    urllib.request.urlopen("https://www.balajiroyalevents.com/storage/gallery/previews/probe.jpg", timeout=20)
+    print("guest /storage unexpectedly succeeded", file=sys.stderr)
+    sys.exit(1)
+except urllib.error.HTTPError as exc:
+    if exc.code not in (403, 404):
+        print("guest /storage unexpected status", exc.code, file=sys.stderr)
+        sys.exit(1)
+except Exception as exc:
+    print("guest /storage check failed", exc, file=sys.stderr)
+    sys.exit(1)
+
+print("protected_media_ok", len(checked))
 PY
 
 FAGERIA_PID_AFTER="$(systemctl show -p MainPID --value fageriya-frontend.service 2>/dev/null || echo 0)"
