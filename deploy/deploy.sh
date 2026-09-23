@@ -63,14 +63,14 @@ log "Laravel composer + migrate + caches"
 cd "$APP_ROOT/backend"
 as_app /usr/bin/composer install --no-dev --optimize-autoloader --no-interaction
 as_app /usr/bin/php artisan migrate --force
-if as_app /usr/bin/php artisan storage:link; then
-  log "storage:link created"
-else
-  log "storage:link already present (kept)"
+# Image protection: do not expose storage/app/public through a web symlink.
+# Laravel serves display images at /protected-media and gates /storage for admin.
+if [[ -L public/storage ]]; then
+  rm -f public/storage
+  log "removed public/storage symlink (CMS files are Laravel-gated)"
+elif [[ -e public/storage ]]; then
+  log "WARNING: public/storage exists and is not a symlink — not removing"
 fi
-[[ -L public/storage ]] || die "public/storage is not a symlink"
-LINK_TARGET="$(readlink -f public/storage)"
-[[ "$LINK_TARGET" == "$(readlink -f storage/app/public)" ]] || die "public/storage does not point at storage/app/public"
 as_app /usr/bin/php artisan optimize
 
 log "Nuxt frontend build (frontend/ only)"

@@ -18,13 +18,15 @@ class AdminLoginFaviconTest extends TestCase
             'favicon' => 'settings/brand/01KZZK64KV96F26WKW0ZCTGZMD.png',
         ]);
 
-        $this->assertSame(
-            '/storage/settings/brand/01KZZK64KV96F26WKW0ZCTGZMD.png',
-            Filament::getPanel('admin')->getFavicon()
+        $favicon = Filament::getPanel('admin')->getFavicon();
+        $this->assertProtectedDisplayUrl(
+            $favicon,
+            'settings/brand/01KZZK64KV96F26WKW0ZCTGZMD.png'
         );
 
         $this->get('/admin/login')
             ->assertOk()
-            ->assertSee('/storage/settings/brand/01KZZK64KV96F26WKW0ZCTGZMD.png', false);
+            ->assertSee((string) $favicon, false)
+            ->assertDontSee('/storage/settings/brand/01KZZK64KV96F26WKW0ZCTGZMD.png', false);
     }
 }

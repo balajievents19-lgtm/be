@@ -24,6 +24,10 @@ class GalleryOriginalObserver
             return;
         }
 
+        if ($item->isVideo()) {
+            return;
+        }
+
         $image = $item->image;
         if (! is_string($image) || $image === '') {
             return;

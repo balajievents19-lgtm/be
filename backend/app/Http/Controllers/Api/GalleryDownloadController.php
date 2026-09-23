@@ -5,18 +5,20 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\GalleryItem;
 use App\Services\Gallery\GalleryOriginalStorage;
+use App\Support\Media\DisplayImageFactory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
 class GalleryDownloadController extends Controller
 {
     public function __construct(
-        private readonly GalleryOriginalStorage $originals
+        private readonly GalleryOriginalStorage $originals,
+        private readonly DisplayImageFactory $images
     ) {}
 
-    public function __invoke(Request $request, int $id): StreamedResponse|JsonResponse
+    public function __invoke(Request $request, int $id): Response
     {
         // Customer must be authenticated (auth:customer middleware).
         if ($request->user('customer') === null) {
@@ -33,7 +35,7 @@ class GalleryDownloadController extends Controller
         }
 
         try {
-            return $this->originals->download($item);
+            return $this->originals->download($item, $this->images);
         } catch (Throwable) {
             return response()->json(['message' => 'Unable to download this file.'], 404);
         }

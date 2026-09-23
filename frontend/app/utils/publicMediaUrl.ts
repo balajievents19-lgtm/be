@@ -1,8 +1,10 @@
 /** Same-site Laravel storage path, including an optional query string. */
 const STORAGE_PATH = /^\/storage\//
+const PROTECTED_MEDIA_PATH = /^\/protected-media\//
 
 /**
- * Convert CMS media URLs to origin-relative /storage/... paths.
+ * Convert CMS media URLs to origin-relative paths.
+ * Protected display URLs and leftover /storage paths stay same-origin.
  * External URLs (YouTube, Instagram, CDNs) are left unchanged.
  */
 export const toPublicMediaUrl = (value: string): string => {
@@ -11,7 +13,12 @@ export const toPublicMediaUrl = (value: string): string => {
     return value
   }
 
-  if (STORAGE_PATH.test(trimmed) || trimmed.startsWith('/images/') || trimmed.startsWith('/_nuxt/')) {
+  if (
+    STORAGE_PATH.test(trimmed)
+    || PROTECTED_MEDIA_PATH.test(trimmed)
+    || trimmed.startsWith('/images/')
+    || trimmed.startsWith('/_nuxt/')
+  ) {
     return trimmed
   }
 
@@ -22,7 +29,7 @@ export const toPublicMediaUrl = (value: string): string => {
 
   try {
     const url = new URL(absolute)
-    if (url.pathname.startsWith('/storage/')) {
+    if (url.pathname.startsWith('/storage/') || url.pathname.startsWith('/protected-media/')) {
       return `${url.pathname}${url.search}`
     }
   } catch {
@@ -65,7 +72,11 @@ export const toAbsoluteSeoMediaUrl = (value: string, origin: string): string => 
   }
 
   const base = origin.replace(/\/$/, '')
-  if (trimmed.startsWith('/storage/') || trimmed.startsWith('/images/')) {
+  if (
+    trimmed.startsWith('/storage/')
+    || trimmed.startsWith('/protected-media/')
+    || trimmed.startsWith('/images/')
+  ) {
     return `${base}${trimmed}`
   }
 

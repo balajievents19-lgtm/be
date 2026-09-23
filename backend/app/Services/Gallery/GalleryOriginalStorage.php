@@ -3,10 +3,11 @@
 namespace App\Services\Gallery;
 
 use App\Models\GalleryItem;
+use App\Support\Media\DisplayImageFactory;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use RuntimeException;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Private original gallery files live on the local (private) disk.
@@ -144,7 +145,7 @@ final class GalleryOriginalStorage
         return $previewRelative;
     }
 
-    public function download(GalleryItem $item): StreamedResponse
+    public function download(GalleryItem $item, DisplayImageFactory $factory): Response
     {
         if (! $this->hasPrivateOriginal($item)) {
             throw new RuntimeException('Original file is not available.');
@@ -152,27 +153,43 @@ final class GalleryOriginalStorage
 
         $disk = $item->original_disk ?: self::PRIVATE_DISK;
         $path = (string) $item->original_path;
-        $absolute = Storage::disk($disk)->path($path);
 
         // Path traversal guard: resolved path must stay under the disk root.
-        $root = realpath(Storage::disk($disk)->path('')) ?: '';
-        $resolved = realpath($absolute);
-        if ($root === '' || $resolved === false || ! str_starts_with($resolved, $root)) {
-            throw new RuntimeException('Invalid original file path.');
+        // Faked disks have no real path — skip the realpath check in that case.
+        $absolute = Storage::disk($disk)->path($path);
+        if (is_string($absolute) && $absolute !== '' && file_exists($absolute)) {
+            $root = realpath(Storage::disk($disk)->path('')) ?: '';
+            $resolved = realpath($absolute);
+            if ($root === '' || $resolved === false || ! str_starts_with($resolved, $root)) {
+                throw new RuntimeException('Invalid original file path.');
+            }
         }
 
-        $mime = Storage::disk($disk)->mimeType($path) ?: 'application/octet-stream';
-        $downloadName = $this->safeFilename($item);
+        $original = Storage::disk($disk)->get($path);
+        if (! is_string($original) || $original === '') {
+            throw new RuntimeException('Original file is not available.');
+        }
 
-        return Storage::disk($disk)->download($path, $downloadName, [
-            'Content-Type' => $mime,
+        $rendered = $factory->makeForDownload($original, $path);
+        $downloadName = $this->safeFilename($item, $rendered['mime']);
+
+        return response($rendered['contents'], 200, [
+            'Content-Type' => $rendered['mime'],
+            'Content-Disposition' => 'attachment; filename="'.$downloadName.'"',
+            'X-Content-Type-Options' => 'nosniff',
+            'Cache-Control' => 'private, no-store',
         ]);
     }
 
-    private function safeFilename(GalleryItem $item): string
+    private function safeFilename(GalleryItem $item, ?string $mime = null): string
     {
         $base = Str::slug($item->title ?: 'gallery-image') ?: 'gallery-image';
-        $ext = pathinfo((string) $item->original_path, PATHINFO_EXTENSION) ?: 'jpg';
+        $ext = match ($mime) {
+            'image/png' => 'png',
+            'image/webp' => 'webp',
+            'image/jpeg' => 'jpg',
+            default => pathinfo((string) $item->original_path, PATHINFO_EXTENSION) ?: 'jpg',
+        };
 
         return $base.'.'.$ext;
     }

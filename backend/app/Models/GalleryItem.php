@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\GalleryMediaType;
+use App\Enums\GalleryVideoSource;
 use App\Models\Concerns\HasPublicStorageUrl;
 use App\Models\Concerns\Publication\HasPublicationWindow;
 use Illuminate\Database\Eloquent\Builder;
@@ -19,6 +21,7 @@ class GalleryItem extends Model
 
     protected $fillable = [
         'gallery_category_id',
+        'media_type',
         'title',
         'slug',
         'description',
@@ -30,6 +33,8 @@ class GalleryItem extends Model
         'caption',
         'youtube_url',
         'vimeo_url',
+        'video_source',
+        'video_url',
         'featured',
         'homepage_featured',
         'sort_order',
@@ -50,6 +55,8 @@ class GalleryItem extends Model
             'sort_order' => 'integer',
             'publish_at' => 'datetime',
             'unpublish_at' => 'datetime',
+            'media_type' => GalleryMediaType::class,
+            'video_source' => GalleryVideoSource::class,
         ];
     }
 
@@ -58,6 +65,18 @@ class GalleryItem extends Model
         static::saving(function (GalleryItem $item): void {
             if (blank($item->slug) && filled($item->title)) {
                 $item->slug = static::uniqueSlugFrom($item->title, $item->id);
+            }
+
+            if ($item->media_type === null) {
+                $item->media_type = GalleryMediaType::Image;
+            }
+
+            if ($item->isVideo() && ! filled($item->image)) {
+                $item->image = '';
+            }
+
+            if ($item->isVideo() && $item->video_source === GalleryVideoSource::Youtube && filled($item->video_url) && strlen((string) $item->video_url) <= 255) {
+                $item->youtube_url = $item->video_url;
             }
         });
     }
@@ -80,6 +99,16 @@ class GalleryItem extends Model
         }
 
         return $slug;
+    }
+
+    public function isVideo(): bool
+    {
+        return $this->media_type === GalleryMediaType::Video;
+    }
+
+    public function isImage(): bool
+    {
+        return ! $this->isVideo();
     }
 
     public function category(): BelongsTo
@@ -115,6 +144,10 @@ class GalleryItem extends Model
                     ->where($table.'.image', '!=', '')
                     ->where($table.'.image', 'not like', '%studio/uploads/%')
                     ->where($table.'.image', 'not like', 'gallery/images/%');
+            })->orWhere(function (Builder $q) use ($table): void {
+                $q->where($table.'.media_type', GalleryMediaType::Video->value)
+                    ->whereNotNull($table.'.video_url')
+                    ->where($table.'.video_url', '!=', '');
             });
         });
     }

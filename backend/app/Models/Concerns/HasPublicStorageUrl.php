@@ -9,8 +9,8 @@ trait HasPublicStorageUrl
     /**
      * Public CMS image URL for the website.
      *
-     * Same-site storage files are returned as origin-relative /storage/... paths so
-     * they work on IP previews and on the real domain. External URLs are unchanged.
+     * Same-site CMS files are returned as origin-relative protected display URLs.
+     * External URLs are unchanged. Original /storage paths are not exposed.
      */
     public function imageUrl(?string $path): ?string
     {

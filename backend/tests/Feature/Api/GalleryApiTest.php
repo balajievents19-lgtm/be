@@ -61,8 +61,12 @@ class GalleryApiTest extends TestCase
                     ],
                 ],
             ])
-            ->assertJsonPath('data.0.image_count', 1)
-            ->assertJsonPath('data.0.cover_image', '/storage/gallery/reception.jpg');
+            ->assertJsonPath('data.0.image_count', 1);
+
+        $this->assertProtectedDisplayUrl(
+            $this->getJson('/api/gallery/categories')->json('data.0.cover_image'),
+            'gallery/reception.jpg'
+        );
 
         $slug = $this->getJson('/api/gallery/categories')->json('data.0.slug');
 

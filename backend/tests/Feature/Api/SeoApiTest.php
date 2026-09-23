@@ -53,18 +53,19 @@ class SeoApiTest extends TestCase
             ->assertJsonPath('data.meta.title', 'Balaji Royal Events SEO')
             ->assertJsonPath('data.meta.description', 'SEO description')
             ->assertJsonPath('data.meta.canonical', 'https://frontend.test')
-            ->assertJsonPath('data.meta.open_graph.url', 'https://frontend.test')
-            ->assertJsonPath('data.meta.image', 'https://frontend.test/storage/settings/seo/og.jpg')
-            ->assertJsonPath('data.meta.open_graph.image', 'https://frontend.test/storage/settings/seo/og.jpg')
-            ->assertJsonPath('data.meta.twitter.image', 'https://frontend.test/storage/settings/seo/og.jpg');
+            ->assertJsonPath('data.meta.open_graph.url', 'https://frontend.test');
+
+        $payload = $this->getJson('/api/seo')->json('data');
+        $this->assertProtectedDisplayUrl($payload['meta']['image'] ?? null, 'settings/seo/og.jpg');
+        $this->assertStringStartsWith('https://frontend.test/protected-media/', (string) ($payload['meta']['image'] ?? ''));
+        $this->assertProtectedDisplayUrl($payload['meta']['open_graph']['image'] ?? null, 'settings/seo/og.jpg');
+        $this->assertProtectedDisplayUrl($payload['meta']['twitter']['image'] ?? null, 'settings/seo/og.jpg');
 
         $organization = collect($this->getJson('/api/seo')->json('data.schema'))
             ->firstWhere('@type', 'Organization');
         $this->assertIsArray($organization);
-        $this->assertSame(
-            'https://frontend.test/storage/settings/brand/logo.png',
-            $organization['logo'] ?? null
-        );
+        $this->assertProtectedDisplayUrl($organization['logo'] ?? null, 'settings/brand/logo.png');
+        $this->assertStringStartsWith('https://frontend.test/protected-media/', (string) ($organization['logo'] ?? ''));
     }
 
     public function test_seo_resolve_home_meta_canonical_og_and_faq_schema(): void

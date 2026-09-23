@@ -138,6 +138,7 @@ onUnmounted(() => {
                 width="1600"
                 height="700"
                 class="absolute inset-0 block h-full w-full object-cover"
+                draggable="false"
               >
             </picture>
             <div

@@ -288,7 +288,8 @@ class SchemaBuilder
      */
     public function galleryImage(GalleryItem $item): array
     {
-        $url = $this->meta->absoluteMedia($item->imageUrl($item->image));
+        $coverPath = $item->publicCoverPath();
+        $url = $coverPath ? $this->meta->absoluteMedia($item->imageUrl($coverPath)) : null;
         $pageUrl = $this->meta->absolute('/gallery/'.$item->slug);
 
         return $this->filterNull([

@@ -3,6 +3,7 @@ const laravelDevOrigin = (process.env.NUXT_DEV_LARAVEL_ORIGIN || 'http://127.0.0
 
 const laravelDevProxy = {
   '/storage': { target: laravelDevOrigin, changeOrigin: true },
+  '/protected-media': { target: laravelDevOrigin, changeOrigin: true },
   '/api': { target: laravelDevOrigin, changeOrigin: true },
   '/sanctum': { target: laravelDevOrigin, changeOrigin: true }
 }
@@ -26,8 +27,7 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
 
-  // Same-origin /storage, /api, and /sanctum during `nuxt dev` so the browser
-  // never has to load CMS images from a hardcoded 127.0.0.1:8000 origin.
+  // Same-origin /storage, /protected-media, /api, and /sanctum during `nuxt dev`.
   vite: {
     server: {
       proxy: laravelDevProxy

@@ -256,7 +256,7 @@ class SeoService
     public function forGalleryItem(GalleryItem $item): array
     {
         $path = '/gallery/'.$item->slug;
-        $image = $item->imageUrl($item->image);
+        $image = $item->imageUrl($item->publicCoverPath() ?: $item->opengraph_image);
 
         return [
             'meta' => $this->meta()->build([

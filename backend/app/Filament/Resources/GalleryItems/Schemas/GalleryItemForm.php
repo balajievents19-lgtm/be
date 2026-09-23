@@ -2,9 +2,14 @@
 
 namespace App\Filament\Resources\GalleryItems\Schemas;
 
+use App\Enums\GalleryMediaType;
+use App\Enums\GalleryVideoSource;
 use App\Filament\Support\WebsitePublishFields;
+use App\Support\Media\GalleryVideoEmbed;
+use Closure;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -12,6 +17,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
 
@@ -19,6 +25,9 @@ class GalleryItemForm
 {
     public static function configure(Schema $schema): Schema
     {
+        $isImage = fn (Get $get): bool => ($get('media_type') ?? GalleryMediaType::Image->value) !== GalleryMediaType::Video->value;
+        $isVideo = fn (Get $get): bool => ($get('media_type') ?? GalleryMediaType::Image->value) === GalleryMediaType::Video->value;
+
         return $schema
             ->components([
                 Tabs::make('Gallery Item')
@@ -30,6 +39,14 @@ class GalleryItemForm
                                 Section::make()
                                     ->columns(2)
                                     ->schema([
+                                        Radio::make('media_type')
+                                            ->label('Media Type')
+                                            ->options(GalleryMediaType::options())
+                                            ->default(GalleryMediaType::Image->value)
+                                            ->required()
+                                            ->inline()
+                                            ->live()
+                                            ->columnSpanFull(),
                                         Select::make('gallery_category_id')
                                             ->label('Gallery Category')
                                             ->relationship(
@@ -41,7 +58,9 @@ class GalleryItemForm
                                             ->preload()
                                             ->required(),
                                         CheckboxList::make('services')
-                                            ->label('Show this photo in Services')
+                                            ->label(fn (Get $get): string => $isVideo($get)
+                                                ? 'Show this video in Services'
+                                                : 'Show this photo in Services')
                                             ->relationship(
                                                 name: 'services',
                                                 titleAttribute: 'name',
@@ -51,7 +70,9 @@ class GalleryItemForm
                                             ->bulkToggleable()
                                             ->columns(2)
                                             ->columnSpanFull()
-                                            ->helperText('The photo is uploaded once. It will appear in this Gallery Category and on every selected Service page.'),
+                                            ->helperText(fn (Get $get): string => $isVideo($get)
+                                                ? 'The video is added once. It will appear in this Gallery Category and on every selected Service page.'
+                                                : 'The photo is uploaded once. It will appear in this Gallery Category and on every selected Service page.'),
                                         TextInput::make('title')
                                             ->required()
                                             ->maxLength(255)
@@ -80,6 +101,7 @@ class GalleryItemForm
                             ->schema([
                                 Section::make()
                                     ->columns(2)
+                                    ->visible($isImage)
                                     ->schema([
                                         FileUpload::make('image')
                                             ->label('Image (public preview; original is secured privately)')
@@ -88,18 +110,9 @@ class GalleryItemForm
                                             ->directory('gallery/images')
                                             ->visibility('public')
                                             ->imageEditor()
-                                            ->required()
+                                            ->required(fn (Get $get): bool => $isImage($get))
                                             ->maxSize(5120)
                                             ->helperText('On save, the original is moved to private storage. Public gallery shows a safe preview.')
-                                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif']),
-                                        FileUpload::make('thumbnail')
-                                            ->label('Thumbnail')
-                                            ->image()
-                                            ->disk('public')
-                                            ->directory('gallery/thumbnails')
-                                            ->visibility('public')
-                                            ->imageEditor()
-                                            ->maxSize(2048)
                                             ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif']),
                                         TextInput::make('alt_text')
                                             ->label('Alt Text')
@@ -110,11 +123,58 @@ class GalleryItemForm
                                             ->label('YouTube URL (external — no video upload)')
                                             ->url()
                                             ->maxLength(255)
-                                            ->helperText('Prefer Gallery → External Media for social/Drive links. Do not upload video files.'),
+                                            ->helperText('Prefer Media Type → Video for gallery videos. Do not upload video files.'),
                                         TextInput::make('vimeo_url')
                                             ->label('Vimeo URL (external — no video upload)')
                                             ->url()
                                             ->maxLength(255),
+                                    ]),
+                                Section::make()
+                                    ->columns(2)
+                                    ->schema([
+                                        FileUpload::make('thumbnail')
+                                            ->label('Thumbnail')
+                                            ->image()
+                                            ->disk('public')
+                                            ->directory('gallery/thumbnails')
+                                            ->visibility('public')
+                                            ->imageEditor()
+                                            ->maxSize(2048)
+                                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
+                                            ->helperText(fn (Get $get): string => $isVideo($get)
+                                                ? 'Optional if YouTube can provide a preview. Uses the same protected image storage as gallery photos.'
+                                                : 'Optional public thumbnail for the gallery card.'),
+                                    ]),
+                                Section::make()
+                                    ->columns(2)
+                                    ->visible($isVideo)
+                                    ->schema([
+                                        Radio::make('video_source')
+                                            ->label('Source')
+                                            ->options(GalleryVideoSource::options())
+                                            ->required(fn (Get $get): bool => $isVideo($get))
+                                            ->inline()
+                                            ->live()
+                                            ->columnSpanFull(),
+                                        TextInput::make('video_url')
+                                            ->label(fn (Get $get): string => GalleryVideoSource::tryFrom((string) $get('video_source'))?->urlLabel() ?? 'Video URL')
+                                            ->required(fn (Get $get): bool => $isVideo($get))
+                                            ->url()
+                                            ->maxLength(2048)
+                                            ->columnSpanFull()
+                                            ->helperText(fn (Get $get): string => GalleryVideoSource::tryFrom((string) $get('video_source'))?->urlHelper() ?? 'HTTPS URL. The video file is not stored on this server.')
+                                            ->rules([
+                                                fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($get): void {
+                                                    if (($get('media_type') ?? '') !== GalleryMediaType::Video->value) {
+                                                        return;
+                                                    }
+                                                    $source = (string) $get('video_source');
+                                                    $url = is_string($value) ? $value : '';
+                                                    if (! GalleryVideoEmbed::sourceMatches($source, $url)) {
+                                                        $fail('Enter a valid HTTPS URL for the selected source. External videos are not downloaded.');
+                                                    }
+                                                },
+                                            ]),
                                     ]),
                             ]),
 

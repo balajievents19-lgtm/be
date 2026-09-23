@@ -5,8 +5,8 @@ namespace App\Support\Media;
 class PublicStorageUrl
 {
     /**
-     * Same-site CMS files as origin-relative /storage/... paths.
-     * External URLs (YouTube, Instagram, CDNs) are returned unchanged.
+     * Same-site CMS files as origin-relative protected display URLs.
+     * External URLs (YouTube, Instagram, CDNs) and static /images chrome are unchanged.
      */
     public static function make(?string $path): ?string
     {
@@ -19,51 +19,75 @@ class PublicStorageUrl
             return null;
         }
 
-        if (str_starts_with($value, '//')) {
-            $parsed = parse_url('https:'.$value);
-            $pathname = is_array($parsed) ? ($parsed['path'] ?? '') : '';
-            if (is_string($pathname) && str_starts_with($pathname, '/storage/')) {
-                return self::storagePathWithQuery($parsed);
-            }
-
+        if (str_starts_with($value, ProtectedMedia::URL_PREFIX)) {
             return $value;
+        }
+
+        [$relative, $query] = self::cmsRelativeAndQuery($value);
+        if ($relative === null) {
+            return $value;
+        }
+
+        $url = ProtectedMedia::displayUrl($relative);
+        if ($url === null) {
+            return $value;
+        }
+
+        return $query !== '' ? $url.'?'.$query : $url;
+    }
+
+    /**
+     * @return array{0: ?string, 1: string}
+     */
+    private static function cmsRelativeAndQuery(string $value): array
+    {
+        if (str_starts_with($value, '//')) {
+            return self::fromParsed(parse_url('https:'.$value));
         }
 
         if (preg_match('#^https?://#i', $value) === 1) {
-            $parsed = parse_url($value);
-            $pathname = is_array($parsed) ? ($parsed['path'] ?? '') : '';
-            if (is_string($pathname) && str_starts_with($pathname, '/storage/')) {
-                return self::storagePathWithQuery($parsed);
-            }
-
-            return $value;
+            return self::fromParsed(parse_url($value));
         }
 
         if (str_starts_with($value, '/storage/')) {
-            return $value;
+            $parsed = parse_url($value);
+
+            return self::fromParsed(is_array($parsed) ? $parsed : false);
         }
 
         if (str_starts_with($value, '/')) {
-            return $value;
+            return [null, ''];
         }
 
-        return '/storage/'.ltrim(str_replace('\\', '/', $value), '/');
+        $parsed = parse_url('/'.$value);
+        if (! is_array($parsed)) {
+            return [ProtectedMedia::normalizeRelative($value), ''];
+        }
+
+        $relative = ProtectedMedia::normalizeRelative(ltrim((string) ($parsed['path'] ?? ''), '/'));
+        $query = isset($parsed['query']) && is_string($parsed['query']) ? $parsed['query'] : '';
+
+        return [$relative, $query];
     }
 
     /**
      * @param  array<string, mixed>|false  $parsed
+     * @return array{0: ?string, 1: string}
      */
-    private static function storagePathWithQuery(array|false $parsed): string
+    private static function fromParsed(array|false $parsed): array
     {
         if (! is_array($parsed)) {
-            return '/storage/';
+            return [null, ''];
         }
 
-        $path = (string) ($parsed['path'] ?? '/storage/');
-        $query = isset($parsed['query']) && $parsed['query'] !== ''
-            ? '?'.$parsed['query']
-            : '';
+        $pathname = (string) ($parsed['path'] ?? '');
+        if (! str_starts_with($pathname, '/storage/')) {
+            return [null, ''];
+        }
 
-        return $path.$query;
+        $relative = ProtectedMedia::normalizeRelative(substr($pathname, strlen('/storage/')));
+        $query = isset($parsed['query']) && is_string($parsed['query']) ? $parsed['query'] : '';
+
+        return [$relative, $query];
     }
 }

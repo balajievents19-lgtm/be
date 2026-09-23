@@ -16,6 +16,7 @@ describe('toPublicMediaUrl', () => {
 
   it('keeps relative site assets and external media URLs', () => {
     assert.equal(toPublicMediaUrl('/storage/logo.png'), '/storage/logo.png')
+    assert.equal(toPublicMediaUrl('/protected-media/opaque-token'), '/protected-media/opaque-token')
     assert.equal(toPublicMediaUrl('/images/heading-blackBgimg.png'), '/images/heading-blackBgimg.png')
     assert.equal(
       toPublicMediaUrl('https://www.youtube.com/watch?v=abc'),
@@ -30,6 +31,13 @@ describe('toPublicMediaUrl', () => {
 
 describe('toAbsoluteSeoMediaUrl', () => {
   it('prefixes origin-relative storage paths for OG and JSON-LD', () => {
+    assert.equal(
+      toAbsoluteSeoMediaUrl(
+        '/protected-media/opaque-token',
+        'https://www.balajiroyalevents.com'
+      ),
+      'https://www.balajiroyalevents.com/protected-media/opaque-token'
+    )
     assert.equal(
       toAbsoluteSeoMediaUrl(
         '/storage/settings/brand/logo.png',

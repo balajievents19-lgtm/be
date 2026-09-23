@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import Lightbox from '~/components/shared/Lightbox.vue'
-import { galleryItemAlt, galleryItemSrc } from '~/types/gallery'
+import GalleryVideoGrid from '~/components/gallery/GalleryVideoGrid.vue'
+import { galleryItemAlt, galleryItemSrc, isGalleryVideo } from '~/types/gallery'
 
 const props = defineProps<{
   slug: string
@@ -10,37 +11,40 @@ const props = defineProps<{
 const { data, pending, failed } = await useGalleryCategory(props.slug)
 
 const category = computed(() => data.value?.category ?? null)
-const items = computed(() =>
-  (data.value?.items ?? []).filter(item => Boolean(galleryItemSrc(item)))
+const allItems = computed(() => data.value?.items ?? [])
+const photos = computed(() =>
+  allItems.value.filter(item => !isGalleryVideo(item) && Boolean(galleryItemSrc(item)))
 )
+const videos = computed(() => allItems.value.filter(isGalleryVideo))
+const hasMedia = computed(() => photos.value.length > 0 || videos.value.length > 0)
 
 const pageSize = 12
 const page = ref(1)
 
-const totalPages = computed(() => Math.max(1, Math.ceil(items.value.length / pageSize)))
+const totalPages = computed(() => Math.max(1, Math.ceil(photos.value.length / pageSize)))
 
 const pagedItems = computed(() => {
   const start = (page.value - 1) * pageSize
-  return items.value.slice(start, start + pageSize)
+  return photos.value.slice(start, start + pageSize)
 })
 
 /** Full image URLs for the large viewer (category-scoped; safer public previews only). */
 const images = computed(() =>
-  items.value
+  photos.value
     .map(item => item.image || item.thumbnail || '')
     .filter(Boolean)
 )
 const itemIds = computed(() =>
-  items.value.map(item => (item.image || item.thumbnail ? item.id : null))
+  photos.value.map(item => (item.image || item.thumbnail ? item.id : null))
 )
 const downloadAvailable = computed(() =>
-  items.value.map(item => Boolean(item.download_available ?? true))
+  photos.value.map(item => Boolean(item.download_available ?? true))
 )
 const isLightboxOpen = ref(false)
 const activeIndex = ref(0)
 
 const activeAlt = computed(() => {
-  const item = items.value[activeIndex.value]
+  const item = photos.value[activeIndex.value]
   return item ? galleryItemAlt(item) : undefined
 })
 
@@ -103,16 +107,23 @@ const onThumbError = (event: Event) => {
       </p>
 
       <p
-        v-else-if="!items.length"
+        v-else-if="!hasMedia"
         class="pb-10 text-center text-sm text-[#666]"
       >
         No images in this category yet.
       </p>
 
-      <div
-        v-else
-        class="gallery-row -mx-[2px] flex flex-wrap overflow-hidden"
-      >
+      <template v-else>
+        <h3
+          v-if="photos.length && videos.length"
+          class="mb-4 text-center font-['Domine',Georgia,'Times_New_Roman',serif] text-xl font-bold text-[#333333]"
+        >
+          Photos
+        </h3>
+        <div
+          v-if="pagedItems.length"
+          class="gallery-row -mx-[2px] flex flex-wrap overflow-hidden"
+        >
         <button
           v-for="(item, index) in pagedItems"
           :key="item.id"
@@ -122,17 +133,17 @@ const onThumbError = (event: Event) => {
           @click="openLightbox((page - 1) * pageSize + index)"
           @contextmenu.prevent
         >
-          <img
-            :src="galleryItemSrc(item)"
-            :alt="galleryItemAlt(item)"
-            class="pointer-events-none block h-auto w-full select-none object-cover"
-            width="400"
-            height="300"
-            loading="lazy"
-            decoding="async"
-            draggable="false"
-            @error="onThumbError"
-          >
+          <span class="gallery-image-wrapper">
+            <img
+              :src="galleryItemSrc(item)"
+              :alt="galleryItemAlt(item)"
+              class="pointer-events-none select-none"
+              loading="lazy"
+              decoding="async"
+              draggable="false"
+              @error="onThumbError"
+            >
+          </span>
 
           <span
             class="pointer-events-none absolute inset-0 bg-[rgba(0,0,0,0.5)] opacity-0 transition-opacity duration-500 ease-in-out group-hover:opacity-100 group-focus-visible:opacity-100"
@@ -144,33 +155,36 @@ const onThumbError = (event: Event) => {
             aria-hidden="true"
           />
         </button>
-      </div>
+        </div>
 
-      <nav
-        v-if="totalPages > 1"
-        class="mt-8 flex items-center justify-center gap-2"
-        aria-label="Gallery pagination"
-      >
-        <button
-          type="button"
-          class="rounded border border-[#ddd] px-3 py-1 text-sm disabled:opacity-40"
-          :disabled="page <= 1"
-          @click="page -= 1"
+        <nav
+          v-if="totalPages > 1 && photos.length"
+          class="mt-8 flex items-center justify-center gap-2"
+          aria-label="Gallery pagination"
         >
-          Previous
-        </button>
-        <span class="text-sm text-[#666]">
-          Page {{ page }} of {{ totalPages }}
-        </span>
-        <button
-          type="button"
-          class="rounded border border-[#ddd] px-3 py-1 text-sm disabled:opacity-40"
-          :disabled="page >= totalPages"
-          @click="page += 1"
-        >
-          Next
-        </button>
-      </nav>
+          <button
+            type="button"
+            class="rounded border border-[#ddd] px-3 py-1 text-sm disabled:opacity-40"
+            :disabled="page <= 1"
+            @click="page -= 1"
+          >
+            Previous
+          </button>
+          <span class="text-sm text-[#666]">
+            Page {{ page }} of {{ totalPages }}
+          </span>
+          <button
+            type="button"
+            class="rounded border border-[#ddd] px-3 py-1 text-sm disabled:opacity-40"
+            :disabled="page >= totalPages"
+            @click="page += 1"
+          >
+            Next
+          </button>
+        </nav>
+
+        <GalleryVideoGrid :items="videos" />
+      </template>
     </UContainer>
 
     <Lightbox

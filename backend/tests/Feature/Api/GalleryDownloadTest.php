@@ -6,6 +6,9 @@ use App\Models\Customer;
 use App\Models\GalleryCategory;
 use App\Models\GalleryItem;
 use App\Services\Gallery\GalleryOriginalStorage;
+use App\Support\Brand;
+use App\Support\Media\PublicStorageUrl;
+use GdImage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
@@ -14,32 +17,49 @@ class GalleryDownloadTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function makeItemWithPrivateOriginal(): GalleryItem
+    private function jpegBytes(): string
+    {
+        $image = imagecreatetruecolor(240, 160);
+        $this->assertNotFalse($image);
+        $fill = imagecolorallocate($image, 8, 10, 16);
+        imagefilledrectangle($image, 0, 0, 239, 159, $fill);
+        ob_start();
+        imagejpeg($image, null, 95);
+        $binary = (string) ob_get_clean();
+        imagedestroy($image);
+
+        return $binary;
+    }
+
+    private function makeItemWithPrivateOriginal(array $overrides = []): GalleryItem
     {
         Storage::fake('local');
         Storage::fake('public');
 
         $category = GalleryCategory::query()->create([
             'name' => 'Wedding',
-            'slug' => 'wedding',
+            'slug' => 'wedding-'.uniqid(),
             'status' => true,
             'sort_order' => 1,
         ]);
 
-        Storage::disk('public')->put('gallery/thumbnails/thumb.jpg', 'thumb-bytes');
-        Storage::disk('local')->put('gallery/originals/1_secret.jpg', 'original-bytes-high-res');
+        $original = $overrides['original_bytes'] ?? $this->jpegBytes();
+        unset($overrides['original_bytes']);
 
-        return GalleryItem::query()->create([
+        Storage::disk('public')->put('gallery/thumbnails/thumb.jpg', $this->jpegBytes());
+        Storage::disk('local')->put('gallery/originals/1_secret.jpg', $original);
+
+        return GalleryItem::query()->create(array_merge([
             'gallery_category_id' => $category->id,
             'title' => 'Protected Photo',
-            'slug' => 'protected-photo',
+            'slug' => 'protected-photo-'.uniqid(),
             'image' => 'gallery/thumbnails/thumb.jpg',
             'thumbnail' => 'gallery/thumbnails/thumb.jpg',
             'original_path' => 'gallery/originals/1_secret.jpg',
             'original_disk' => 'local',
             'status' => true,
             'sort_order' => 1,
-        ]);
+        ], $overrides));
     }
 
     public function test_guest_cannot_download_original(): void
@@ -50,9 +70,18 @@ class GalleryDownloadTest extends TestCase
             ->assertUnauthorized();
     }
 
-    public function test_customer_can_download_original(): void
+    public function test_logged_out_direct_storage_url_does_not_yield_original(): void
     {
-        $item = $this->makeItemWithPrivateOriginal();
+        $this->makeItemWithPrivateOriginal();
+
+        $this->get('/storage/gallery/originals/1_secret.jpg')->assertForbidden();
+        $this->get('/storage/gallery/thumbnails/thumb.jpg')->assertForbidden();
+    }
+
+    public function test_customer_download_is_watermarked_and_does_not_change_original(): void
+    {
+        $original = $this->jpegBytes();
+        $item = $this->makeItemWithPrivateOriginal(['original_bytes' => $original]);
         $customer = Customer::factory()->create();
 
         $response = $this->actingAs($customer, 'customer')
@@ -60,6 +89,45 @@ class GalleryDownloadTest extends TestCase
 
         $response->assertOk();
         $this->assertStringContainsString('attachment', (string) $response->headers->get('content-disposition'));
+        $this->assertStringNotContainsString('gallery/originals', (string) $response->headers->get('content-disposition'));
+
+        $downloaded = $response->getContent();
+        $this->assertNotSame('', $downloaded);
+        $this->assertNotSame($original, $downloaded);
+        $this->assertSame($original, Storage::disk('local')->get('gallery/originals/1_secret.jpg'));
+        $this->assertContainsEmbeddedBrandWatermark($downloaded);
+    }
+
+    public function test_customer_cannot_bypass_watermark_via_protected_media_or_api_preview(): void
+    {
+        $original = $this->jpegBytes();
+        $item = $this->makeItemWithPrivateOriginal(['original_bytes' => $original]);
+        $customer = Customer::factory()->create();
+
+        $previewUrl = PublicStorageUrl::make('gallery/thumbnails/thumb.jpg');
+        $this->assertProtectedDisplayUrl($previewUrl, 'gallery/thumbnails/thumb.jpg');
+        $token = basename((string) parse_url((string) $previewUrl, PHP_URL_PATH));
+
+        $preview = $this->actingAs($customer, 'customer')
+            ->get('/protected-media/'.$token);
+        $preview->assertOk();
+        $this->assertNotSame($original, $preview->getContent());
+        $this->assertStringContainsString('inline', strtolower((string) $preview->headers->get('content-disposition')));
+
+        $api = $this->getJson('/api/gallery/'.$item->slug)->assertOk()->json('data');
+        $this->assertArrayNotHasKey('original_path', $api);
+        $this->assertStringStartsWith('/protected-media/', (string) $api['image']);
+        $this->assertStringNotContainsString('gallery/originals', json_encode($api));
+    }
+
+    public function test_customer_cannot_download_inactive_gallery_item(): void
+    {
+        $item = $this->makeItemWithPrivateOriginal(['status' => false]);
+        $customer = Customer::factory()->create();
+
+        $this->actingAs($customer, 'customer')
+            ->getJson('/api/gallery/items/'.$item->id.'/download')
+            ->assertNotFound();
     }
 
     public function test_invalid_gallery_item_returns_404(): void
@@ -136,5 +204,31 @@ class GalleryDownloadTest extends TestCase
         $this->assertNotSame('gallery/images/old.jpg', $item->image);
         $this->assertFalse(str_starts_with((string) $item->image, 'gallery/images/'));
         $this->assertTrue(Storage::disk('public')->exists((string) $item->image));
+    }
+
+    private function assertContainsEmbeddedBrandWatermark(string $bytes): void
+    {
+        $decoded = @imagecreatefromstring($bytes);
+        $this->assertInstanceOf(GdImage::class, $decoded);
+
+        $width = imagesx($decoded);
+        $height = imagesy($decoded);
+        $found = false;
+
+        for ($x = 0; $x < $width; $x += 3) {
+            for ($y = (int) round($height * 0.88); $y < $height; $y += 2) {
+                $rgb = imagecolorat($decoded, $x, $y);
+                $r = ($rgb >> 16) & 0xFF;
+                $g = ($rgb >> 8) & 0xFF;
+                $b = $rgb & 0xFF;
+                if ($r > 90 || $g > 90 || $b > 90) {
+                    $found = true;
+                    break 2;
+                }
+            }
+        }
+
+        imagedestroy($decoded);
+        $this->assertTrue($found, 'Downloaded pixels do not include a visible '.Brand::NAME.' watermark.');
     }
 }

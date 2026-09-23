@@ -83,9 +83,9 @@ class HomeApiTest extends TestCase
         $response->assertJsonPath('data.team_members', []);
         $this->assertLessThanOrEqual(4, count($response->json('data.gallery_categories')));
         $this->assertSame('weddings', $response->json('data.gallery_categories.0.slug'));
-        $this->assertSame(
-            '/storage/services/wedding.jpg',
-            $response->json('data.featured_services.0.featured_image')
+        $this->assertProtectedDisplayUrl(
+            $response->json('data.featured_services.0.featured_image'),
+            'services/wedding.jpg'
         );
     }
 

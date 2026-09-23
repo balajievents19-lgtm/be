@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { A11y, Keyboard, Navigation } from 'swiper/modules'
 import type { Service } from '~/types/service'
-import { galleryItemSrc } from '~/types/gallery'
+import { galleryItemSrc, isGalleryVideo } from '~/types/gallery'
 
 import 'swiper/css'
 import 'swiper/css/navigation'
@@ -15,7 +15,7 @@ const props = defineProps<{
 const modules = [A11y, Keyboard, Navigation]
 const swiperRef = ref<{ slideNext: () => void, slidePrev: () => void } | null>(null)
 
-const relatedItems = computed(() => props.service.related_gallery?.filter(item => galleryItemSrc(item)) ?? [])
+const relatedItems = computed(() => props.service.related_gallery?.filter(item => !isGalleryVideo(item) && galleryItemSrc(item)) ?? [])
 
 const gallery = computed(() => {
   if (relatedItems.value.length) {
@@ -67,15 +67,15 @@ const onSwiper = (swiper: { slideNext: () => void, slidePrev: () => void }) => {
           v-for="(src, index) in gallery"
           :key="relatedItems[index]?.id ?? `${src}-${index}`"
         >
-          <img
-            :src="src"
-            :alt="`${service.name} gallery ${index + 1}`"
-            class="block h-auto w-full"
-            width="800"
-            height="500"
-            loading="lazy"
-            decoding="async"
-          >
+          <span class="gallery-image-wrapper">
+            <img
+              :src="src"
+              :alt="`${service.name} gallery ${index + 1}`"
+              loading="lazy"
+              decoding="async"
+              draggable="false"
+            >
+          </span>
         </SwiperSlide>
       </Swiper>
 

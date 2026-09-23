@@ -22,10 +22,20 @@ class GalleryItemsTable
         return $table
             ->columns([
                 ImageColumn::make('image')
-                    ->label('Image')
+                    ->label('Preview')
                     ->disk('public')
                     ->height(48)
-                    ->square(),
+                    ->square()
+                    ->getStateUsing(fn ($record) => $record->thumbnail ?: $record->image),
+                TextColumn::make('media_type')
+                    ->label('Type')
+                    ->badge()
+                    ->formatStateUsing(fn ($state): string => $state instanceof \App\Enums\GalleryMediaType
+                        ? $state->label()
+                        : (string) $state)
+                    ->color(fn ($state): string => ($state instanceof \App\Enums\GalleryMediaType
+                        ? $state->value
+                        : (string) $state) === 'video' ? 'warning' : 'gray'),
                 TextColumn::make('title')
                     ->searchable()
                     ->sortable(),
@@ -71,6 +81,9 @@ class GalleryItemsTable
             ->defaultSort('sort_order')
             ->reorderable('sort_order')
             ->filters([
+                SelectFilter::make('media_type')
+                    ->label('Media Type')
+                    ->options(\App\Enums\GalleryMediaType::options()),
                 SelectFilter::make('gallery_category_id')
                     ->label('Gallery Category')
                     ->relationship('category', 'name')
