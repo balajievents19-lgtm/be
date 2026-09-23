@@ -43,6 +43,32 @@ export const isSafeGalleryEmbedUrl = (url: string | null | undefined): boolean =
   }
 }
 
+export const isYouTubeNocookieEmbedUrl = (url: string | null | undefined): boolean => {
+  if (!url) {
+    return false
+  }
+
+  try {
+    const parsed = new URL(url)
+    if (parsed.protocol !== 'https:') {
+      return false
+    }
+
+    return parsed.hostname.toLowerCase() === 'www.youtube-nocookie.com'
+      && /^\/embed\/[A-Za-z0-9_-]{6,}$/.test(parsed.pathname)
+  } catch {
+    return false
+  }
+}
+
+export const youtubeEmbedUrlFromId = (id: string | null | undefined): string | null => {
+  if (!id || !/^[A-Za-z0-9_-]{6,}$/.test(id)) {
+    return null
+  }
+
+  return `https://www.youtube-nocookie.com/embed/${id}`
+}
+
 export const isSafeGalleryOpenUrl = (url: string | null | undefined): boolean => {
   if (!url) {
     return false

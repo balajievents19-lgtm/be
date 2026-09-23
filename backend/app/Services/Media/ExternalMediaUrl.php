@@ -62,7 +62,7 @@ final class ExternalMediaUrl
             : self::detectProvider($host, $url);
 
         return match ($provider) {
-            'youtube' => self::resolveYouTube($url, $openUrl),
+            'youtube' => self::resolveYouTube($url),
             'vimeo' => self::resolveVimeo($url, $openUrl),
             'instagram' => self::resolveLinkOnly($url, 'instagram', 'View on Instagram'),
             'facebook' => self::resolveLinkOnly($url, 'facebook', 'View on Facebook'),
@@ -92,32 +92,43 @@ final class ExternalMediaUrl
         return 'other';
     }
 
-    /**
-     * @return array{valid: bool, provider: string, embed_url: string|null, open_url: string, mode: string, message: string|null}
-     */
-    private static function resolveYouTube(string $url, string $openUrl): array
+    public static function youtubeId(string $url): ?string
     {
-        $id = null;
+        $url = trim($url);
         $host = strtolower((string) parse_url($url, PHP_URL_HOST));
         $path = (string) parse_url($url, PHP_URL_PATH);
         parse_str((string) parse_url($url, PHP_URL_QUERY), $query);
 
+        $id = null;
         if ($host === 'youtu.be') {
-            $id = trim($path, '/');
+            $id = explode('/', trim($path, '/'))[0] ?? null;
         } elseif (isset($query['v']) && is_string($query['v'])) {
             $id = $query['v'];
-        } elseif (preg_match('#/(embed|shorts)/([A-Za-z0-9_-]{6,})#', $path, $m)) {
+        } elseif (preg_match('#/(embed|shorts|live)/([A-Za-z0-9_-]{6,})#', $path, $m)) {
             $id = $m[2];
         }
 
-        if (! $id || ! preg_match('/^[A-Za-z0-9_-]{6,}$/', $id)) {
+        if (! is_string($id) || preg_match('/^[A-Za-z0-9_-]{6,}$/', $id) !== 1) {
+            return null;
+        }
+
+        return $id;
+    }
+
+    /**
+     * @return array{valid: bool, provider: string, embed_url: string|null, open_url: string, mode: string, message: string|null}
+     */
+    private static function resolveYouTube(string $url): array
+    {
+        $id = self::youtubeId($url);
+        if ($id === null) {
             return [
-                'valid' => true,
+                'valid' => false,
                 'provider' => 'youtube',
                 'embed_url' => null,
-                'open_url' => $openUrl,
+                'open_url' => $url,
                 'mode' => 'link',
-                'message' => 'Could not build a safe YouTube embed; open the link instead.',
+                'message' => 'Enter a valid YouTube watch, youtu.be, Shorts, or embed URL.',
             ];
         }
 

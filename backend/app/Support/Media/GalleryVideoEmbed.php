@@ -14,6 +14,7 @@ final class GalleryVideoEmbed
      * @return array{
      *     valid: bool,
      *     source: string,
+     *     video_id: string|null,
      *     embed_url: string|null,
      *     open_url: string|null,
      *     mode: string,
@@ -29,6 +30,7 @@ final class GalleryVideoEmbed
         $empty = [
             'valid' => false,
             'source' => $source !== '' ? $source : 'other',
+            'video_id' => null,
             'embed_url' => null,
             'open_url' => null,
             'mode' => 'link',
@@ -71,7 +73,7 @@ final class GalleryVideoEmbed
         $detected = ExternalMediaUrl::detectProvider($host, $url);
 
         return match ($source) {
-            GalleryVideoSource::Youtube->value => $detected === 'youtube',
+            GalleryVideoSource::Youtube->value => ExternalMediaUrl::youtubeId($url) !== null,
             GalleryVideoSource::Instagram->value => $detected === 'instagram',
             GalleryVideoSource::Facebook->value => $detected === 'facebook',
             GalleryVideoSource::Other->value => $scheme === 'https',
@@ -80,26 +82,35 @@ final class GalleryVideoEmbed
     }
 
     /**
-     * @return array{valid: bool, source: string, embed_url: string|null, open_url: string|null, mode: string, poster_url: string|null, cta_label: string|null, message: string|null}
+     * @return array{valid: bool, source: string, video_id: string|null, embed_url: string|null, open_url: string|null, mode: string, poster_url: string|null, cta_label: string|null, message: string|null}
      */
     private static function youtube(string $url): array
     {
-        $resolved = ExternalMediaUrl::resolve($url, 'youtube');
-        $embed = $resolved['embed_url'];
-        $poster = null;
-        if (is_string($embed) && preg_match('#/embed/([A-Za-z0-9_-]+)#', $embed, $m)) {
-            $poster = 'https://i.ytimg.com/vi/'.$m[1].'/hqdefault.jpg';
+        $id = ExternalMediaUrl::youtubeId($url);
+        if ($id === null) {
+            return [
+                'valid' => false,
+                'source' => 'youtube',
+                'video_id' => null,
+                'embed_url' => null,
+                'open_url' => null,
+                'mode' => 'link',
+                'poster_url' => null,
+                'cta_label' => null,
+                'message' => 'Enter a valid YouTube watch, youtu.be, Shorts, or embed URL.',
+            ];
         }
 
         return [
-            'valid' => (bool) $resolved['valid'],
+            'valid' => true,
             'source' => 'youtube',
-            'embed_url' => $embed,
-            'open_url' => $resolved['open_url'] ?: $url,
-            'mode' => $resolved['mode'],
-            'poster_url' => $poster,
-            'cta_label' => $resolved['mode'] === 'link' ? 'Watch on YouTube' : null,
-            'message' => $resolved['message'],
+            'video_id' => $id,
+            'embed_url' => 'https://www.youtube-nocookie.com/embed/'.$id,
+            'open_url' => null,
+            'mode' => 'embed',
+            'poster_url' => 'https://i.ytimg.com/vi/'.$id.'/hqdefault.jpg',
+            'cta_label' => null,
+            'message' => null,
         ];
     }
 
@@ -113,6 +124,7 @@ final class GalleryVideoEmbed
             return [
                 'valid' => true,
                 'source' => 'instagram',
+                'video_id' => null,
                 'embed_url' => null,
                 'open_url' => $url,
                 'mode' => 'link',
@@ -128,6 +140,7 @@ final class GalleryVideoEmbed
         return [
             'valid' => true,
             'source' => 'instagram',
+            'video_id' => null,
             'embed_url' => 'https://www.instagram.com/'.$kind.'/'.$code.'/embed/',
             'open_url' => 'https://www.instagram.com/'.$kind.'/'.$code.'/',
             'mode' => 'embed',
@@ -145,6 +158,7 @@ final class GalleryVideoEmbed
         return [
             'valid' => true,
             'source' => 'facebook',
+            'video_id' => null,
             'embed_url' => 'https://www.facebook.com/plugins/video.php?href='.rawurlencode($url).'&show_text=0',
             'open_url' => $url,
             'mode' => 'embed',
@@ -162,6 +176,20 @@ final class GalleryVideoEmbed
         $resolved = ExternalMediaUrl::resolve($url);
         $mode = $resolved['mode'];
         $embed = $resolved['embed_url'];
+        $youtubeId = ExternalMediaUrl::youtubeId($url);
+        if ($youtubeId !== null) {
+            return [
+                'valid' => true,
+                'source' => 'other',
+                'video_id' => $youtubeId,
+                'embed_url' => 'https://www.youtube-nocookie.com/embed/'.$youtubeId,
+                'open_url' => null,
+                'mode' => 'embed',
+                'poster_url' => 'https://i.ytimg.com/vi/'.$youtubeId.'/hqdefault.jpg',
+                'cta_label' => null,
+                'message' => null,
+            ];
+        }
         if ($mode === 'embed' && ! self::isAllowedOtherEmbed($embed)) {
             $mode = 'link';
             $embed = null;
@@ -170,6 +198,7 @@ final class GalleryVideoEmbed
         return [
             'valid' => (bool) $resolved['valid'],
             'source' => 'other',
+            'video_id' => null,
             'embed_url' => $embed,
             'open_url' => $resolved['open_url'] ?: $url,
             'mode' => $mode,

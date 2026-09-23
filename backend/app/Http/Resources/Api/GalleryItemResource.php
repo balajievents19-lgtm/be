@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Api;
 
+use App\Enums\GalleryVideoSource;
 use App\Models\GalleryItem;
 use App\Support\Brand;
 use App\Support\Media\GalleryVideoEmbed;
@@ -18,6 +19,7 @@ class GalleryItemResource extends JsonResource
     {
         // Public clients get thumbnail + safe preview only — never original_path / private URLs.
         $previewPath = $this->thumbnail ?: $this->publicPreviewPath();
+        $isYoutube = $this->isVideo() && $this->video_source === GalleryVideoSource::Youtube;
         $embed = $this->isVideo()
             ? GalleryVideoEmbed::resolve($this->video_source?->value, $this->video_url)
             : null;
@@ -32,20 +34,21 @@ class GalleryItemResource extends JsonResource
                 Brand::rewrite($this->description)
             ),
             // Backward-compatible keys: both are safe public previews (not downloadable originals).
-            'image' => $this->imageUrl($previewPath),
-            'thumbnail' => $this->imageUrl($this->thumbnail ?: $previewPath),
+            'image' => $this->imageUrl($previewPath) ?: ($embed['poster_url'] ?? null),
+            'thumbnail' => $this->imageUrl($this->thumbnail ?: $previewPath) ?: ($embed['poster_url'] ?? null),
             'alt_text' => Brand::rewrite($this->alt_text),
             'caption' => Brand::rewrite($this->caption),
-            'youtube_url' => $this->youtube_url,
+            'youtube_url' => $isYoutube ? null : $this->youtube_url,
             'vimeo_url' => $this->vimeo_url,
             'video_source' => $this->isVideo() ? $this->video_source?->value : null,
-            'video_url' => $this->isVideo() ? ($embed['open_url'] ?? null) : null,
+            'video_id' => $this->isVideo() ? ($embed['video_id'] ?? null) : null,
+            'video_url' => $this->isVideo() && ! $isYoutube ? ($embed['open_url'] ?? null) : null,
             'embed' => $this->when($this->isVideo(), [
                 'embed_url' => $embed['embed_url'] ?? null,
-                'open_url' => $embed['open_url'] ?? null,
+                'open_url' => $isYoutube ? null : ($embed['open_url'] ?? null),
                 'mode' => $embed['mode'] ?? 'link',
                 'poster_url' => $embed['poster_url'] ?? null,
-                'cta_label' => $embed['cta_label'] ?? null,
+                'cta_label' => $isYoutube ? null : ($embed['cta_label'] ?? null),
             ]),
             'featured' => $this->featured,
             'homepage_featured' => $this->homepage_featured,

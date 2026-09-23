@@ -31,6 +31,7 @@ export interface GalleryItem {
   youtube_url: string | null
   vimeo_url: string | null
   video_source?: string | null
+  video_id?: string | null
   video_url?: string | null
   embed?: GalleryItemEmbed | null
   featured: boolean

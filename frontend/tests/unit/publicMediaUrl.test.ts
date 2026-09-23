@@ -61,7 +61,11 @@ describe('rewritePublicStorageUrls', () => {
       slug: 'wedding-planning',
       desktop_image: 'https://www.balajiroyalevents.com/storage/hero-slides/desktop/slider-img.jpg',
       embed_url: 'https://www.youtube-nocookie.com/embed/abc'
-    })
+    }) as { slug: string, desktop_image: string, embed_url: string }
+    assert.equal(rewritten.slug, 'wedding-planning')
+    assert.equal(rewritten.desktop_image, '/storage/hero-slides/desktop/slider-img.jpg')
+    assert.equal(rewritten.embed_url, 'https://www.youtube-nocookie.com/embed/abc')
+  })
 
   it('leaves Blob download bodies unchanged', () => {
     const blob = new Blob([new Uint8Array([255, 216, 255])], { type: 'image/jpeg' })

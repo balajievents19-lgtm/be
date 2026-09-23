@@ -47,6 +47,13 @@ class GalleryVideoApiTest extends TestCase
         $this->assertSame('video', $json['media_type']);
         $this->assertSame('youtube', $json['video_source']);
         $this->assertSame('https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ', $json['embed']['embed_url']);
+        $this->assertSame('dQw4w9WgXcQ', $json['video_id']);
+        $this->assertNull($json['video_url']);
+        $this->assertNull($json['youtube_url']);
+        $this->assertNull($json['embed']['open_url']);
+        $this->assertNull($json['embed']['cta_label']);
+        $this->assertStringNotContainsString('Watch on YouTube', json_encode($json));
+        $this->assertStringNotContainsString('youtube.com/watch', json_encode($json));
         $this->assertFalse($json['download_available']);
         $this->assertArrayNotHasKey('original_path', $json);
         $this->assertStringNotContainsString('gallery/originals', json_encode($json));

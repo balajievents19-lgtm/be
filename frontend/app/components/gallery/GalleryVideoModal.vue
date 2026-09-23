@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import type { GalleryItem } from '~/types/gallery'
-import { isSafeGalleryEmbedUrl, isSafeGalleryOpenUrl } from '~/utils/galleryVideo'
+import {
+  isSafeGalleryEmbedUrl,
+  isSafeGalleryOpenUrl,
+  isYouTubeNocookieEmbedUrl,
+  youtubeEmbedUrlFromId
+} from '~/utils/galleryVideo'
 
 const props = defineProps<{
   open: boolean
@@ -14,17 +19,36 @@ const emit = defineEmits<{
 
 const closeButtonRef = ref<HTMLButtonElement | null>(null)
 
+const isYouTube = computed(() => props.item?.video_source === 'youtube')
+
 const embedUrl = computed(() => {
+  if (isYouTube.value) {
+    const fromEmbed = props.item?.embed?.embed_url
+    if (isYouTubeNocookieEmbedUrl(fromEmbed)) {
+      return fromEmbed
+    }
+
+    return youtubeEmbedUrlFromId(props.item?.video_id ?? null)
+  }
+
   const url = props.item?.embed?.embed_url
   return props.item?.embed?.mode === 'embed' && isSafeGalleryEmbedUrl(url) ? url : null
 })
 
 const openUrl = computed(() => {
+  if (isYouTube.value) {
+    return null
+  }
   const url = props.item?.embed?.open_url || props.item?.video_url
   return isSafeGalleryOpenUrl(url) ? url : null
 })
 
-const cta = computed(() => props.item?.embed?.cta_label || 'Watch video')
+const cta = computed(() => {
+  if (isYouTube.value) {
+    return null
+  }
+  return props.item?.embed?.cta_label || 'Watch video'
+})
 
 const close = () => {
   emit('update:open', false)
@@ -111,7 +135,7 @@ onUnmounted(() => {
               This video is hosted on {{ item.video_source || 'an external site' }}.
             </p>
             <a
-              v-if="openUrl"
+              v-if="openUrl && cta"
               :href="openUrl"
               target="_blank"
               rel="noopener noreferrer"
@@ -123,7 +147,7 @@ onUnmounted(() => {
               v-else
               class="m-0 text-sm text-white/70"
             >
-              This link cannot be opened safely.
+              {{ isYouTube ? 'This YouTube video cannot be embedded safely.' : 'This link cannot be opened safely.' }}
             </p>
           </div>
         </div>

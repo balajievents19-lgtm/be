@@ -13,6 +13,9 @@ class GalleryVideoEmbedTest extends TestCase
         $this->assertTrue($watch['valid']);
         $this->assertSame('embed', $watch['mode']);
         $this->assertSame('https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ', $watch['embed_url']);
+        $this->assertSame('dQw4w9WgXcQ', $watch['video_id']);
+        $this->assertNull($watch['open_url']);
+        $this->assertNull($watch['cta_label']);
         $this->assertSame('https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg', $watch['poster_url']);
 
         $short = GalleryVideoEmbed::resolve('youtube', 'https://www.youtube.com/shorts/dQw4w9WgXcQ');
@@ -47,7 +50,8 @@ class GalleryVideoEmbedTest extends TestCase
     {
         $yt = GalleryVideoEmbed::resolve('other', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ');
         $this->assertSame('embed', $yt['mode']);
-        $this->assertNotNull($yt['embed_url']);
+        $this->assertSame('https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ', $yt['embed_url']);
+        $this->assertNull($yt['open_url']);
 
         $page = GalleryVideoEmbed::resolve('other', 'https://example.com/about');
         $this->assertTrue($page['valid']);
@@ -58,6 +62,7 @@ class GalleryVideoEmbedTest extends TestCase
 
     public function test_rejects_javascript_and_source_mismatch(): void
     {
+        $this->assertFalse(GalleryVideoEmbed::sourceMatches('youtube', 'https://www.youtube.com/channel/UCxxxxxxxx'));
         $this->assertFalse(GalleryVideoEmbed::sourceMatches('youtube', 'javascript:alert(1)'));
         $this->assertFalse(GalleryVideoEmbed::sourceMatches('instagram', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'));
         $this->assertFalse(GalleryVideoEmbed::resolve('other', 'http://example.com/video')['valid']);
