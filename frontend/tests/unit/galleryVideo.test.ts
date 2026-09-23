@@ -11,6 +11,8 @@ describe('isSafeGalleryEmbedUrl', () => {
     assert.equal(isSafeGalleryEmbedUrl('https://www.instagram.com/reel/AbC/'), false)
     assert.equal(isSafeGalleryOpenUrl('https://example.com/our-film'), true)
     assert.equal(isSafeGalleryOpenUrl('javascript:alert(1)'), false)
+    assert.equal(isSafeGalleryOpenUrl('https://www.youtube.com/watch?v=dQw4w9WgXcQ'), false)
+    assert.equal(isSafeGalleryOpenUrl('https://youtu.be/dQw4w9WgXcQ'), false)
   })
 
   it('accepts only youtube-nocookie embed URLs for on-site YouTube playback', () => {

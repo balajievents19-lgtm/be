@@ -26,7 +26,7 @@ final class ExternalMediaUrl
     ];
 
     /**
-     * @return array{valid: bool, provider: string, embed_url: string|null, open_url: string, mode: string, message: string|null}
+     * @return array{valid: bool, provider: string, embed_url: string|null, open_url: string|null, mode: string, message: string|null}
      */
     public static function resolve(string $url, ?string $preferredProvider = null): array
     {
@@ -116,7 +116,7 @@ final class ExternalMediaUrl
     }
 
     /**
-     * @return array{valid: bool, provider: string, embed_url: string|null, open_url: string, mode: string, message: string|null}
+     * @return array{valid: bool, provider: string, embed_url: string|null, open_url: string|null, mode: string, message: string|null}
      */
     private static function resolveYouTube(string $url): array
     {
@@ -126,7 +126,7 @@ final class ExternalMediaUrl
                 'valid' => false,
                 'provider' => 'youtube',
                 'embed_url' => null,
-                'open_url' => $url,
+                'open_url' => null,
                 'mode' => 'link',
                 'message' => 'Enter a valid YouTube watch, youtu.be, Shorts, or embed URL.',
             ];
@@ -136,7 +136,7 @@ final class ExternalMediaUrl
             'valid' => true,
             'provider' => 'youtube',
             'embed_url' => 'https://www.youtube-nocookie.com/embed/'.$id,
-            'open_url' => 'https://www.youtube.com/watch?v='.$id,
+            'open_url' => null,
             'mode' => 'embed',
             'message' => null,
         ];

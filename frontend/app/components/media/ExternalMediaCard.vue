@@ -6,9 +6,22 @@ const props = defineProps<{
   item: ExternalMediaItem
 }>()
 
+const isYouTube = computed(() => props.item.provider === 'youtube')
 const canEmbed = computed(() => props.item.mode === 'embed' && isSafeEmbedUrl(props.item.embed_url))
-const openHref = computed(() => (isSafeOpenUrl(props.item.url) ? props.item.url : null))
-const cta = computed(() => props.item.cta_label || 'Open link')
+const openHref = computed(() => {
+  if (isYouTube.value) {
+    return null
+  }
+
+  return isSafeOpenUrl(props.item.url) ? props.item.url : null
+})
+const cta = computed(() => {
+  if (isYouTube.value) {
+    return null
+  }
+
+  return props.item.cta_label || 'Open link'
+})
 </script>
 
 <template>
@@ -41,7 +54,7 @@ const cta = computed(() => props.item.cta_label || 'Open link')
         </div>
         <div class="absolute inset-0 flex items-end justify-center bg-gradient-to-t from-black/70 to-transparent p-4">
           <a
-            v-if="openHref"
+            v-if="openHref && cta"
             :href="openHref"
             target="_blank"
             rel="noopener noreferrer"
@@ -70,13 +83,13 @@ const cta = computed(() => props.item.cta_label || 'Open link')
         {{ item.description }}
       </p>
       <a
-        v-if="canEmbed && openHref"
+        v-if="canEmbed && openHref && !isYouTube"
         :href="openHref"
         target="_blank"
         rel="noopener noreferrer"
         class="mt-3 inline-block text-sm font-medium text-brand-500 hover:underline"
       >
-        Open on {{ item.provider === 'youtube' ? 'YouTube' : item.provider === 'vimeo' ? 'Vimeo' : 'provider' }}
+        Open on {{ item.provider === 'vimeo' ? 'Vimeo' : 'provider' }}
       </a>
     </div>
   </article>

@@ -53,6 +53,7 @@ class GalleryVideoApiTest extends TestCase
         $this->assertNull($json['embed']['open_url']);
         $this->assertNull($json['embed']['cta_label']);
         $this->assertStringNotContainsString('Watch on YouTube', json_encode($json));
+        $this->assertStringNotContainsString('Open on YouTube', json_encode($json));
         $this->assertStringNotContainsString('youtube.com/watch', json_encode($json));
         $this->assertFalse($json['download_available']);
         $this->assertArrayNotHasKey('original_path', $json);

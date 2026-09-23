@@ -69,8 +69,31 @@ export const youtubeEmbedUrlFromId = (id: string | null | undefined): string | n
   return `https://www.youtube-nocookie.com/embed/${id}`
 }
 
-export const isSafeGalleryOpenUrl = (url: string | null | undefined): boolean => {
+const isYouTubeOutboundUrl = (url: string | null | undefined): boolean => {
   if (!url) {
+    return false
+  }
+
+  try {
+    const parsed = new URL(url)
+    const host = parsed.hostname.toLowerCase()
+
+    if (host === 'youtu.be' || host === 'www.youtu.be' || host === 'm.youtu.be') {
+      return true
+    }
+
+    if (host === 'youtube.com' || host === 'www.youtube.com' || host === 'm.youtube.com') {
+      return !parsed.pathname.toLowerCase().startsWith('/embed/')
+    }
+
+    return false
+  } catch {
+    return false
+  }
+}
+
+export const isSafeGalleryOpenUrl = (url: string | null | undefined): boolean => {
+  if (!url || isYouTubeOutboundUrl(url)) {
     return false
   }
 

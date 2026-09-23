@@ -36,7 +36,14 @@ class ExternalMediaApiTest extends TestCase
             ->assertJsonCount(1, 'data')
             ->assertJsonPath('data.0.title', 'Wedding Film')
             ->assertJsonPath('data.0.mode', 'embed')
-            ->assertJsonPath('data.0.embed_url', 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ');
+            ->assertJsonPath('data.0.embed_url', 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ')
+            ->assertJsonPath('data.0.url', null)
+            ->assertJsonPath('data.0.cta_label', null);
+
+        $payload = json_encode($this->getJson('/api/external-media')->json('data.0'));
+        $this->assertStringNotContainsString('youtube.com/watch', (string) $payload);
+        $this->assertStringNotContainsString('youtu.be/', (string) $payload);
+        $this->assertStringNotContainsString('Open on YouTube', (string) $payload);
     }
 
     public function test_instagram_and_drive_use_safe_link_mode(): void

@@ -10,7 +10,7 @@ export interface ExternalMediaItem {
   title: string
   media_type: string
   provider: string
-  url: string
+  url: string | null
   embed_url: string | null
   mode: ExternalMediaMode
   cta_label: string | null
@@ -42,8 +42,31 @@ export const isSafeEmbedUrl = (url: string | null | undefined): boolean => {
   }
 }
 
-export const isSafeOpenUrl = (url: string | null | undefined): boolean => {
+export const isYouTubeOutboundUrl = (url: string | null | undefined): boolean => {
   if (!url) {
+    return false
+  }
+
+  try {
+    const parsed = new URL(url)
+    const host = parsed.hostname.toLowerCase()
+
+    if (host === 'youtu.be' || host === 'www.youtu.be' || host === 'm.youtu.be') {
+      return true
+    }
+
+    if (host === 'youtube.com' || host === 'www.youtube.com' || host === 'm.youtube.com') {
+      return !parsed.pathname.toLowerCase().startsWith('/embed/')
+    }
+
+    return false
+  } catch {
+    return false
+  }
+}
+
+export const isSafeOpenUrl = (url: string | null | undefined): boolean => {
+  if (!url || isYouTubeOutboundUrl(url)) {
     return false
   }
   try {

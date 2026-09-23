@@ -38,7 +38,7 @@ class GalleryItemResource extends JsonResource
             'thumbnail' => $this->imageUrl($this->thumbnail ?: $previewPath) ?: ($embed['poster_url'] ?? null),
             'alt_text' => Brand::rewrite($this->alt_text),
             'caption' => Brand::rewrite($this->caption),
-            'youtube_url' => $isYoutube ? null : $this->youtube_url,
+            'youtube_url' => null,
             'vimeo_url' => $this->vimeo_url,
             'video_source' => $this->isVideo() ? $this->video_source?->value : null,
             'video_id' => $this->isVideo() ? ($embed['video_id'] ?? null) : null,

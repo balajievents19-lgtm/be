@@ -13,5 +13,7 @@ describe('externalMedia utils', () => {
   it('allows http(s) open links only', () => {
     assert.equal(isSafeOpenUrl('https://instagram.com/p/x'), true)
     assert.equal(isSafeOpenUrl('javascript:alert(1)'), false)
+    assert.equal(isSafeOpenUrl('https://www.youtube.com/watch?v=dQw4w9WgXcQ'), false)
+    assert.equal(isSafeOpenUrl('https://youtu.be/dQw4w9WgXcQ'), false)
   })
 })
