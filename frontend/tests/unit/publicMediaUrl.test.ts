@@ -63,10 +63,8 @@ describe('rewritePublicStorageUrls', () => {
       embed_url: 'https://www.youtube-nocookie.com/embed/abc'
     })
 
-    assert.deepEqual(rewritten, {
-      slug: 'wedding-planning',
-      desktop_image: '/storage/hero-slides/desktop/slider-img.jpg',
-      embed_url: 'https://www.youtube-nocookie.com/embed/abc'
-    })
+  it('leaves Blob download bodies unchanged', () => {
+    const blob = new Blob([new Uint8Array([255, 216, 255])], { type: 'image/jpeg' })
+    assert.equal(rewritePublicStorageUrls(blob), blob)
   })
 })

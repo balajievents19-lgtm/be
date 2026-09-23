@@ -45,6 +45,14 @@ export const rewritePublicStorageUrls = <T>(value: T): T => {
     return toPublicMediaUrl(value) as T
   }
 
+  // Binary downloads (gallery original) must not be walked as JSON objects.
+  if (typeof Blob !== 'undefined' && value instanceof Blob) {
+    return value
+  }
+  if (typeof ArrayBuffer !== 'undefined' && value instanceof ArrayBuffer) {
+    return value
+  }
+
   if (Array.isArray(value)) {
     return value.map(item => rewritePublicStorageUrls(item)) as T
   }
