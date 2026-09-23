@@ -29,6 +29,9 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->throttleApi('api');
         $middleware->append(SecurityHeaders::class);
+        $middleware->web(append: [
+            \App\Http\Middleware\AlignAdminAssetOrigin::class,
+        ]);
         $middleware->alias([
             'customer.verified' => \App\Http\Middleware\EnsureCustomerEmailVerified::class,
         ]);

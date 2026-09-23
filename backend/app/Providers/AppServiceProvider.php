@@ -56,6 +56,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Livewire temp files must not use the public disk. FILESYSTEM_DISK=public
+        // would otherwise publish livewire-tmp under /storage and break FilePond previews.
+        config([
+            'livewire.temporary_file_upload.disk' => 'local',
+        ]);
         // API customer routes must return 401 JSON, not redirect to a missing web "login" route.
         Authenticate::redirectUsing(function (Request $request): ?string {
             if ($request->is('api/*') || $request->expectsJson()) {
