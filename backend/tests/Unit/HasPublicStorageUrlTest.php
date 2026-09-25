@@ -28,7 +28,7 @@ class HasPublicStorageUrlTest extends TestCase
 
         $withQuery = $model->imageUrl('http://127.0.0.1:8000/storage/services/featured/photo.jpg?v=2');
         $this->assertProtectedDisplayUrl($withQuery, 'services/featured/photo.jpg');
-        $this->assertSame('v=2', parse_url((string) $withQuery, PHP_URL_QUERY));
+        $this->assertSame('v=2&d=v5', parse_url((string) $withQuery, PHP_URL_QUERY));
 
         $this->assertProtectedDisplayUrl($model->imageUrl('/storage/already.jpg'), 'already.jpg');
         $this->assertSame('/images/heading-blackBgimg.png', $model->imageUrl('/images/heading-blackBgimg.png'));

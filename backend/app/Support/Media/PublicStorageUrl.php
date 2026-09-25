@@ -33,7 +33,10 @@ class PublicStorageUrl
             return $value;
         }
 
-        return $query !== '' ? $url.'?'.$query : $url;
+        $displayCache = 'd=v5';
+        $combined = $query !== '' ? $query.'&'.$displayCache : $displayCache;
+
+        return $url.'?'.$combined;
     }
 
     /**
