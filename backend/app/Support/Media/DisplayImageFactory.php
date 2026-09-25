@@ -242,6 +242,9 @@ final class DisplayImageFactory
         if ($encoded['contents'] === '') {
             $encoded = $this->encodeImagick($target, $format, $quality);
         }
+        if ($encoded['contents'] === '') {
+            $encoded = $this->encodeCli($target, $format, $quality);
+        }
         if ($scratch instanceof GdImage) {
             imagedestroy($scratch);
         }
@@ -317,10 +320,14 @@ final class DisplayImageFactory
     private function canEncode(string $format): bool
     {
         if ($format === self::FORMAT_AVIF) {
-            return function_exists('imageavif') || $this->imagickSupports(self::FORMAT_AVIF);
+            return function_exists('imageavif')
+                || $this->imagickSupports(self::FORMAT_AVIF)
+                || $this->cliBinary(self::FORMAT_AVIF) !== null;
         }
         if ($format === self::FORMAT_WEBP) {
-            return function_exists('imagewebp') || $this->imagickSupports(self::FORMAT_WEBP);
+            return function_exists('imagewebp')
+                || $this->imagickSupports(self::FORMAT_WEBP)
+                || $this->cliBinary(self::FORMAT_WEBP) !== null;
         }
 
         return true;
@@ -339,6 +346,85 @@ final class DisplayImageFactory
         } catch (\Throwable) {
             return false;
         }
+    }
+
+    /**
+     * @return array{contents: string, mime: string}
+     */
+    private function encodeCli(GdImage $target, string $format, int $quality): array
+    {
+        $bin = $this->cliBinary($format);
+        if ($bin === null || ! in_array($format, [self::FORMAT_AVIF, self::FORMAT_WEBP], true)) {
+            return ['contents' => '', 'mime' => $this->mimeForFormat($format)];
+        }
+
+        $input = tempnam(sys_get_temp_dir(), 'bewm');
+        if ($input === false) {
+            return ['contents' => '', 'mime' => $this->mimeForFormat($format)];
+        }
+        $output = $input.'.'.$format;
+        if (! @imagepng($target, $input, 0) || ! is_file($input)) {
+            @unlink($input);
+
+            return ['contents' => '', 'mime' => $this->mimeForFormat($format)];
+        }
+
+        $base = strtolower((string) basename($bin));
+        if ($base === 'cwebp' || str_contains($base, 'cwebp')) {
+            $command = escapeshellarg($bin).' -quiet -q '.$quality.' '.escapeshellarg($input).' -o '.escapeshellarg($output);
+        } elseif ($base === 'avifenc' || str_contains($base, 'avifenc')) {
+            $command = escapeshellarg($bin).' --min 20 --max 42 -s 6 '.escapeshellarg($input).' -o '.escapeshellarg($output);
+        } else {
+            $command = escapeshellarg($bin).' '.escapeshellarg($input).' -quality '.$quality.' '.escapeshellarg($output);
+        }
+
+        $exit = 1;
+        @exec($command.' 2>'.(PHP_OS_FAMILY === 'Windows' ? 'NUL' : '/dev/null'), $ignored, $exit);
+        $contents = ($exit === 0 && is_file($output)) ? (string) file_get_contents($output) : '';
+        @unlink($input);
+        @unlink($output);
+
+        if ($contents === '') {
+            return ['contents' => '', 'mime' => $this->mimeForFormat($format)];
+        }
+
+        return [
+            'contents' => $contents,
+            'mime' => $this->mimeForFormat($format),
+        ];
+    }
+
+    private function cliBinary(string $format): ?string
+    {
+        static $cache = [];
+        if (array_key_exists($format, $cache)) {
+            return $cache[$format];
+        }
+
+        $names = match ($format) {
+            self::FORMAT_AVIF => ['avifenc', 'magick'],
+            self::FORMAT_WEBP => ['cwebp', 'magick'],
+            default => [],
+        };
+        foreach ($names as $name) {
+            $resolved = $this->resolveBinary($name);
+            if ($resolved !== null) {
+                return $cache[$format] = $resolved;
+            }
+        }
+
+        return $cache[$format] = null;
+    }
+
+    private function resolveBinary(string $name): ?string
+    {
+        $command = PHP_OS_FAMILY === 'Windows' ? 'where '.escapeshellarg($name) : 'command -v '.escapeshellarg($name);
+        $line = @exec($command);
+        if (! is_string($line) || $line === '' || ! is_file($line)) {
+            return null;
+        }
+
+        return $line;
     }
 
     private function flattenForJpeg(GdImage $canvas): ?GdImage

@@ -59,6 +59,12 @@ if [[ "$(id -un)" == "root" && -f "$APP_ROOT/deploy/sudoers.balaji-deploy" ]]; t
   install -m 440 "$APP_ROOT/deploy/sudoers.balaji-deploy" /etc/sudoers.d/balaji-deploy
 fi
 
+if [[ "$(id -un)" == "root" ]] && ! command -v cwebp >/dev/null 2>&1; then
+  log "Installing libwebp-tools (cwebp) for photo display encoding"
+  DEBIAN_FRONTEND=noninteractive apt-get update -qq
+  DEBIAN_FRONTEND=noninteractive apt-get install -y -qq webp libwebp-tools || log "cwebp package install skipped"
+fi
+
 log "Laravel composer + migrate + caches"
 cd "$APP_ROOT/backend"
 as_app /usr/bin/composer install --no-dev --optimize-autoloader --no-interaction

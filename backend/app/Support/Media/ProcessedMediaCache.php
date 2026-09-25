@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Storage;
  */
 final class ProcessedMediaCache
 {
-    public const VERSION = 'wm3x3-opt-v2';
+    public const VERSION = 'wm3x3-opt-v3';
 
     /**
      * @param  callable(): array{contents: string, mime: string}  $producer
