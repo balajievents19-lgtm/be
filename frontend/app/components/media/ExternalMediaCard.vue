@@ -26,12 +26,11 @@ const cta = computed(() => {
 
 <template>
   <article class="flex h-full flex-col overflow-hidden rounded-[8px] border border-solid border-[#ececec] bg-white shadow-[0_6px_18px_rgba(16,15,15,0.06)]">
-    <div class="relative aspect-video overflow-hidden bg-[#111827]">
+    <div class="card-media-frame bg-[#111827]">
       <iframe
         v-if="canEmbed && item.embed_url"
         :src="item.embed_url"
         :title="item.title"
-        class="absolute inset-0 h-full w-full border-0"
         loading="lazy"
         referrerpolicy="strict-origin-when-cross-origin"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -42,13 +41,14 @@ const cta = computed(() => {
           v-if="item.thumbnail"
           :src="item.thumbnail"
           :alt="item.title"
-          class="h-full w-full object-cover"
+          width="1200"
+          height="1200"
           loading="lazy"
           decoding="async"
         >
         <div
           v-else
-          class="flex h-full w-full items-center justify-center bg-[#1f2937] px-4 text-center text-sm text-white/80"
+          class="card-media-fallback flex items-center justify-center bg-[#1f2937] px-4 text-center text-sm text-white/80"
         >
           {{ item.provider }}
         </div>

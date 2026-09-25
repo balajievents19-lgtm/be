@@ -90,15 +90,16 @@ const postMeta = (post: BlogPostItem) => {
                 v-if="postImage(featured)"
                 class="w-full px-[15px] min-[768px]:w-1/2"
               >
-                <img
-                  :src="postImage(featured)"
-                  :alt="featured.alt_text || featured.title"
-                  class="block h-auto w-full"
-                  width="770"
-                  height="420"
-                  loading="lazy"
-                  decoding="async"
-                >
+                <div class="card-media-frame">
+                  <img
+                    :src="postImage(featured)"
+                    :alt="featured.alt_text || featured.title"
+                    width="1200"
+                    height="1200"
+                    loading="lazy"
+                    decoding="async"
+                  >
+                </div>
               </div>
               <div
                 class="w-full px-[15px]"
@@ -187,16 +188,19 @@ const postMeta = (post: BlogPostItem) => {
         >
           <article class="news-box style3 mb-[30px] overflow-hidden bg-white">
             <div class="max-[991px]:overflow-hidden max-[767px]:block">
-              <img
+              <div
                 v-if="postImage(sideCard)"
-                :src="postImage(sideCard)"
-                :alt="sideCard.alt_text || sideCard.title"
-                class="block h-auto w-full max-[991px]:float-left max-[991px]:w-1/2 max-[991px]:pr-[15px] max-[767px]:float-none max-[767px]:w-full max-[767px]:pr-0"
-                width="370"
-                height="240"
-                loading="lazy"
-                decoding="async"
+                class="card-media-frame"
               >
+                <img
+                  :src="postImage(sideCard)"
+                  :alt="sideCard.alt_text || sideCard.title"
+                  width="1200"
+                  height="1200"
+                  loading="lazy"
+                  decoding="async"
+                >
+              </div>
               <div
                 class="px-[50px] pt-[50px] pb-[60px] max-[991px]:float-left max-[991px]:w-1/2 max-[991px]:pt-[30px] max-[767px]:float-none max-[767px]:w-full max-[767px]:p-[30px]"
               >

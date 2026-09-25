@@ -107,22 +107,21 @@ const eventLink = (item: EventOverviewItem) => item.link_url || '/services'
           >
             <div class="px-[15px]">
               <article class="event-box block pt-[42px] text-center">
-                <div class="group relative mb-[22px] block w-full bg-black text-center">
+                <div class="group relative mb-[22px] card-media-frame bg-black text-center">
+                  <img
+                    :src="event.image"
+                    :alt="event.title"
+                    width="1200"
+                    height="1200"
+                    class="transition-opacity duration-[350ms] ease-in-out group-hover:opacity-70"
+                    loading="lazy"
+                    decoding="async"
+                  >
                   <NuxtLink
                     :to="eventLink(event)"
-                    class="relative block"
+                    class="absolute inset-0 z-[1] block"
                     :aria-label="event.title"
                   >
-                    <img
-                      :src="event.image"
-                      :alt="event.title"
-                      width="370"
-                      height="300"
-                      class="mx-auto block h-auto w-full max-w-full transition-opacity duration-[350ms] ease-in-out group-hover:opacity-70"
-                      loading="lazy"
-                      decoding="async"
-                    >
-
                     <span
                       class="capsan pointer-events-none absolute inset-0 h-full w-full scale-0 text-center opacity-0 transition-[opacity,transform] duration-[350ms] ease-in-out group-hover:scale-100 group-hover:opacity-100 group-focus-within:scale-100 group-focus-within:opacity-100"
                       aria-hidden="true"

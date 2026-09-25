@@ -55,16 +55,19 @@ const eventLink = (item: { link_url: string | null }) => item.link_url || '/cont
               :key="item.id"
               class="overflow-hidden rounded-2xl border border-[#ead9c4] bg-white shadow-[0_8px_24px_rgba(26,18,8,0.06)]"
             >
-              <img
+              <div
                 v-if="item.image"
-                :src="item.image"
-                :alt="item.title"
-                class="aspect-[16/10] h-auto w-full object-cover"
-                loading="lazy"
-                decoding="async"
-                width="640"
-                height="400"
+                class="card-media-frame"
               >
+                <img
+                  :src="item.image"
+                  :alt="item.title"
+                  loading="lazy"
+                  decoding="async"
+                  width="1200"
+                  height="1200"
+                >
+              </div>
               <div class="p-5">
                 <h2 class="font-['Domine',Georgia,serif] text-xl text-[#222]">
                   {{ item.title }}

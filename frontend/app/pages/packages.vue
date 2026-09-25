@@ -76,14 +76,13 @@ const orderedPackages = computed(() => {
               <div class="h-full border border-solid border-[#e6e6e6] bg-white">
                 <div
                   v-if="pkg.image"
-                  class="overflow-hidden bg-[#e1e8ed]"
+                  class="card-media-frame"
                 >
                   <img
                     :src="pkg.image"
                     :alt="pkg.name"
-                    class="block h-auto w-full object-cover"
-                    width="400"
-                    height="260"
+                    width="1200"
+                    height="1200"
                     loading="lazy"
                     decoding="async"
                   >

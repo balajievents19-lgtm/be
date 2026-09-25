@@ -67,16 +67,19 @@ const postImage = (post: { featured_image: string | null, thumbnail: string | nu
               class="mb-[30px] w-full px-[15px] min-[768px]:w-1/2 min-[992px]:w-1/3"
             >
               <div class="news-box h-full bg-surface-muted">
-                <img
+                <div
                   v-if="postImage(post)"
-                  :src="postImage(post)"
-                  :alt="post.alt_text || post.title"
-                  class="block h-auto w-full"
-                  width="370"
-                  height="240"
-                  loading="lazy"
-                  decoding="async"
+                  class="card-media-frame"
                 >
+                  <img
+                    :src="postImage(post)"
+                    :alt="post.alt_text || post.title"
+                    width="1200"
+                    height="1200"
+                    loading="lazy"
+                    decoding="async"
+                  >
+                </div>
                 <div class="p-8">
                   <div class="relative mb-5 pb-[15px]">
                     <h2 class="m-0 block font-['Domine',Georgia,'Times_New_Roman',serif] text-xl font-bold leading-8 text-[#333333]">

@@ -94,14 +94,13 @@ const photoLabel = (category: GalleryCategoryCard) => {
           >
             <div class="group h-full overflow-hidden rounded-[10px] border border-solid border-[#ececec] bg-white shadow-[0_8px_24px_rgba(16,15,15,0.08)] transition-shadow duration-300 hover:shadow-[0_12px_30px_rgba(241,91,34,0.18)]">
               <div class="relative">
-                <div class="relative aspect-[4/3] overflow-hidden bg-[#e1e8ed]">
+                <div class="card-media-frame">
                   <img
                     v-if="category.cover_image"
                     :src="category.cover_image"
                     :alt="category.name"
-                    class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    width="400"
-                    height="300"
+                    width="1200"
+                    height="1200"
                     loading="lazy"
                     decoding="async"
                     draggable="false"
@@ -109,7 +108,7 @@ const photoLabel = (category: GalleryCategoryCard) => {
                   >
                   <div
                     v-else
-                    class="flex h-full w-full items-center justify-center bg-[#d7dee4] text-sm text-[#666]"
+                    class="card-media-fallback flex items-center justify-center bg-[#d7dee4] text-sm text-[#666]"
                   >
                     {{ category.name }}
                   </div>
