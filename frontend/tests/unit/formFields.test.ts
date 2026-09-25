@@ -3,8 +3,10 @@ import { describe, it } from 'node:test'
 import {
   buildProgramLocationLabel,
   formatEventDateDisplay,
+  isExactTenDigitMobile,
   isPastEventDate,
-  isValidEnquiryPhone
+  isValidEnquiryPhone,
+  sanitizeIndianMobileDigits
 } from '../../app/utils/formFields.ts'
 
 describe('formFields utils', () => {
@@ -40,5 +42,22 @@ describe('formFields utils', () => {
     assert.equal(isValidEnquiryPhone('+91 98765 43210'), true)
     assert.equal(isValidEnquiryPhone('12345'), false)
     assert.equal(isValidEnquiryPhone('abcdefghij'), false)
+  })
+
+  it('accepts only exact 10-digit Indian mobile numbers', () => {
+    assert.equal(isExactTenDigitMobile('9876543210'), true)
+    assert.equal(isExactTenDigitMobile('0123456789'), true)
+    assert.equal(isExactTenDigitMobile('abcdefghij'), false)
+    assert.equal(isExactTenDigitMobile('987654321'), false)
+    assert.equal(isExactTenDigitMobile('98765432101'), false)
+    assert.equal(isExactTenDigitMobile('98765 43210'), false)
+    assert.equal(isExactTenDigitMobile('+919876543210'), false)
+  })
+
+  it('sanitizes mobile input to digits only, max 10', () => {
+    assert.equal(sanitizeIndianMobileDigits('ab98cd765ef43210xyz'), '9876543210')
+    assert.equal(sanitizeIndianMobileDigits('98765 43210'), '9876543210')
+    assert.equal(sanitizeIndianMobileDigits('9876543210123'), '9876543210')
+    assert.equal(sanitizeIndianMobileDigits('phone'), '')
   })
 })

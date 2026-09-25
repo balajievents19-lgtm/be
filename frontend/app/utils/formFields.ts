@@ -42,6 +42,9 @@ export const buildProgramLocationLabel = (parts: {
 /** Customer mobile / service inquiry: exactly 10 digits, any starting digit. */
 export const isExactTenDigitMobile = (value: string): boolean => /^[0-9]{10}$/.test(value)
 
+/** Strip non-digits and cap at 10 so mobile fields cannot accept letters or extra digits. */
+export const sanitizeIndianMobileDigits = (value: string): string => value.replace(/\D/g, '').slice(0, 10)
+
 /** Enquiry phone: 10–15 digits after stripping formatting. */
 export const isValidEnquiryPhone = (value: string): boolean => {
   const trimmed = value.trim()
