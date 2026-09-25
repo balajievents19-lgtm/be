@@ -23,7 +23,15 @@ class MediaDisplayController extends Controller
         $disk = Storage::disk('public');
         abort_if(! $disk->exists($path), 404);
 
-        $etag = $cache->etag($disk, $path, DisplayImageFactory::MODE_DISPLAY);
+        $sourceMime = null;
+        try {
+            $sourceMime = $disk->mimeType($path);
+        } catch (\Throwable) {
+            $sourceMime = null;
+        }
+
+        $format = $factory->negotiateDisplayFormat($request->header('Accept'), $path, $sourceMime);
+        $etag = $cache->etag($disk, $path, DisplayImageFactory::MODE_DISPLAY, $format);
         $mtime = $disk->lastModified($path);
 
         $notModified = new Response();
@@ -33,6 +41,7 @@ class MediaDisplayController extends Controller
         $notModified->setEtag($etag);
         $notModified->setLastModified((new \DateTimeImmutable())->setTimestamp($mtime));
         $notModified->headers->set('X-Content-Type-Options', 'nosniff');
+        $notModified->headers->set('Vary', 'Accept');
         if ($notModified->isNotModified($request)) {
             return $notModified;
         }
@@ -41,7 +50,8 @@ class MediaDisplayController extends Controller
             $disk,
             $path,
             DisplayImageFactory::MODE_DISPLAY,
-            fn (): array => $factory->make($disk->get($path), $path, DisplayImageFactory::MODE_DISPLAY)
+            $format,
+            fn (): array => $factory->make($disk->get($path), $path, DisplayImageFactory::MODE_DISPLAY, $format)
         );
 
         return response($rendered['contents'], 200, [
@@ -52,6 +62,7 @@ class MediaDisplayController extends Controller
             'Last-Modified' => gmdate('D, d M Y H:i:s', $rendered['last_modified']).' GMT',
             'X-Content-Type-Options' => 'nosniff',
             'X-Media-Cache' => $rendered['hit'] ? 'HIT' : 'MISS',
+            'Vary' => 'Accept',
         ]);
     }
 }

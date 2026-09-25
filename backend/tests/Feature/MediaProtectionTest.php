@@ -72,6 +72,63 @@ class MediaProtectionTest extends TestCase
         $this->assertNull(ProtectedMedia::pathFromToken('not-a-valid-token'));
     }
 
+    public function test_display_negotiates_avif_webp_jpeg_and_keeps_logos_as_png(): void
+    {
+        Storage::fake('public');
+        Storage::fake('local');
+        $this->seed(RBACSeeder::class);
+
+        $photo = $this->photoPng(500, 500);
+        Storage::disk('public')->put('gallery/hall.png', $photo);
+        $logo = $this->tinyPng();
+        Storage::disk('public')->put('settings/brand/logo.png', $logo);
+
+        $photoToken = basename((string) parse_url((string) PublicStorageUrl::make('gallery/hall.png'), PHP_URL_PATH));
+        $logoToken = basename((string) parse_url((string) PublicStorageUrl::make('settings/brand/logo.png'), PHP_URL_PATH));
+
+        $pngBaseline = app(\App\Support\Media\DisplayImageFactory::class)
+            ->make($photo, 'gallery/hall.png', \App\Support\Media\DisplayImageFactory::MODE_DISPLAY, \App\Support\Media\DisplayImageFactory::FORMAT_PNG);
+        $this->assertSame('image/png', $pngBaseline['mime']);
+
+        $avif = $this->withHeaders(['Accept' => 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8'])
+            ->get('/protected-media/'.$photoToken);
+        $avif->assertOk()
+            ->assertHeader('Content-Type', 'image/avif')
+            ->assertHeader('Vary', 'Accept');
+        $this->assertLessThan(strlen($pngBaseline['contents']), strlen((string) $avif->getContent()));
+        $this->assertLessThan((int) (strlen($pngBaseline['contents']) * 0.85), strlen((string) $avif->getContent()));
+        $this->assertGreaterThan(2000, strlen((string) $avif->getContent()));
+        $this->assertNotSame($photo, $avif->getContent());
+        $this->assertSame($photo, Storage::disk('public')->get('gallery/hall.png'));
+
+        $decoded = imagecreatefromstring((string) $avif->getContent());
+        $this->assertInstanceOf(\GdImage::class, $decoded);
+        $this->assertSame(500, imagesx($decoded));
+        $this->assertSame(500, imagesy($decoded));
+        imagedestroy($decoded);
+
+        $webp = $this->withHeaders(['Accept' => 'image/webp,image/apng,image/*,*/*;q=0.8'])
+            ->get('/protected-media/'.$photoToken);
+        $webp->assertOk()->assertHeader('Content-Type', 'image/webp');
+        $this->assertLessThan(strlen($pngBaseline['contents']), strlen((string) $webp->getContent()));
+        $this->assertNotSame($avif->headers->get('etag'), $webp->headers->get('etag'));
+
+        $jpeg = $this->withHeaders(['Accept' => 'image/jpeg,image/*,*/*;q=0.8'])
+            ->get('/protected-media/'.$photoToken);
+        $jpeg->assertOk()->assertHeader('Content-Type', 'image/jpeg');
+
+        $etag = (string) $avif->headers->get('etag');
+        $this->withHeaders([
+            'Accept' => 'image/avif,image/webp',
+            'If-None-Match' => $etag,
+        ])->get('/protected-media/'.$photoToken)->assertStatus(304);
+
+        $this->withHeaders(['Accept' => 'image/avif,image/webp'])
+            ->get('/protected-media/'.$logoToken)
+            ->assertOk()
+            ->assertHeader('Content-Type', 'image/png');
+    }
+
     private function tinyJpeg(): string
     {
         $image = imagecreatetruecolor(48, 32);
@@ -80,6 +137,44 @@ class MediaProtectionTest extends TestCase
         imagefilledrectangle($image, 0, 0, 47, 31, $fill);
         ob_start();
         imagejpeg($image, null, 80);
+        $binary = (string) ob_get_clean();
+        imagedestroy($image);
+
+        return $binary;
+    }
+
+    private function tinyPng(): string
+    {
+        $image = imagecreatetruecolor(64, 64);
+        $this->assertNotFalse($image);
+        imagealphablending($image, false);
+        imagesavealpha($image, true);
+        $transparent = imagecolorallocatealpha($image, 0, 0, 0, 127);
+        imagefilledrectangle($image, 0, 0, 63, 63, $transparent);
+        imagealphablending($image, true);
+        $ink = imagecolorallocate($image, 241, 91, 34);
+        imagefilledellipse($image, 32, 32, 28, 28, $ink);
+        ob_start();
+        imagepng($image);
+        $binary = (string) ob_get_clean();
+        imagedestroy($image);
+
+        return $binary;
+    }
+
+    private function photoPng(int $width, int $height): string
+    {
+        $image = imagecreatetruecolor($width, $height);
+        $this->assertNotFalse($image);
+        for ($y = 0; $y < $height; $y++) {
+            for ($x = 0; $x < $width; $x++) {
+                $n = (($x * 73) ^ ($y * 151) ^ ($x * $y * 19)) & 255;
+                $color = imagecolorallocate($image, $n, 255 - $n, ($x + $y) % 220);
+                imagesetpixel($image, $x, $y, $color);
+            }
+        }
+        ob_start();
+        imagepng($image, null, 6);
         $binary = (string) ob_get_clean();
         imagedestroy($image);
 

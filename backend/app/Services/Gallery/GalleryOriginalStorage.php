@@ -171,6 +171,7 @@ final class GalleryOriginalStorage
             $source,
             $path,
             DisplayImageFactory::MODE_DOWNLOAD,
+            $factory->downloadFormat($path),
             function () use ($factory, $source, $path): array {
                 $original = $source->get($path);
                 if (! is_string($original) || $original === '') {

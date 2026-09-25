@@ -11,15 +11,15 @@ use Illuminate\Support\Facades\Storage;
  */
 final class ProcessedMediaCache
 {
-    public const VERSION = 'wm3x3-v1';
+    public const VERSION = 'wm3x3-opt-v1';
 
     /**
      * @param  callable(): array{contents: string, mime: string}  $producer
      * @return array{contents: string, mime: string, etag: string, last_modified: int, hit: bool}
      */
-    public function remember(Filesystem $sourceDisk, string $relativePath, string $mode, callable $producer): array
+    public function remember(Filesystem $sourceDisk, string $relativePath, string $mode, string $format, callable $producer): array
     {
-        $etag = $this->etag($sourceDisk, $relativePath, $mode);
+        $etag = $this->etag($sourceDisk, $relativePath, $mode, $format);
         $payloadPath = $this->payloadPath($etag);
         $metaPath = $this->metaPath($etag);
         $cache = Storage::disk('local');
@@ -45,6 +45,7 @@ final class ProcessedMediaCache
             'mime' => $rendered['mime'],
             'source_mtime' => $mtime,
             'mode' => $mode,
+            'format' => $format,
             'version' => self::VERSION,
         ]));
 
@@ -57,7 +58,7 @@ final class ProcessedMediaCache
         ];
     }
 
-    public function etag(Filesystem $sourceDisk, string $relativePath, string $mode): string
+    public function etag(Filesystem $sourceDisk, string $relativePath, string $mode, string $format): string
     {
         $mtime = $this->mtime($sourceDisk, $relativePath);
         $size = 0;
@@ -67,7 +68,7 @@ final class ProcessedMediaCache
             $size = 0;
         }
 
-        return hash('sha256', self::VERSION.'|'.$mode.'|'.$relativePath.'|'.$mtime.'|'.$size);
+        return hash('sha256', self::VERSION.'|'.$mode.'|'.$format.'|'.$relativePath.'|'.$mtime.'|'.$size);
     }
 
     public function payloadPath(string $etag): string

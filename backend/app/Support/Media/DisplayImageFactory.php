@@ -18,12 +18,52 @@ final class DisplayImageFactory
 
     public const MODE_DOWNLOAD = 'download';
 
+    public const FORMAT_AVIF = 'avif';
+
+    public const FORMAT_WEBP = 'webp';
+
+    public const FORMAT_JPEG = 'jpeg';
+
+    public const FORMAT_PNG = 'png';
+
+    /**
+     * Pick a display encode format from Accept. Logos/GIF/SVG/ICO stay on their source type.
+     */
+    public function negotiateDisplayFormat(?string $accept, string $relativePath, ?string $sourceMime = null): string
+    {
+        if ($this->mustPreserveSourceFormat($relativePath, $sourceMime)) {
+            return $this->preservedFormat($relativePath, $sourceMime);
+        }
+
+        $accept = strtolower((string) $accept);
+        if (str_contains($accept, 'image/avif') && function_exists('imageavif')) {
+            return self::FORMAT_AVIF;
+        }
+        if (str_contains($accept, 'image/webp') && function_exists('imagewebp')) {
+            return self::FORMAT_WEBP;
+        }
+
+        return self::FORMAT_JPEG;
+    }
+
+    public function downloadFormat(string $relativePath, ?string $sourceMime = null): string
+    {
+        if ($this->mustPreserveSourceFormat($relativePath, $sourceMime)) {
+            return $this->preservedFormat($relativePath, $sourceMime);
+        }
+
+        return self::FORMAT_JPEG;
+    }
+
     /**
      * @return array{contents: string, mime: string}
      */
-    public function make(?string $binary, string $relativePath, string $mode = self::MODE_DISPLAY): array
+    public function make(?string $binary, string $relativePath, string $mode = self::MODE_DISPLAY, ?string $format = null): array
     {
         $fallbackMime = $this->guessMime($binary, $relativePath);
+        $format ??= $mode === self::MODE_DOWNLOAD
+            ? $this->downloadFormat($relativePath, $fallbackMime)
+            : self::FORMAT_WEBP;
         $allowOriginalFallback = $mode !== self::MODE_DOWNLOAD;
 
         if (! is_string($binary) || $binary === '' || ! function_exists('imagecreatefromstring')) {
@@ -63,7 +103,7 @@ final class DisplayImageFactory
         imagesavealpha($canvas, true);
         $this->paintTiledWatermark($canvas, $width, $height, Brand::NAME, $mode);
 
-        $encoded = $this->encode($canvas, $fallbackMime, $relativePath, $mode);
+        $encoded = $this->encode($canvas, $format, $mode);
         imagedestroy($canvas);
 
         if ($encoded['contents'] === '') {
@@ -155,31 +195,140 @@ final class DisplayImageFactory
     /**
      * @return array{contents: string, mime: string}
      */
-    private function encode(GdImage $canvas, string $fallbackMime, string $relativePath, string $mode): array
+    private function encode(GdImage $canvas, string $format, string $mode): array
     {
-        $quality = $mode === self::MODE_DOWNLOAD ? 90 : 82;
-        $isPng = str_contains($fallbackMime, 'png')
-            || str_ends_with(strtolower($relativePath), '.png');
-        $isWebp = str_contains($fallbackMime, 'webp')
-            || str_ends_with(strtolower($relativePath), '.webp');
+        $chain = match ($format) {
+            self::FORMAT_AVIF => [self::FORMAT_AVIF, self::FORMAT_WEBP, self::FORMAT_JPEG],
+            self::FORMAT_WEBP => [self::FORMAT_WEBP, self::FORMAT_JPEG],
+            self::FORMAT_PNG => [self::FORMAT_PNG],
+            default => [self::FORMAT_JPEG],
+        };
+
+        foreach ($chain as $candidate) {
+            $encoded = $this->encodeAs($canvas, $candidate, $mode);
+            if ($encoded['contents'] !== '') {
+                return $encoded;
+            }
+        }
+
+        return [
+            'contents' => '',
+            'mime' => $this->mimeForFormat($format),
+        ];
+    }
+
+    /**
+     * @return array{contents: string, mime: string}
+     */
+    private function encodeAs(GdImage $canvas, string $format, string $mode): array
+    {
+        $displayQuality = match ($format) {
+            self::FORMAT_AVIF => 58,
+            self::FORMAT_WEBP => 80,
+            default => 82,
+        };
+        $quality = $mode === self::MODE_DOWNLOAD ? 90 : $displayQuality;
+
+        $target = $canvas;
+        $scratch = null;
+        if ($format === self::FORMAT_JPEG) {
+            $scratch = $this->flattenForJpeg($canvas);
+            if ($scratch instanceof GdImage) {
+                $target = $scratch;
+            }
+        }
 
         ob_start();
-        if ($isPng) {
-            imagepng($canvas, null, 6);
-            $mime = 'image/png';
-        } elseif ($isWebp && function_exists('imagewebp')) {
-            imagewebp($canvas, null, $quality);
-            $mime = 'image/webp';
+        $ok = false;
+        if ($format === self::FORMAT_AVIF && function_exists('imageavif')) {
+            $ok = @imageavif($target, null, $quality);
+        } elseif ($format === self::FORMAT_WEBP && function_exists('imagewebp')) {
+            $ok = @imagewebp($target, null, $quality);
+        } elseif ($format === self::FORMAT_PNG) {
+            $ok = imagepng($target, null, 6);
         } else {
-            imagejpeg($canvas, null, $quality);
-            $mime = 'image/jpeg';
+            $ok = imagejpeg($target, null, $quality);
+            $format = self::FORMAT_JPEG;
         }
         $contents = (string) ob_get_clean();
+        if ($scratch instanceof GdImage) {
+            imagedestroy($scratch);
+        }
+
+        if (! $ok || $contents === '') {
+            return ['contents' => '', 'mime' => $this->mimeForFormat($format)];
+        }
 
         return [
             'contents' => $contents,
-            'mime' => $mime,
+            'mime' => $this->mimeForFormat($format),
         ];
+    }
+
+    private function flattenForJpeg(GdImage $canvas): ?GdImage
+    {
+        $width = imagesx($canvas);
+        $height = imagesy($canvas);
+        $flat = imagecreatetruecolor($width, $height);
+        if (! $flat instanceof GdImage) {
+            return null;
+        }
+
+        $white = imagecolorallocate($flat, 255, 255, 255);
+        imagefilledrectangle($flat, 0, 0, $width - 1, $height - 1, $white);
+        imagealphablending($flat, true);
+        imagecopy($flat, $canvas, 0, 0, 0, 0, $width, $height);
+
+        return $flat;
+    }
+
+    private function mustPreserveSourceFormat(string $relativePath, ?string $sourceMime): bool
+    {
+        $mime = strtolower((string) $sourceMime);
+        $extension = strtolower((string) pathinfo($relativePath, PATHINFO_EXTENSION));
+        if (in_array($extension, ['svg', 'gif', 'ico'], true)) {
+            return true;
+        }
+        if (str_contains($mime, 'svg') || str_contains($mime, 'gif') || str_contains($mime, 'icon')) {
+            return true;
+        }
+
+        return $this->isBrandAsset($relativePath);
+    }
+
+    private function isBrandAsset(string $relativePath): bool
+    {
+        $path = strtolower(str_replace('\\', '/', $relativePath));
+        $base = basename($path);
+
+        return str_contains($base, 'logo')
+            || str_contains($base, 'favicon')
+            || str_contains($path, '/brand/')
+            || str_contains($path, 'settings/brand');
+    }
+
+    private function preservedFormat(string $relativePath, ?string $sourceMime): string
+    {
+        $mime = strtolower((string) $sourceMime);
+        $extension = strtolower((string) pathinfo($relativePath, PATHINFO_EXTENSION));
+        if (str_contains($mime, 'jpeg') || in_array($extension, ['jpg', 'jpeg'], true)) {
+            return self::FORMAT_JPEG;
+        }
+        if (str_contains($mime, 'webp') || $extension === 'webp') {
+            return self::FORMAT_WEBP;
+        }
+
+        return self::FORMAT_PNG;
+    }
+
+    private function mimeForFormat(string $format): string
+    {
+        return match ($format) {
+            self::FORMAT_AVIF => 'image/avif',
+            self::FORMAT_WEBP => 'image/webp',
+            self::FORMAT_PNG => 'image/png',
+            default => 'image/jpeg',
+        };
     }
 
     /**
@@ -205,6 +354,7 @@ final class DisplayImageFactory
             'png' => 'image/png',
             'gif' => 'image/gif',
             'webp' => 'image/webp',
+            'avif' => 'image/avif',
             'svg' => 'image/svg+xml',
             'ico' => 'image/x-icon',
             default => null,
