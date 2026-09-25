@@ -3,27 +3,55 @@
 namespace App\Http\Controllers;
 
 use App\Support\Media\DisplayImageFactory;
+use App\Support\Media\ProcessedMediaCache;
 use App\Support\Media\ProtectedMedia;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response;
 
 class MediaDisplayController extends Controller
 {
-    public function __invoke(string $token, DisplayImageFactory $factory): Response
-    {
+    public function __invoke(
+        Request $request,
+        string $token,
+        DisplayImageFactory $factory,
+        ProcessedMediaCache $cache,
+    ): Response {
         $path = ProtectedMedia::pathFromToken($token);
         abort_if($path === null, 404);
 
         $disk = Storage::disk('public');
         abort_if(! $disk->exists($path), 404);
 
-        $rendered = $factory->make($disk->get($path), $path);
+        $etag = $cache->etag($disk, $path, DisplayImageFactory::MODE_DISPLAY);
+        $mtime = $disk->lastModified($path);
+
+        $notModified = new Response();
+        $notModified->setPublic();
+        $notModified->setMaxAge(86400);
+        $notModified->headers->addCacheControlDirective('must-revalidate');
+        $notModified->setEtag($etag);
+        $notModified->setLastModified((new \DateTimeImmutable())->setTimestamp($mtime));
+        $notModified->headers->set('X-Content-Type-Options', 'nosniff');
+        if ($notModified->isNotModified($request)) {
+            return $notModified;
+        }
+
+        $rendered = $cache->remember(
+            $disk,
+            $path,
+            DisplayImageFactory::MODE_DISPLAY,
+            fn (): array => $factory->make($disk->get($path), $path, DisplayImageFactory::MODE_DISPLAY)
+        );
 
         return response($rendered['contents'], 200, [
             'Content-Type' => $rendered['mime'],
             'Content-Disposition' => 'inline',
-            'Cache-Control' => 'public, max-age=86400',
+            'Cache-Control' => 'public, max-age=86400, must-revalidate',
+            'ETag' => '"'.$rendered['etag'].'"',
+            'Last-Modified' => gmdate('D, d M Y H:i:s', $rendered['last_modified']).' GMT',
             'X-Content-Type-Options' => 'nosniff',
+            'X-Media-Cache' => $rendered['hit'] ? 'HIT' : 'MISS',
         ]);
     }
 }

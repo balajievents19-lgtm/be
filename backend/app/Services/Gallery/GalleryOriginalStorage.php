@@ -4,6 +4,7 @@ namespace App\Services\Gallery;
 
 use App\Models\GalleryItem;
 use App\Support\Media\DisplayImageFactory;
+use App\Support\Media\ProcessedMediaCache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -165,12 +166,20 @@ final class GalleryOriginalStorage
             }
         }
 
-        $original = Storage::disk($disk)->get($path);
-        if (! is_string($original) || $original === '') {
-            throw new RuntimeException('Original file is not available.');
-        }
+        $source = Storage::disk($disk);
+        $rendered = app(ProcessedMediaCache::class)->remember(
+            $source,
+            $path,
+            DisplayImageFactory::MODE_DOWNLOAD,
+            function () use ($factory, $source, $path): array {
+                $original = $source->get($path);
+                if (! is_string($original) || $original === '') {
+                    throw new RuntimeException('Original file is not available.');
+                }
 
-        $rendered = $factory->makeForDownload($original, $path);
+                return $factory->makeForDownload($original, $path);
+            }
+        );
         $downloadName = $this->safeFilename($item, $rendered['mime']);
 
         return response($rendered['contents'], 200, [

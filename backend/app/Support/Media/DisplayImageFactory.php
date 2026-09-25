@@ -61,7 +61,7 @@ final class DisplayImageFactory
 
         imagealphablending($canvas, true);
         imagesavealpha($canvas, true);
-        $this->paintWatermark($canvas, $width, $height, $mode);
+        $this->paintTiledWatermark($canvas, $width, $height, Brand::NAME, $mode);
 
         $encoded = $this->encode($canvas, $fallbackMime, $relativePath, $mode);
         imagedestroy($canvas);
@@ -89,59 +89,34 @@ final class DisplayImageFactory
         return $rendered;
     }
 
-    private function paintWatermark(GdImage $image, int $width, int $height, string $mode): void
+    /**
+     * 3×3 tiled "Balaji Royal Events" watermark. Original pixels on disk are not written.
+     */
+    private function paintTiledWatermark(GdImage $image, int $width, int $height, string $label, string $mode): void
     {
-        $label = Brand::NAME;
-
-        if ($mode === self::MODE_DOWNLOAD) {
-            $this->paintDownloadWatermark($image, $width, $height, $label);
-
-            return;
+        $minSide = min($width, $height);
+        $maxScale = $mode === self::MODE_DOWNLOAD ? 11 : 8;
+        $scale = max(2, min($maxScale, (int) round($minSide / 150)));
+        $charWidth = imagefontwidth(5) * strlen($label);
+        $maxTextWidth = max($charWidth, (int) round($width * 0.28));
+        if ($charWidth * $scale > $maxTextWidth) {
+            $scale = max(1, (int) floor($maxTextWidth / $charWidth));
         }
+        $textWidth = $charWidth * $scale;
+        $textHeight = imagefontheight(5) * $scale;
+        $inkAlpha = $mode === self::MODE_DOWNLOAD ? 42 : 52;
+        $shadowAlpha = 72;
 
-        $pad = max(8, (int) round($width * 0.012));
-        $shadow = imagecolorallocatealpha($image, 0, 0, 0, 70);
-        $ink = imagecolorallocatealpha($image, 255, 255, 255, 55);
-        if ($shadow === false || $ink === false) {
-            return;
+        foreach ([0.18, 0.50, 0.82] as $fy) {
+            foreach ([0.18, 0.50, 0.82] as $fx) {
+                $x = (int) round(($width * $fx) - ($textWidth / 2));
+                $y = (int) round(($height * $fy) - ($textHeight / 2));
+                $x = max(4, min($width - $textWidth - 4, $x));
+                $y = max(4, min($height - $textHeight - 4, $y));
+                $this->drawScaledString($image, $label, $x + 2, $y + 2, $scale, 0, 0, 0, $shadowAlpha);
+                $this->drawScaledString($image, $label, $x, $y, $scale, 255, 255, 255, $inkAlpha);
+            }
         }
-
-        $font = 5;
-        $textWidth = imagefontwidth($font) * strlen($label);
-        $textHeight = imagefontheight($font);
-        $x = max($pad, $width - $textWidth - $pad);
-        $y = max($pad, $height - $textHeight - $pad);
-
-        imagestring($image, $font, $x + 1, $y + 1, $label, $shadow);
-        imagestring($image, $font, $x, $y, $label, $ink);
-    }
-
-    private function paintDownloadWatermark(GdImage $image, int $width, int $height, string $label): void
-    {
-        $bandHeight = max(28, (int) round($height * 0.09));
-        $band = imagecreatetruecolor($width, $bandHeight);
-        if (! $band instanceof GdImage) {
-            return;
-        }
-
-        imagealphablending($band, false);
-        imagesavealpha($band, true);
-        $bandFill = imagecolorallocatealpha($band, 14, 17, 35, 55);
-        imagefilledrectangle($band, 0, 0, $width - 1, $bandHeight - 1, $bandFill);
-        imagealphablending($band, true);
-
-        $scale = max(2, min(10, (int) round($width / 220)));
-        $this->drawScaledString($band, $label, 16, max(4, (int) round(($bandHeight - (imagefontheight(5) * $scale)) / 2)), $scale, 255, 255, 255, 20);
-        imagecopy($image, $band, 0, $height - $bandHeight, 0, 0, $width, $bandHeight);
-        imagedestroy($band);
-
-        $centerScale = max(3, min(14, (int) round($width / 160)));
-        $textWidth = imagefontwidth(5) * strlen($label) * $centerScale;
-        $textHeight = imagefontheight(5) * $centerScale;
-        $cx = max(8, (int) round(($width - $textWidth) / 2));
-        $cy = max(8, (int) round(($height - $textHeight) / 2));
-        $this->drawScaledString($image, $label, $cx + 2, $cy + 2, $centerScale, 0, 0, 0, 70);
-        $this->drawScaledString($image, $label, $cx, $cy, $centerScale, 255, 255, 255, 45);
     }
 
     private function drawScaledString(

@@ -19,6 +19,7 @@ class MediaProtectionTest extends TestCase
     public function test_display_route_serves_inline_image_and_storage_is_gated(): void
     {
         Storage::fake('public');
+        Storage::fake('local');
         $this->seed(RBACSeeder::class);
 
         $binary = $this->tinyJpeg();
@@ -29,9 +30,27 @@ class MediaProtectionTest extends TestCase
 
         $token = basename((string) parse_url((string) $url, PHP_URL_PATH));
 
-        $this->get('/protected-media/'.$token)
-            ->assertOk()
+        $first = $this->get('/protected-media/'.$token);
+        $first->assertOk()
             ->assertHeader('Content-Disposition', 'inline');
+        $this->assertStringContainsString('max-age=86400', (string) $first->headers->get('Cache-Control'));
+        $this->assertStringContainsString('must-revalidate', (string) $first->headers->get('Cache-Control'));
+
+        $etag = (string) $first->headers->get('etag');
+        $this->assertNotEmpty($etag);
+        $this->assertSame('MISS', $first->headers->get('x-media-cache'));
+        $this->assertNotSame($binary, $first->getContent());
+
+        $second = $this->get('/protected-media/'.$token);
+        $second->assertOk();
+        $this->assertSame('HIT', $second->headers->get('x-media-cache'));
+        $this->assertSame($first->getContent(), $second->getContent());
+
+        $this->withHeaders(['If-None-Match' => $etag])
+            ->get('/protected-media/'.$token)
+            ->assertStatus(304);
+
+        $this->assertSame($binary, Storage::disk('public')->get('gallery/hall.jpg'));
 
         $this->get('/storage/gallery/hall.jpg')->assertForbidden();
 
@@ -65,5 +84,32 @@ class MediaProtectionTest extends TestCase
         imagedestroy($image);
 
         return $binary;
+    }
+
+    public function test_factory_tiles_watermark_on_common_aspect_ratios(): void
+    {
+        $factory = app(\App\Support\Media\DisplayImageFactory::class);
+
+        foreach ([
+            [640, 960],
+            [1200, 800],
+            [800, 800],
+            [2000, 1200],
+        ] as [$w, $h]) {
+            $image = imagecreatetruecolor($w, $h);
+            $this->assertNotFalse($image);
+            $fill = imagecolorallocate($image, 8, 10, 16);
+            imagefilledrectangle($image, 0, 0, $w - 1, $h - 1, $fill);
+            ob_start();
+            imagejpeg($image, null, 90);
+            $binary = (string) ob_get_clean();
+            imagedestroy($image);
+
+            $rendered = $factory->make($binary, 'gallery/sample.jpg');
+            $this->assertNotSame($binary, $rendered['contents']);
+            $decoded = imagecreatefromstring($rendered['contents']);
+            $this->assertInstanceOf(\GdImage::class, $decoded);
+            imagedestroy($decoded);
+        }
     }
 }

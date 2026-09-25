@@ -95,7 +95,7 @@ class GalleryDownloadTest extends TestCase
         $this->assertNotSame('', $downloaded);
         $this->assertNotSame($original, $downloaded);
         $this->assertSame($original, Storage::disk('local')->get('gallery/originals/1_secret.jpg'));
-        $this->assertContainsEmbeddedBrandWatermark($downloaded);
+        $this->assertContainsTiledBrandWatermark($downloaded);
     }
 
     public function test_customer_cannot_bypass_watermark_via_protected_media_or_api_preview(): void
@@ -111,8 +111,7 @@ class GalleryDownloadTest extends TestCase
         $preview = $this->actingAs($customer, 'customer')
             ->get('/protected-media/'.$token);
         $preview->assertOk();
-        $this->assertNotSame($original, $preview->getContent());
-        $this->assertStringContainsString('inline', strtolower((string) $preview->headers->get('content-disposition')));
+        $this->assertContainsTiledBrandWatermark($preview->getContent());
 
         $api = $this->getJson('/api/gallery/'.$item->slug)->assertOk()->json('data');
         $this->assertArrayNotHasKey('original_path', $api);
@@ -206,29 +205,39 @@ class GalleryDownloadTest extends TestCase
         $this->assertTrue(Storage::disk('public')->exists((string) $item->image));
     }
 
-    private function assertContainsEmbeddedBrandWatermark(string $bytes): void
+    private function assertContainsTiledBrandWatermark(string $bytes): void
     {
         $decoded = @imagecreatefromstring($bytes);
         $this->assertInstanceOf(GdImage::class, $decoded);
 
         $width = imagesx($decoded);
         $height = imagesy($decoded);
-        $found = false;
+        $hits = 0;
 
-        for ($x = 0; $x < $width; $x += 3) {
-            for ($y = (int) round($height * 0.88); $y < $height; $y += 2) {
-                $rgb = imagecolorat($decoded, $x, $y);
-                $r = ($rgb >> 16) & 0xFF;
-                $g = ($rgb >> 8) & 0xFF;
-                $b = $rgb & 0xFF;
-                if ($r > 90 || $g > 90 || $b > 90) {
-                    $found = true;
-                    break 2;
+        foreach ([0.18, 0.50, 0.82] as $fy) {
+            foreach ([0.18, 0.50, 0.82] as $fx) {
+                $cx = (int) round($width * $fx);
+                $cy = (int) round($height * $fy);
+                $found = false;
+                for ($x = max(0, $cx - 24); $x < min($width, $cx + 24); $x += 2) {
+                    for ($y = max(0, $cy - 16); $y < min($height, $cy + 16); $y += 2) {
+                        $rgb = imagecolorat($decoded, $x, $y);
+                        $r = ($rgb >> 16) & 0xFF;
+                        $g = ($rgb >> 8) & 0xFF;
+                        $b = $rgb & 0xFF;
+                        if ($r > 90 || $g > 90 || $b > 90) {
+                            $found = true;
+                            break 2;
+                        }
+                    }
+                }
+                if ($found) {
+                    $hits++;
                 }
             }
         }
 
         imagedestroy($decoded);
-        $this->assertTrue($found, 'Downloaded pixels do not include a visible '.Brand::NAME.' watermark.');
+        $this->assertGreaterThanOrEqual(5, $hits, 'Expected a repeated '.Brand::NAME.' watermark across the image.');
     }
 }
