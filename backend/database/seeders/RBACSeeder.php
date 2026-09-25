@@ -51,6 +51,14 @@ class RBACSeeder extends Seeder
             $permissionsByName
         ));
 
+        $specialistPermissions = $this->resolvePermissions(
+            \App\Support\Staff\StaffContentAccess::specialistGalleryPermissions(),
+            $permissionsByName
+        );
+        foreach (AdminModules::SPECIALIST_ROLES as $roleName) {
+            $this->role($roleName)->syncPermissions($specialistPermissions);
+        }
+
         $admin = User::query()->where('email', 'admin@balajievents.test')->first();
 
         if ($admin === null) {

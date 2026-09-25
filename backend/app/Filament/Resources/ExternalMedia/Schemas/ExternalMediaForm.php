@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ExternalMedia\Schemas;
 
 use App\Filament\Support\WebsitePublishFields;
+use App\Support\Staff\StaffContentAccess;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -11,6 +12,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Auth;
 
 class ExternalMediaForm
 {
@@ -31,6 +33,42 @@ class ExternalMediaForm
                                             ->required()
                                             ->maxLength(255)
                                             ->columnSpanFull(),
+                                        Select::make('gallery_category_id')
+                                            ->label('Gallery Category')
+                                            ->relationship(
+                                                name: 'category',
+                                                titleAttribute: 'name',
+                                                modifyQueryUsing: function ($query) {
+                                                    $query->ordered();
+                                                    $user = Auth::user();
+                                                    if ($user && ! StaffContentAccess::isSuperAdmin($user)) {
+                                                        $ids = StaffContentAccess::accessibleGalleryCategoryIds($user);
+                                                        $query->whereIn('id', $ids !== [] ? $ids : [0]);
+                                                    }
+
+                                                    return $query;
+                                                },
+                                            )
+                                            ->searchable()
+                                            ->preload(),
+                                        Select::make('service_id')
+                                            ->label('Service')
+                                            ->relationship(
+                                                name: 'service',
+                                                titleAttribute: 'name',
+                                                modifyQueryUsing: function ($query) {
+                                                    $query->ordered();
+                                                    $user = Auth::user();
+                                                    if ($user && ! StaffContentAccess::isSuperAdmin($user)) {
+                                                        $ids = StaffContentAccess::accessibleServiceIds($user);
+                                                        $query->whereIn('id', $ids !== [] ? $ids : [0]);
+                                                    }
+
+                                                    return $query;
+                                                },
+                                            )
+                                            ->searchable()
+                                            ->preload(),
                                         Select::make('media_type')
                                             ->label('Media type')
                                             ->options([

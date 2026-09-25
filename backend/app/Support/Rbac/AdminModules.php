@@ -15,6 +15,23 @@ final class AdminModules
     public const ROLE_NEWSLETTER_MANAGER = 'Newsletter Manager';
 
     /**
+     * Specialist identities. Permissions are assigned per user via Content Access, not role name.
+     *
+     * @var list<string>
+     */
+    public const SPECIALIST_ROLES = [
+        'Photographer',
+        'Tent Manager',
+        'Wedding Planner',
+        'Event Manager',
+        'Decorator',
+        'DJ/Sound Manager',
+        'Catering Manager',
+        'Bridal/Mehndi Manager',
+        'SFX Manager',
+    ];
+
+    /**
      * @var list<string>
      */
     public const WEBSITE = [

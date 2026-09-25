@@ -168,7 +168,7 @@ onBeforeUnmount(() => {
 <template>
   <div
     ref="rootEl"
-    class="relative inline-block w-full"
+    class="relative block w-full min-w-0"
   >
     <span
       class="icon icon-location-1 pointer-events-none absolute top-0 left-0 z-10 mt-1 h-10 w-[37px] text-center text-lg leading-[48px] text-[#464e7b]"
@@ -179,20 +179,22 @@ onBeforeUnmount(() => {
       type="button"
       :class="[
         inputClass,
-        'text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500',
-        !model ? 'text-[#888]' : ''
+        'min-w-0 overflow-hidden whitespace-nowrap text-ellipsis text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500',
+        !model ? 'text-[#888]' : 'text-[#333]'
       ]"
       :aria-expanded="open"
       aria-haspopup="dialog"
       aria-label="Event location"
       @click="openPanel"
     >
-      {{ model || 'Event Location' }}
+      <span class="block min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">
+        {{ model || 'Event Location' }}
+      </span>
     </button>
 
     <div
       v-if="open"
-      class="absolute top-[calc(100%+6px)] left-0 z-30 w-full min-w-[260px] overflow-hidden rounded border border-[#d8d8d8] bg-white shadow-[0_12px_28px_rgba(0,0,0,0.12)]"
+      class="absolute top-[calc(100%+6px)] left-0 z-30 w-full min-w-0 max-w-full overflow-hidden rounded border border-[#d8d8d8] bg-white shadow-[0_12px_28px_rgba(0,0,0,0.12)]"
       role="dialog"
       aria-label="Choose event location"
     >

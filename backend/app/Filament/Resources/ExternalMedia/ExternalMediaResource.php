@@ -9,6 +9,7 @@ use App\Filament\Resources\ExternalMedia\Pages\ListExternalMedia;
 use App\Filament\Resources\ExternalMedia\Schemas\ExternalMediaForm;
 use App\Filament\Resources\ExternalMedia\Tables\ExternalMediaTable;
 use App\Models\ExternalMedia;
+use App\Support\Staff\StaffEloquentScope;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -16,6 +17,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 use UnitEnum;
 
 class ExternalMediaResource extends Resource
@@ -59,10 +61,13 @@ class ExternalMediaResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()
+        $query = parent::getEloquentQuery()
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);
+        $user = Auth::user();
+
+        return $user ? StaffEloquentScope::externalMedia($query, $user) : $query;
     }
 
     public static function getRecordRouteBindingEloquentQuery(): Builder

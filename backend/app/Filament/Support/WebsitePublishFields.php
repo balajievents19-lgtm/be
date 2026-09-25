@@ -2,12 +2,14 @@
 
 namespace App\Filament\Support;
 
+use App\Support\Staff\StaffContentAccess;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Utilities\Get;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Shared Website CMS publish / visibility fields for business owners.
@@ -22,9 +24,11 @@ class WebsitePublishFields
         $fields = [
             Toggle::make('status')
                 ->label('Published')
-                ->helperText('Turn off to hide this from the website.')
+                ->helperText('Turn off to hide this from the website. Staff cannot publish; Super Admin approves first.')
                 ->default(true)
                 ->inline(false)
+                ->disabled(fn (): bool => ! StaffContentAccess::canPublish(Auth::user()))
+                ->dehydrated(fn (): bool => StaffContentAccess::canPublish(Auth::user()))
                 ->required(),
             TextInput::make('sort_order')
                 ->label('Display Order')

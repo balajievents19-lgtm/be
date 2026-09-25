@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\GalleryMediaType;
 use App\Enums\GalleryVideoSource;
+use App\Models\Concerns\HasContentModeration;
 use App\Models\Concerns\HasPublicStorageUrl;
 use App\Models\Concerns\Publication\HasPublicationWindow;
 use Illuminate\Database\Eloquent\Builder;
@@ -15,6 +16,7 @@ use Illuminate\Support\Str;
 
 class GalleryItem extends Model
 {
+    use HasContentModeration;
     use HasPublicationWindow;
     use HasPublicStorageUrl;
     use SoftDeletes;
@@ -44,6 +46,13 @@ class GalleryItem extends Model
         'seo_title',
         'seo_description',
         'opengraph_image',
+        'created_by',
+        'updated_by',
+        'moderation_status',
+        'brand_review_required',
+        'moderation_notes',
+        'reviewed_by',
+        'reviewed_at',
     ];
 
     protected function casts(): array
@@ -57,6 +66,8 @@ class GalleryItem extends Model
             'unpublish_at' => 'datetime',
             'media_type' => GalleryMediaType::class,
             'video_source' => GalleryVideoSource::class,
+            'brand_review_required' => 'boolean',
+            'reviewed_at' => 'datetime',
         ];
     }
 
@@ -126,7 +137,7 @@ class GalleryItem extends Model
     {
         $table = $query->getModel()->getTable();
 
-        return $query->where($table.'.status', true)->withinPublicationWindow();
+        return $query->where($table.'.status', true)->withinPublicationWindow()->publiclyModerated();
     }
 
     /**

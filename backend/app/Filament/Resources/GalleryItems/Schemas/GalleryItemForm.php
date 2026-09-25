@@ -6,6 +6,7 @@ use App\Enums\GalleryMediaType;
 use App\Enums\GalleryVideoSource;
 use App\Filament\Support\WebsitePublishFields;
 use App\Support\Media\GalleryVideoEmbed;
+use App\Support\Staff\StaffContentAccess;
 use Closure;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\FileUpload;
@@ -19,6 +20,7 @@ use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class GalleryItemForm
@@ -52,7 +54,16 @@ class GalleryItemForm
                                             ->relationship(
                                                 name: 'category',
                                                 titleAttribute: 'name',
-                                                modifyQueryUsing: fn ($query) => $query->ordered(),
+                                                modifyQueryUsing: function ($query) {
+                                                    $user = Auth::user();
+                                                    $query->ordered();
+                                                    if ($user && ! StaffContentAccess::isSuperAdmin($user)) {
+                                                        $ids = StaffContentAccess::accessibleGalleryCategoryIds($user);
+                                                        $query->whereIn('id', $ids !== [] ? $ids : [0]);
+                                                    }
+
+                                                    return $query;
+                                                },
                                             )
                                             ->searchable()
                                             ->preload()
@@ -64,7 +75,18 @@ class GalleryItemForm
                                             ->relationship(
                                                 name: 'services',
                                                 titleAttribute: 'name',
-                                                modifyQueryUsing: fn ($query) => $query->active()->ordered(),
+                                                modifyQueryUsing: function ($query) {
+                                                    $query->active()->ordered();
+                                                    $user = Auth::user();
+                                                    if ($user && ! StaffContentAccess::isSuperAdmin($user)) {
+                                                        $ids = StaffContentAccess::accessibleServiceIds($user);
+                                                        if ($ids !== []) {
+                                                            $query->whereIn('id', $ids);
+                                                        }
+                                                    }
+
+                                                    return $query;
+                                                },
                                             )
                                             ->searchable()
                                             ->bulkToggleable()

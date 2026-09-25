@@ -9,12 +9,14 @@ use App\Filament\Resources\GalleryVideos\Pages\CreateGalleryVideo;
 use App\Filament\Resources\GalleryVideos\Pages\EditGalleryVideo;
 use App\Filament\Resources\GalleryVideos\Pages\ListGalleryVideos;
 use App\Models\GalleryItem;
+use App\Support\Staff\StaffEloquentScope;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use UnitEnum;
 
 class GalleryVideoResource extends Resource
@@ -51,10 +53,13 @@ class GalleryVideoResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()
+        $query = parent::getEloquentQuery()
             ->where(fn (Builder $query): Builder => $query
                 ->whereNotNull('youtube_url')
                 ->orWhereNotNull('vimeo_url'));
+        $user = Auth::user();
+
+        return $user ? StaffEloquentScope::galleryItems($query, $user) : $query;
     }
 
     public static function getPages(): array

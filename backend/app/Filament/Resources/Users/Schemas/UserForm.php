@@ -55,9 +55,10 @@ class UserForm
                             ->searchable()
                             ->visible(fn (): bool => AdminUserSecurity::canManageRoles(Auth::user()))
                             ->disabled(fn (): bool => ! AdminUserSecurity::canManageRoles(Auth::user()))
-                            ->helperText('Only Super Admin can assign or change roles. Available roles: Super Admin, Content Manager, Lead Manager, Newsletter Manager.')
+                            ->helperText('Only Super Admin can assign or change roles. Roles describe who the user is. Staff Access & Permissions below controls Services and Gallery Categories.')
                             ->columnSpanFull(),
                     ]),
+                ...UserContentAccessFields::sections(),
             ]);
     }
 }

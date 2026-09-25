@@ -105,8 +105,7 @@ const onSubmit = async (event: Event) => {
   }
 
   if (!customer.value) {
-    apiError.value = 'Please verify your account before submitting an enquiry.'
-    openLogin()
+    apiError.value = 'Login Required. Please login first to continue.'
     return
   }
 
@@ -181,7 +180,7 @@ const onSubmit = async (event: Event) => {
         class="mb-6 text-sm text-[#555]"
         role="status"
       >
-        Sign in with a verified account to send this inquiry.
+        Login Required. Please login first to continue.
         <button
           type="button"
           class="text-brand-500 underline"

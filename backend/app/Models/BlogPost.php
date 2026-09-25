@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasContentModeration;
 use App\Models\Concerns\HasPublicStorageUrl;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -11,6 +12,7 @@ use Illuminate\Support\Str;
 
 class BlogPost extends Model
 {
+    use HasContentModeration;
     use HasPublicStorageUrl;
     use SoftDeletes;
 
@@ -38,6 +40,13 @@ class BlogPost extends Model
         'reading_time',
         'author',
         'tags',
+        'created_by',
+        'updated_by',
+        'moderation_status',
+        'brand_review_required',
+        'moderation_notes',
+        'reviewed_by',
+        'reviewed_at',
     ];
 
     protected function casts(): array
@@ -50,6 +59,8 @@ class BlogPost extends Model
             'unpublish_at' => 'datetime',
             'reading_time' => 'integer',
             'tags' => 'array',
+            'brand_review_required' => 'boolean',
+            'reviewed_at' => 'datetime',
         ];
     }
 
@@ -109,7 +120,8 @@ class BlogPost extends Model
                 $builder
                     ->whereNull('unpublish_at')
                     ->orWhere('unpublish_at', '>', now());
-            });
+            })
+            ->publiclyModerated();
     }
 
     public function scopeOrdered(Builder $query): Builder

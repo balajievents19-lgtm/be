@@ -39,6 +39,21 @@ const submitted = ref(false)
 const apiError = ref('')
 const mobileError = ref('')
 const mobileTouched = ref(false)
+const showLoginRequired = ref(false)
+
+const enquiryErrorFromApi = (error: unknown): string => {
+  const err = error as { data?: { code?: string, message?: string, errors?: Record<string, string[]> }, message?: string }
+  if (err?.data?.code === 'customer_auth_required') {
+    return ''
+  }
+  if (err?.data?.code === 'email_verification_required') {
+    return 'Please verify your account before submitting an enquiry.'
+  }
+  const firstValidation = err?.data?.errors
+    ? Object.values(err.data.errors).flat()[0]
+    : null
+  return firstValidation || err?.data?.message || err?.message || 'Unable to send your inquiry. Please try again.'
+}
 
 const mobileHint = computed(() => {
   if (!mobileTouched.value && !form.mobile) {
@@ -60,16 +75,14 @@ const onMobileInput = (event: Event) => {
 const search = async () => {
   submitted.value = false
   apiError.value = ''
-  mobileTouched.value = true
-  mobileError.value = mobileHint.value
+  showLoginRequired.value = false
 
   if (form.website.trim()) {
     return
   }
 
   if (!customer.value) {
-    apiError.value = 'Please verify your account before submitting an enquiry.'
-    openLogin()
+    showLoginRequired.value = true
     return
   }
 
@@ -77,6 +90,9 @@ const search = async () => {
     apiError.value = 'Please verify your account before submitting an enquiry.'
     return
   }
+
+  mobileTouched.value = true
+  mobileError.value = mobileHint.value
 
   if (!form.eventTypeId.trim() || !form.location.trim() || !form.date.trim()) {
     apiError.value = 'Event Type, Event Location, and Event Date are required.'
@@ -132,11 +148,13 @@ const search = async () => {
     mobileTouched.value = false
     mobileError.value = ''
   } catch (error: unknown) {
-    const err = error as { data?: { message?: string, errors?: Record<string, string[]> }, message?: string }
-    const firstValidation = err?.data?.errors
-      ? Object.values(err.data.errors).flat()[0]
-      : null
-    apiError.value = firstValidation || err?.data?.message || err?.message || 'Unable to send your inquiry. Please try again.'
+    const err = error as { data?: { code?: string } }
+    if (err?.data?.code === 'customer_auth_required' || !customer.value) {
+      showLoginRequired.value = true
+      apiError.value = ''
+    } else {
+      apiError.value = enquiryErrorFromApi(error)
+    }
   } finally {
     submitting.value = false
   }
@@ -147,6 +165,7 @@ const search = async () => {
   <form
     class="banner-search relative mx-auto mb-0 w-full max-w-[570px] rounded-[3px] bg-[rgba(255,255,255,0.8)] px-[30px] pt-[30px] pb-[23px] max-[991px]:mt-6 min-[992px]:mt-8 min-[1200px]:mt-10 lg:max-w-[960px]"
     aria-label="Event inquiry"
+    novalidate
     @submit.prevent="search"
   >
     <input
@@ -207,21 +226,21 @@ const search = async () => {
       <div class="min-w-0 w-full">
         <FormsAppEventTypeSelect
           v-model="form.eventTypeId"
-          required
+          :required="canSubmitEnquiry"
         />
       </div>
 
       <div class="relative min-w-0 w-full">
         <FormsAppLocationPicker
           v-model="form.location"
-          required
+          :required="canSubmitEnquiry"
         />
       </div>
 
       <div class="relative min-w-0 w-full">
         <FormsAppDatePicker
           v-model="form.date"
-          required
+          :required="canSubmitEnquiry"
         />
       </div>
 
@@ -241,16 +260,32 @@ const search = async () => {
       </div>
     </div>
 
-    <p
-      v-if="loaded && !customer"
-      class="mb-2.5 text-center text-sm text-[#555]"
-      role="status"
+    <div
+      v-if="showLoginRequired || (loaded && !customer)"
+      class="mb-2.5 rounded-[3px] border border-solid border-brand-500 bg-white px-4 py-3 text-center"
+      role="alert"
     >
-      Sign in with a verified account to send this enquiry.
-      <button type="button" class="text-brand-500 underline" @click="openLogin()">Login</button>
-      or
-      <button type="button" class="text-brand-500 underline" @click="openRegister()">Register</button>
-    </p>
+      <p class="m-0 font-['Domine',Georgia,'Times_New_Roman',serif] text-base font-bold text-[#333]">
+        Login Required
+      </p>
+      <p class="mt-1 mb-2.5 text-sm text-[#555]">
+        Please login first to continue.
+      </p>
+      <button
+        type="button"
+        class="inline-flex cursor-pointer items-center justify-center rounded-[3px] border border-solid border-brand-500 bg-brand-500 px-4 py-2 text-sm text-white transition-colors hover:border-brand-600 hover:bg-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
+        @click="openLogin()"
+      >
+        Login
+      </button>
+      <button
+        type="button"
+        class="ml-2 text-sm text-brand-500 underline"
+        @click="openRegister()"
+      >
+        Register
+      </button>
+    </div>
     <p
       v-else-if="loaded && customer && !canSubmitEnquiry"
       class="mb-2.5 text-center text-sm text-[#555]"

@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Users\Pages;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
 use App\Support\Rbac\AdminUserSecurity;
+use App\Support\Staff\StaffAccessSync;
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
@@ -48,7 +49,36 @@ class EditUser extends EditRecord
             unset($data['roles']);
         }
 
+        unset($data['service_access'], $data['category_access']);
+
         return $data;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        /** @var User $record */
+        $record = $this->getRecord();
+
+        return array_merge($data, StaffAccessSync::formState($record));
+    }
+
+    protected function afterSave(): void
+    {
+        if (! AdminUserSecurity::canManageRoles(Auth::user())) {
+            return;
+        }
+
+        /** @var User $record */
+        $record = $this->getRecord();
+        StaffAccessSync::sync(
+            $record,
+            $this->data['service_access'] ?? [],
+            $this->data['category_access'] ?? []
+        );
     }
 
     protected function beforeSave(): void

@@ -9,8 +9,11 @@ use App\Filament\Resources\GalleryItems\Pages\ListGalleryItems;
 use App\Filament\Resources\GalleryItems\Schemas\GalleryItemForm;
 use App\Filament\Resources\GalleryItems\Tables\GalleryItemsTable;
 use App\Models\GalleryItem;
+use App\Support\Staff\StaffEloquentScope;
 use BackedEnum;
 use Filament\Resources\Resource;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
@@ -58,5 +61,13 @@ class GalleryItemResource extends Resource
             'create' => CreateGalleryItem::route('/create'),
             'edit' => EditGalleryItem::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        $user = Auth::user();
+
+        return $user ? StaffEloquentScope::galleryItems($query, $user) : $query;
     }
 }

@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Models\BlogPost;
 use App\Models\User;
 use App\Policies\Concerns\ChecksModulePermission;
+use App\Support\Staff\StaffContentAccess;
 
 class BlogPostPolicy
 {
@@ -29,21 +30,25 @@ class BlogPostPolicy
 
     public function update(User $user, BlogPost $blogPost): bool
     {
-        return $this->allows($user, 'update');
+        if (StaffContentAccess::isSuperAdmin($user)) {
+            return true;
+        }
+
+        return $this->allows($user, 'update') && $blogPost->isOwnedBy($user);
     }
 
     public function delete(User $user, BlogPost $blogPost): bool
     {
-        return $this->allows($user, 'delete');
+        return StaffContentAccess::canDeleteContent($user);
     }
 
     public function restore(User $user, BlogPost $blogPost): bool
     {
-        return $this->allows($user, 'delete');
+        return StaffContentAccess::canDeleteContent($user);
     }
 
-    public function forceDelete(User $user, BlogPost $blogPost): bool
+    public function approve(User $user, BlogPost $blogPost): bool
     {
-        return $this->allows($user, 'delete');
+        return StaffContentAccess::canApprove($user);
     }
 }

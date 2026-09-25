@@ -4,6 +4,7 @@ namespace App\Filament\Resources\GalleryItems\Tables;
 
 use App\Enums\GalleryMediaType;
 use App\Filament\Tables\Columns\AdminPreviewImageColumn;
+use App\Support\Staff\StaffContentAccess;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -15,6 +16,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 
 class GalleryItemsTable
 {
@@ -120,9 +122,9 @@ class GalleryItemsTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                    RestoreBulkAction::make(),
-                    ForceDeleteBulkAction::make(),
+                    DeleteBulkAction::make()->visible(fn (): bool => StaffContentAccess::canDeleteContent(Auth::user())),
+                    RestoreBulkAction::make()->visible(fn (): bool => StaffContentAccess::canDeleteContent(Auth::user())),
+                    ForceDeleteBulkAction::make()->visible(fn (): bool => StaffContentAccess::canDeleteContent(Auth::user())),
                 ]),
             ])
             ->emptyStateHeading('No gallery items yet')

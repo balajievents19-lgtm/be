@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ExternalMedia\Tables;
 
 use App\Filament\Tables\Columns\AdminPreviewImageColumn;
+use App\Support\Staff\StaffContentAccess;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -14,6 +15,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 
 class ExternalMediaTable
 {
@@ -77,9 +79,9 @@ class ExternalMediaTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                    ForceDeleteBulkAction::make(),
-                    RestoreBulkAction::make(),
+                    DeleteBulkAction::make()->visible(fn (): bool => StaffContentAccess::canDeleteContent(Auth::user())),
+                    ForceDeleteBulkAction::make()->visible(fn (): bool => StaffContentAccess::canDeleteContent(Auth::user())),
+                    RestoreBulkAction::make()->visible(fn (): bool => StaffContentAccess::canDeleteContent(Auth::user())),
                 ]),
             ]);
     }

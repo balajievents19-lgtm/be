@@ -103,6 +103,14 @@ class HomeController extends Controller
                 ->ordered()
                 ->get();
 
+            if ($homepageExternalMedia->isEmpty()) {
+                $homepageExternalMedia = ExternalMedia::query()
+                    ->active()
+                    ->ordered()
+                    ->take(12)
+                    ->get();
+            }
+
             $eventTypes = EventType::query()
                 ->active()
                 ->ordered()

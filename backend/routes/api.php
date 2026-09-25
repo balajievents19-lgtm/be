@@ -63,6 +63,18 @@ Route::post('/newsletter', [NewsletterController::class, 'store'])
     ->middleware('throttle:newsletter')
     ->name('api.newsletter.store');
 
+Route::middleware('auth')->prefix('staff-content')->group(function (): void {
+    Route::post('/gallery-items', [\App\Http\Controllers\StaffContentController::class, 'storeGalleryItem']);
+    Route::put('/gallery-items/{galleryItem}', [\App\Http\Controllers\StaffContentController::class, 'updateGalleryItem']);
+    Route::delete('/gallery-items/{galleryItem}', [\App\Http\Controllers\StaffContentController::class, 'destroyGalleryItem']);
+    Route::post('/gallery-items/{galleryItem}/approve', [\App\Http\Controllers\StaffContentController::class, 'approveGalleryItem']);
+    Route::post('/gallery-items/{galleryItem}/reject', [\App\Http\Controllers\StaffContentController::class, 'rejectGalleryItem']);
+    Route::post('/external-media', [\App\Http\Controllers\StaffContentController::class, 'storeExternalMedia']);
+    Route::delete('/external-media/{externalMedia}', [\App\Http\Controllers\StaffContentController::class, 'destroyExternalMedia']);
+    Route::post('/{type}/{id}/approve', [\App\Http\Controllers\StaffContentController::class, 'approve'])->whereNumber('id');
+    Route::post('/{type}/{id}/reject', [\App\Http\Controllers\StaffContentController::class, 'reject'])->whereNumber('id');
+});
+
 /*
 |--------------------------------------------------------------------------
 | Customer SPA authentication (Sanctum stateful cookies)

@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Models\ExternalMedia;
 use App\Models\User;
 use App\Policies\Concerns\ChecksModulePermission;
+use App\Support\Staff\StaffContentAccess;
 
 class ExternalMediaPolicy
 {
@@ -19,31 +20,62 @@ class ExternalMediaPolicy
 
     public function view(User $user, ExternalMedia $externalMedia): bool
     {
-        return $this->allows($user, 'view');
+        if (! $this->allows($user, 'view')) {
+            return false;
+        }
+        if (StaffContentAccess::isSuperAdmin($user)) {
+            return true;
+        }
+        if ($externalMedia->gallery_category_id) {
+            return StaffContentAccess::canAccessGalleryCategory($user, (int) $externalMedia->gallery_category_id);
+        }
+        if ($externalMedia->service_id) {
+            return StaffContentAccess::canAccessService($user, (int) $externalMedia->service_id);
+        }
+
+        return $externalMedia->isOwnedBy($user);
     }
 
     public function create(User $user): bool
     {
-        return $this->allows($user, 'create');
+        return $this->allows($user, 'create') && StaffContentAccess::canCreateAnyGalleryContent($user);
     }
 
     public function update(User $user, ExternalMedia $externalMedia): bool
     {
-        return $this->allows($user, 'update');
+        if (StaffContentAccess::isSuperAdmin($user)) {
+            return true;
+        }
+        if (! $this->allows($user, 'update') || ! $externalMedia->isOwnedBy($user)) {
+            return false;
+        }
+        if ($externalMedia->gallery_category_id) {
+            return StaffContentAccess::canEditOwnInGalleryCategory($user, (int) $externalMedia->gallery_category_id);
+        }
+        if ($externalMedia->service_id) {
+            return StaffContentAccess::canEditOwnInService($user, (int) $externalMedia->service_id);
+        }
+
+        return false;
     }
 
     public function delete(User $user, ExternalMedia $externalMedia): bool
     {
-        return $this->allows($user, 'delete');
+        return StaffContentAccess::canDeleteContent($user);
     }
 
     public function restore(User $user, ExternalMedia $externalMedia): bool
     {
-        return $this->allows($user, 'delete');
+        return StaffContentAccess::canDeleteContent($user);
     }
 
     public function forceDelete(User $user, ExternalMedia $externalMedia): bool
     {
-        return $this->allows($user, 'delete');
+        return StaffContentAccess::canDeleteContent($user);
+    }
+
+    public function approve(User $user, ExternalMedia $externalMedia): bool
+    {
+        return StaffContentAccess::canApprove($user);
     }
 }

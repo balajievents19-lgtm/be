@@ -9,11 +9,14 @@ use App\Filament\Resources\BlogPosts\Pages\ListBlogPosts;
 use App\Filament\Resources\BlogPosts\Schemas\BlogPostForm;
 use App\Filament\Resources\BlogPosts\Tables\BlogPostsTable;
 use App\Models\BlogPost;
+use App\Support\Staff\StaffEloquentScope;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use UnitEnum;
 
 class BlogPostResource extends Resource
@@ -58,5 +61,13 @@ class BlogPostResource extends Resource
             'create' => CreateBlogPost::route('/create'),
             'edit' => EditBlogPost::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        $user = Auth::user();
+
+        return $user ? StaffEloquentScope::blogPosts($query, $user) : $query;
     }
 }
