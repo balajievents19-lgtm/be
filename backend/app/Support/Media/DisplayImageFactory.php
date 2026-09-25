@@ -36,10 +36,10 @@ final class DisplayImageFactory
         }
 
         $accept = strtolower((string) $accept);
-        if (str_contains($accept, 'image/avif') && function_exists('imageavif')) {
+        if (str_contains($accept, 'image/avif') && $this->canEncode(self::FORMAT_AVIF)) {
             return self::FORMAT_AVIF;
         }
-        if (str_contains($accept, 'image/webp') && function_exists('imagewebp')) {
+        if (str_contains($accept, 'image/webp') && $this->canEncode(self::FORMAT_WEBP)) {
             return self::FORMAT_WEBP;
         }
 
@@ -238,23 +238,34 @@ final class DisplayImageFactory
             }
         }
 
-        ob_start();
-        $ok = false;
-        if ($format === self::FORMAT_AVIF && function_exists('imageavif')) {
-            $ok = @imageavif($target, null, $quality);
-        } elseif ($format === self::FORMAT_WEBP && function_exists('imagewebp')) {
-            $ok = @imagewebp($target, null, $quality);
-        } elseif ($format === self::FORMAT_PNG) {
-            $ok = imagepng($target, null, 6);
-        } else {
-            $ok = imagejpeg($target, null, $quality);
-            $format = self::FORMAT_JPEG;
+        $encoded = $this->encodeGd($target, $format, $quality);
+        if ($encoded['contents'] === '') {
+            $encoded = $this->encodeImagick($target, $format, $quality);
         }
-        $contents = (string) ob_get_clean();
         if ($scratch instanceof GdImage) {
             imagedestroy($scratch);
         }
 
+        return $encoded;
+    }
+
+    /**
+     * @return array{contents: string, mime: string}
+     */
+    private function encodeGd(GdImage $target, string $format, int $quality): array
+    {
+        ob_start();
+        $ok = false;
+        if ($format === self::FORMAT_AVIF) {
+            $ok = function_exists('imageavif') && @imageavif($target, null, $quality);
+        } elseif ($format === self::FORMAT_WEBP) {
+            $ok = function_exists('imagewebp') && @imagewebp($target, null, $quality);
+        } elseif ($format === self::FORMAT_PNG) {
+            $ok = imagepng($target, null, 6);
+        } elseif ($format === self::FORMAT_JPEG) {
+            $ok = imagejpeg($target, null, $quality);
+        }
+        $contents = (string) ob_get_clean();
         if (! $ok || $contents === '') {
             return ['contents' => '', 'mime' => $this->mimeForFormat($format)];
         }
@@ -263,6 +274,71 @@ final class DisplayImageFactory
             'contents' => $contents,
             'mime' => $this->mimeForFormat($format),
         ];
+    }
+
+    /**
+     * @return array{contents: string, mime: string}
+     */
+    private function encodeImagick(GdImage $target, string $format, int $quality): array
+    {
+        if (! in_array($format, [self::FORMAT_AVIF, self::FORMAT_WEBP], true) || ! $this->imagickSupports($format)) {
+            return ['contents' => '', 'mime' => $this->mimeForFormat($format)];
+        }
+
+        ob_start();
+        imagepng($target, null, 0);
+        $png = (string) ob_get_clean();
+        if ($png === '') {
+            return ['contents' => '', 'mime' => $this->mimeForFormat($format)];
+        }
+
+        try {
+            $image = new \Imagick();
+            $image->readImageBlob($png);
+            $image->setImageFormat($format);
+            $image->setImageCompressionQuality($quality);
+            $contents = (string) $image->getImageBlob();
+            $image->clear();
+            $image->destroy();
+        } catch (\Throwable) {
+            return ['contents' => '', 'mime' => $this->mimeForFormat($format)];
+        }
+
+        if ($contents === '') {
+            return ['contents' => '', 'mime' => $this->mimeForFormat($format)];
+        }
+
+        return [
+            'contents' => $contents,
+            'mime' => $this->mimeForFormat($format),
+        ];
+    }
+
+    private function canEncode(string $format): bool
+    {
+        if ($format === self::FORMAT_AVIF) {
+            return function_exists('imageavif') || $this->imagickSupports(self::FORMAT_AVIF);
+        }
+        if ($format === self::FORMAT_WEBP) {
+            return function_exists('imagewebp') || $this->imagickSupports(self::FORMAT_WEBP);
+        }
+
+        return true;
+    }
+
+    private function imagickSupports(string $format): bool
+    {
+        if (! class_exists(\Imagick::class)) {
+            return false;
+        }
+
+        try {
+            $formats = \Imagick::queryFormats(strtoupper($format));
+
+            return is_array($formats) && $formats !== [];
+        } catch (\Throwable) {
+            return false;
+        }
     }
 
     private function flattenForJpeg(GdImage $canvas): ?GdImage
@@ -289,7 +365,7 @@ final class DisplayImageFactory
         if (in_array($extension, ['svg', 'gif', 'ico'], true)) {
             return true;
         }
-        if (str_contains($mime, 'svg') || str_contains($mime, 'gif') || str_contains($mime, 'icon')) {
+        if (str_contains($mime, 'svg') || str_contains($mime, 'gif') || str_contains($mime, 'x-icon') || str_contains($mime, 'vnd.microsoft.icon')) {
             return true;
         }
 
@@ -301,10 +377,12 @@ final class DisplayImageFactory
         $path = strtolower(str_replace('\\', '/', $relativePath));
         $base = basename($path);
 
-        return str_contains($base, 'logo')
-            || str_contains($base, 'favicon')
-            || str_contains($path, '/brand/')
-            || str_contains($path, 'settings/brand');
+        if (preg_match('/^(logo|favicon)(\.[a-z0-9]+)?$/', $base) === 1) {
+            return true;
+        }
+
+        return str_starts_with($path, 'settings/brand/')
+            || str_contains($path, '/brand/logo');
     }
 
     private function preservedFormat(string $relativePath, ?string $sourceMime): string
