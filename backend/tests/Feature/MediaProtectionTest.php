@@ -216,6 +216,45 @@ class MediaProtectionTest extends TestCase
         return $binary;
     }
 
+    public function test_homepage_cms_display_skips_watermark_but_gallery_display_keeps_it(): void
+    {
+        $factory = app(\App\Support\Media\DisplayImageFactory::class);
+        $binary = $this->solidDarkJpeg(900, 600);
+
+        foreach ([
+            'hero-slides/desktop/slide.jpg',
+            'event-overviews/wedding.jpg',
+            'service-packages/royal.jpg',
+            'blog/featured/post.jpg',
+            'settings/about/story.jpg',
+        ] as $path) {
+            $rendered = $factory->make(
+                $binary,
+                $path,
+                \App\Support\Media\DisplayImageFactory::MODE_DISPLAY,
+                \App\Support\Media\DisplayImageFactory::FORMAT_JPEG
+            );
+            $this->assertNotSame($binary, $rendered['contents'], $path);
+            $this->assertTiledWatermarkHits($rendered['contents'], 0, $path);
+        }
+
+        $gallery = $factory->make(
+            $binary,
+            'gallery/images/hall.jpg',
+            \App\Support\Media\DisplayImageFactory::MODE_DISPLAY,
+            \App\Support\Media\DisplayImageFactory::FORMAT_JPEG
+        );
+        $this->assertTiledWatermarkHits($gallery['contents'], 5, 'gallery display');
+
+        $download = $factory->make(
+            $binary,
+            'gallery/images/hall.jpg',
+            \App\Support\Media\DisplayImageFactory::MODE_DOWNLOAD,
+            \App\Support\Media\DisplayImageFactory::FORMAT_JPEG
+        );
+        $this->assertTiledWatermarkHits($download['contents'], 5, 'gallery download');
+    }
+
     public function test_factory_tiles_watermark_on_common_aspect_ratios(): void
     {
         $factory = app(\App\Support\Media\DisplayImageFactory::class);
@@ -241,5 +280,61 @@ class MediaProtectionTest extends TestCase
             $this->assertInstanceOf(\GdImage::class, $decoded);
             imagedestroy($decoded);
         }
+    }
+
+    private function solidDarkJpeg(int $width, int $height): string
+    {
+        $image = imagecreatetruecolor($width, $height);
+        $this->assertNotFalse($image);
+        $fill = imagecolorallocate($image, 8, 10, 16);
+        imagefilledrectangle($image, 0, 0, $width - 1, $height - 1, $fill);
+        ob_start();
+        imagejpeg($image, null, 90);
+        $binary = (string) ob_get_clean();
+        imagedestroy($image);
+
+        return $binary;
+    }
+
+    private function assertTiledWatermarkHits(string $bytes, int $minimumHits, string $label): void
+    {
+        $decoded = @imagecreatefromstring($bytes);
+        $this->assertInstanceOf(\GdImage::class, $decoded, $label);
+
+        $width = imagesx($decoded);
+        $height = imagesy($decoded);
+        $hits = 0;
+
+        foreach ([0.18, 0.50, 0.82] as $fy) {
+            foreach ([0.18, 0.50, 0.82] as $fx) {
+                $cx = (int) round($width * $fx);
+                $cy = (int) round($height * $fy);
+                $found = false;
+                for ($x = max(0, $cx - 24); $x < min($width, $cx + 24); $x += 2) {
+                    for ($y = max(0, $cy - 16); $y < min($height, $cy + 16); $y += 2) {
+                        $rgb = imagecolorat($decoded, $x, $y);
+                        $r = ($rgb >> 16) & 0xFF;
+                        $g = ($rgb >> 8) & 0xFF;
+                        $b = $rgb & 0xFF;
+                        if ($r > 90 || $g > 90 || $b > 90) {
+                            $found = true;
+                            break 2;
+                        }
+                    }
+                }
+                if ($found) {
+                    $hits++;
+                }
+            }
+        }
+
+        imagedestroy($decoded);
+        if ($minimumHits === 0) {
+            $this->assertSame(0, $hits, 'Did not expect a tiled watermark on '.$label);
+
+            return;
+        }
+
+        $this->assertGreaterThanOrEqual($minimumHits, $hits, 'Expected a repeated watermark on '.$label);
     }
 }

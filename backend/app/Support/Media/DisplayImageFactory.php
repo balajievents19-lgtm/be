@@ -121,7 +121,7 @@ final class DisplayImageFactory
 
         imagealphablending($canvas, true);
         imagesavealpha($canvas, true);
-        if (! $skipWatermark) {
+        if ($this->shouldPaintWatermark($mode, $relativePath, $skipWatermark)) {
             $this->paintTiledWatermark($canvas, $width, $height, Brand::NAME, $mode);
         }
 
@@ -149,6 +149,30 @@ final class DisplayImageFactory
         }
 
         return $rendered;
+    }
+
+    /**
+     * Gallery public display and all downloads stay 3×3 watermarked.
+     * Homepage/CMS photos (hero, events, packages, blog, about, etc.) render clean.
+     */
+    private function shouldPaintWatermark(string $mode, string $relativePath, bool $skipWatermark): bool
+    {
+        if ($skipWatermark) {
+            return false;
+        }
+
+        if ($mode === self::MODE_DOWNLOAD) {
+            return true;
+        }
+
+        return $this->isGalleryProtectedPath($relativePath);
+    }
+
+    private function isGalleryProtectedPath(string $relativePath): bool
+    {
+        $path = strtolower(str_replace('\\', '/', ltrim($relativePath, '/')));
+
+        return str_starts_with($path, 'gallery/');
     }
 
     /**
