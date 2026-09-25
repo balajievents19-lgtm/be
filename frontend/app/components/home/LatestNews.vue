@@ -86,12 +86,10 @@ const postMeta = (post: BlogPostItem) => {
             class="news-box mb-[30px] bg-white"
           >
             <div class="-mx-[15px] flex flex-wrap">
-              <div
-                v-if="postImage(featured)"
-                class="w-full px-[15px] min-[768px]:w-1/2"
-              >
+              <div class="w-full px-[15px] min-[768px]:w-1/2">
                 <div class="card-media-frame">
                   <img
+                    v-if="postImage(featured)"
                     :src="postImage(featured)"
                     :alt="featured.alt_text || featured.title"
                     width="1200"
@@ -99,12 +97,16 @@ const postMeta = (post: BlogPostItem) => {
                     loading="lazy"
                     decoding="async"
                   >
+                  <div
+                    v-else
+                    class="card-media-fallback"
+                    aria-hidden="true"
+                  >
+                    <i class="icon icon-camera" />
+                  </div>
                 </div>
               </div>
-              <div
-                class="w-full px-[15px]"
-                :class="postImage(featured) ? 'min-[768px]:w-1/2' : ''"
-              >
+              <div class="w-full px-[15px] min-[768px]:w-1/2">
                 <div class="px-5 pt-[35px] pb-11 max-[1199px]:py-[15px] max-[767px]:p-[30px]">
                   <div class="relative mb-[34px] pb-[15px] max-[1199px]:mb-2.5">
                     <h3 class="m-0 block font-['Domine',Georgia,'Times_New_Roman',serif] text-2xl font-bold leading-9 text-[#333333]">
@@ -188,11 +190,9 @@ const postMeta = (post: BlogPostItem) => {
         >
           <article class="news-box style3 mb-[30px] overflow-hidden bg-white">
             <div class="max-[991px]:overflow-hidden max-[767px]:block">
-              <div
-                v-if="postImage(sideCard)"
-                class="card-media-frame"
-              >
+              <div class="card-media-frame">
                 <img
+                  v-if="postImage(sideCard)"
                   :src="postImage(sideCard)"
                   :alt="sideCard.alt_text || sideCard.title"
                   width="1200"
@@ -200,6 +200,13 @@ const postMeta = (post: BlogPostItem) => {
                   loading="lazy"
                   decoding="async"
                 >
+                <div
+                  v-else
+                  class="card-media-fallback"
+                  aria-hidden="true"
+                >
+                  <i class="icon icon-camera" />
+                </div>
               </div>
               <div
                 class="px-[50px] pt-[50px] pb-[60px] max-[991px]:float-left max-[991px]:w-1/2 max-[991px]:pt-[30px] max-[767px]:float-none max-[767px]:w-full max-[767px]:p-[30px]"

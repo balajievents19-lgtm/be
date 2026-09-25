@@ -107,8 +107,9 @@ const eventLink = (item: EventOverviewItem) => item.link_url || '/services'
           >
             <div class="px-[15px]">
               <article class="event-box block pt-[42px] text-center">
-                <div class="group relative mb-[22px] card-media-frame bg-black text-center">
+                <div class="group relative mb-[22px] card-media-frame text-center">
                   <img
+                    v-if="event.image"
                     :src="event.image"
                     :alt="event.title"
                     width="1200"
@@ -117,6 +118,13 @@ const eventLink = (item: EventOverviewItem) => item.link_url || '/services'
                     loading="lazy"
                     decoding="async"
                   >
+                  <div
+                    v-else
+                    class="card-media-fallback"
+                    aria-hidden="true"
+                  >
+                    <i class="icon icon-camera" />
+                  </div>
                   <NuxtLink
                     :to="eventLink(event)"
                     class="absolute inset-0 z-[1] block"

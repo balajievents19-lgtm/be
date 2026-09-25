@@ -108,9 +108,10 @@ const photoLabel = (category: GalleryCategoryCard) => {
                   >
                   <div
                     v-else
-                    class="card-media-fallback flex items-center justify-center bg-[#d7dee4] text-sm text-[#666]"
+                    class="card-media-fallback"
+                    aria-hidden="true"
                   >
-                    {{ category.name }}
+                    <i class="icon icon-camera" />
                   </div>
                 </div>
 

@@ -67,11 +67,9 @@ const postImage = (post: { featured_image: string | null, thumbnail: string | nu
               class="mb-[30px] w-full px-[15px] min-[768px]:w-1/2 min-[992px]:w-1/3"
             >
               <div class="news-box h-full bg-surface-muted">
-                <div
-                  v-if="postImage(post)"
-                  class="card-media-frame"
-                >
+                <div class="card-media-frame">
                   <img
+                    v-if="postImage(post)"
                     :src="postImage(post)"
                     :alt="post.alt_text || post.title"
                     width="1200"
@@ -79,6 +77,13 @@ const postImage = (post: { featured_image: string | null, thumbnail: string | nu
                     loading="lazy"
                     decoding="async"
                   >
+                  <div
+                    v-else
+                    class="card-media-fallback"
+                    aria-hidden="true"
+                  >
+                    <i class="icon icon-camera" />
+                  </div>
                 </div>
                 <div class="p-8">
                   <div class="relative mb-5 pb-[15px]">

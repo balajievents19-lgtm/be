@@ -55,11 +55,9 @@ const eventLink = (item: { link_url: string | null }) => item.link_url || '/cont
               :key="item.id"
               class="overflow-hidden rounded-2xl border border-[#ead9c4] bg-white shadow-[0_8px_24px_rgba(26,18,8,0.06)]"
             >
-              <div
-                v-if="item.image"
-                class="card-media-frame"
-              >
+              <div class="card-media-frame">
                 <img
+                  v-if="item.image"
                   :src="item.image"
                   :alt="item.title"
                   loading="lazy"
@@ -67,6 +65,13 @@ const eventLink = (item: { link_url: string | null }) => item.link_url || '/cont
                   width="1200"
                   height="1200"
                 >
+                <div
+                  v-else
+                  class="card-media-fallback"
+                  aria-hidden="true"
+                >
+                  <i class="icon icon-camera" />
+                </div>
               </div>
               <div class="p-5">
                 <h2 class="font-['Domine',Georgia,serif] text-xl text-[#222]">

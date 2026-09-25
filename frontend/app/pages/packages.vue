@@ -74,11 +74,9 @@ const orderedPackages = computed(() => {
               class="mb-[30px] w-full px-[15px] min-[768px]:w-1/2 min-[992px]:w-1/3"
             >
               <div class="h-full border border-solid border-[#e6e6e6] bg-white">
-                <div
-                  v-if="pkg.image"
-                  class="card-media-frame"
-                >
+                <div class="card-media-frame">
                   <img
+                    v-if="pkg.image"
                     :src="pkg.image"
                     :alt="pkg.name"
                     width="1200"
@@ -86,6 +84,13 @@ const orderedPackages = computed(() => {
                     loading="lazy"
                     decoding="async"
                   >
+                  <div
+                    v-else
+                    class="card-media-fallback"
+                    aria-hidden="true"
+                  >
+                    <i class="icon icon-camera" />
+                  </div>
                 </div>
                 <div class="p-5">
                   <h2 class="m-0 font-['Domine',Georgia,'Times_New_Roman',serif] text-xl font-normal leading-7 text-[#333]">

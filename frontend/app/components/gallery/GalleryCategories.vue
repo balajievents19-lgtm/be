@@ -111,9 +111,10 @@ const { data: categories, pending, failed } = useGalleryCategories()
               >
               <div
                 v-else
-                class="card-media-fallback flex items-center justify-center bg-[#d7dee4] text-sm text-[#666]"
+                class="card-media-fallback"
+                aria-hidden="true"
               >
-                {{ category.name }}
+                <i class="icon icon-camera" />
               </div>
               <span
                 class="pointer-events-none absolute inset-0 bg-[rgba(0,0,0,0.35)] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
