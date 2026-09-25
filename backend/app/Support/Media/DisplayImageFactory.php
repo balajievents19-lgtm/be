@@ -2,6 +2,7 @@
 
 namespace App\Support\Media;
 
+use App\Models\Setting;
 use App\Support\Brand;
 use GdImage;
 use RuntimeException;
@@ -26,11 +27,19 @@ final class DisplayImageFactory
 
     public const FORMAT_PNG = 'png';
 
+    public const FORMAT_FAVICON = 'png-icon48';
+
+    public const FAVICON_DISPLAY_SIZE = 48;
+
     /**
      * Pick a display encode format from Accept. Logos/GIF/SVG/ICO stay on their source type.
      */
     public function negotiateDisplayFormat(?string $accept, string $relativePath, ?string $sourceMime = null): string
     {
+        if ($this->isCmsFaviconPath($relativePath)) {
+            return self::FORMAT_FAVICON;
+        }
+
         if ($this->mustPreserveSourceFormat($relativePath, $sourceMime)) {
             return $this->preservedFormat($relativePath, $sourceMime);
         }
@@ -84,7 +93,18 @@ final class DisplayImageFactory
         }
 
         $canvas = $source;
-        if ($mode === self::MODE_DISPLAY && $width > self::MAX_WIDTH) {
+        $skipWatermark = false;
+        if ($mode === self::MODE_DISPLAY && $this->isCmsFaviconPath($relativePath)) {
+            $fitted = $this->fitSquare($source, self::FAVICON_DISPLAY_SIZE);
+            if ($fitted instanceof GdImage) {
+                imagedestroy($source);
+                $canvas = $fitted;
+                $width = self::FAVICON_DISPLAY_SIZE;
+                $height = self::FAVICON_DISPLAY_SIZE;
+                $skipWatermark = true;
+                $format = self::FORMAT_FAVICON;
+            }
+        } elseif ($mode === self::MODE_DISPLAY && $width > self::MAX_WIDTH) {
             $targetWidth = self::MAX_WIDTH;
             $targetHeight = max(1, (int) round($height * ($targetWidth / $width)));
             $resized = imagecreatetruecolor($targetWidth, $targetHeight);
@@ -101,7 +121,9 @@ final class DisplayImageFactory
 
         imagealphablending($canvas, true);
         imagesavealpha($canvas, true);
-        $this->paintTiledWatermark($canvas, $width, $height, Brand::NAME, $mode);
+        if (! $skipWatermark) {
+            $this->paintTiledWatermark($canvas, $width, $height, Brand::NAME, $mode);
+        }
 
         $encoded = $this->encode($canvas, $format, $mode);
         imagedestroy($canvas);
@@ -200,7 +222,7 @@ final class DisplayImageFactory
         $chain = match ($format) {
             self::FORMAT_AVIF => [self::FORMAT_AVIF, self::FORMAT_WEBP, self::FORMAT_JPEG],
             self::FORMAT_WEBP => [self::FORMAT_WEBP, self::FORMAT_JPEG],
-            self::FORMAT_PNG => [self::FORMAT_PNG],
+            self::FORMAT_PNG, self::FORMAT_FAVICON => [$format],
             default => [self::FORMAT_JPEG],
         };
 
@@ -263,8 +285,8 @@ final class DisplayImageFactory
             $ok = function_exists('imageavif') && @imageavif($target, null, $quality);
         } elseif ($format === self::FORMAT_WEBP) {
             $ok = function_exists('imagewebp') && @imagewebp($target, null, $quality);
-        } elseif ($format === self::FORMAT_PNG) {
-            $ok = imagepng($target, null, 6);
+        } elseif ($format === self::FORMAT_PNG || $format === self::FORMAT_FAVICON) {
+            $ok = imagepng($target, null, $format === self::FORMAT_FAVICON ? 9 : 6);
         } elseif ($format === self::FORMAT_JPEG) {
             $ok = imagejpeg($target, null, $quality);
         }
@@ -468,6 +490,52 @@ final class DisplayImageFactory
         return $this->isBrandAsset($relativePath);
     }
 
+    private function isCmsFaviconPath(string $relativePath): bool
+    {
+        $path = strtolower(str_replace('\\', '/', ltrim($relativePath, '/')));
+        $base = basename($path);
+        if (str_starts_with($base, 'favicon.')) {
+            return true;
+        }
+
+        try {
+            $configured = Setting::query()->value('favicon');
+        } catch (\Throwable) {
+            return false;
+        }
+
+        if (! is_string($configured) || $configured === '') {
+            return false;
+        }
+
+        return $path === strtolower(str_replace('\\', '/', ltrim($configured, '/')));
+    }
+
+    private function fitSquare(GdImage $source, int $size): ?GdImage
+    {
+        $canvas = imagecreatetruecolor($size, $size);
+        if (! $canvas instanceof GdImage) {
+            return null;
+        }
+
+        imagealphablending($canvas, false);
+        imagesavealpha($canvas, true);
+        $transparent = imagecolorallocatealpha($canvas, 0, 0, 0, 127);
+        imagefilledrectangle($canvas, 0, 0, $size - 1, $size - 1, $transparent);
+        imagealphablending($canvas, true);
+
+        $sourceWidth = imagesx($source);
+        $sourceHeight = imagesy($source);
+        $scale = min($size / max(1, $sourceWidth), $size / max(1, $sourceHeight));
+        $destWidth = max(1, (int) round($sourceWidth * $scale));
+        $destHeight = max(1, (int) round($sourceHeight * $scale));
+        $destX = (int) round(($size - $destWidth) / 2);
+        $destY = (int) round(($size - $destHeight) / 2);
+        imagecopyresampled($canvas, $source, $destX, $destY, 0, 0, $destWidth, $destHeight, $sourceWidth, $sourceHeight);
+
+        return $canvas;
+    }
+
     private function isBrandAsset(string $relativePath): bool
     {
         $path = strtolower(str_replace('\\', '/', $relativePath));
@@ -500,7 +568,7 @@ final class DisplayImageFactory
         return match ($format) {
             self::FORMAT_AVIF => 'image/avif',
             self::FORMAT_WEBP => 'image/webp',
-            self::FORMAT_PNG => 'image/png',
+            self::FORMAT_PNG, self::FORMAT_FAVICON => 'image/png',
             default => 'image/jpeg',
         };
     }

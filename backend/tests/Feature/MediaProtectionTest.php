@@ -129,6 +129,41 @@ class MediaProtectionTest extends TestCase
             ->assertHeader('Content-Type', 'image/png');
     }
 
+    public function test_favicon_display_is_resized_png_and_leaves_original_untouched(): void
+    {
+        Storage::fake('public');
+        Storage::fake('local');
+        $this->seed(RBACSeeder::class);
+
+        $original = $this->photoPng(500, 500);
+        Storage::disk('public')->put('settings/brand/site-icon.png', $original);
+        \App\Models\Setting::query()->create([
+            'company_name' => 'Balaji Royal Events',
+            'favicon' => 'settings/brand/site-icon.png',
+        ]);
+
+        $token = basename((string) parse_url((string) PublicStorageUrl::make('settings/brand/site-icon.png'), PHP_URL_PATH));
+        $response = $this->get('/protected-media/'.$token);
+        $response->assertOk()->assertHeader('Content-Type', 'image/png');
+
+        $body = (string) $response->getContent();
+        $this->assertNotSame($original, $body);
+        $this->assertLessThan(strlen($original), strlen($body));
+        $this->assertLessThan(20_000, strlen($body));
+        $this->assertSame($original, Storage::disk('public')->get('settings/brand/site-icon.png'));
+
+        $decoded = imagecreatefromstring($body);
+        $this->assertInstanceOf(\GdImage::class, $decoded);
+        $this->assertSame(48, imagesx($decoded));
+        $this->assertSame(48, imagesy($decoded));
+        imagedestroy($decoded);
+
+        $etag = (string) $response->headers->get('etag');
+        $this->withHeaders(['If-None-Match' => $etag])
+            ->get('/protected-media/'.$token)
+            ->assertStatus(304);
+    }
+
     private function tinyJpeg(): string
     {
         $image = imagecreatetruecolor(48, 32);
