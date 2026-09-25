@@ -40,7 +40,13 @@ class ProductionSecurityTest extends TestCase
 
     public function test_contact_api_response_does_not_leak_internal_fields(): void
     {
-        $response = $this->postJson('/api/contact', [
+        $customer = \App\Models\Customer::factory()->create([
+            'name' => 'Safe Lead',
+            'email' => 'safe.lead@example.com',
+            'phone' => '9000000111',
+        ]);
+
+        $response = $this->actingAs($customer, 'customer')->postJson('/api/contact', [
             'name' => 'Safe Lead',
             'mobile' => '9000000111',
             'email' => 'safe.lead@example.com',

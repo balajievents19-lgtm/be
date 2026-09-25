@@ -14,7 +14,8 @@ class BrandTest extends TestCase
         $this->assertSame('Balaji Royal Events', Brand::name('Balaji Events'));
         $this->assertSame('Balaji Royal Events', Brand::name('Balaji Event'));
         $this->assertSame('Balaji Royal Events', Brand::name('BALAJI EVENTS'));
-        $this->assertSame('Balaji Royal Events', Brand::name('Balaji Royal Events'));
+        $this->assertSame('Balaji Royal Events', Brand::name('BalajiEvent'));
+        $this->assertSame('Balaji Royal Events', Brand::name('BalajiEvents'));
         $this->assertSame(
             'Contact Balaji Royal Events in Jhunjhunu',
             Brand::name('Contact Balaji Events in Jhunjhunu')

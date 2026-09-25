@@ -14,7 +14,8 @@ final class Brand
 
         $normalized = preg_replace('/\bBalaji Events\b/i', self::NAME, $text) ?? $text;
         $normalized = preg_replace('/\bBalaji Event\b/i', self::NAME, $normalized) ?? $normalized;
-        $normalized = preg_replace('/\bBalajiEvents\b/', self::NAME, $normalized) ?? $normalized;
+        $normalized = preg_replace('/\bBalajiEvents\b/i', self::NAME, $normalized) ?? $normalized;
+        $normalized = preg_replace('/\bBalajiEvent\b/i', self::NAME, $normalized) ?? $normalized;
 
         return $normalized;
     }

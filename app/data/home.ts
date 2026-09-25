@@ -50,7 +50,7 @@ export const overviewEvents: EventItem[] = [
     title: 'Event Planner',
     caption: 'Event Planner',
     image: '/images/event/event-img1.jpg',
-    description: 'Balaji Events is trusted wedding management company in india.We were Provide many differnt service in Rajasthan. We promise to set the perfect pitch for to-be and groom to celebrate their special day in grand way.',
+    description: 'Balaji Royal Events is trusted wedding management company in india.We were Provide many differnt service in Rajasthan. We promise to set the perfect pitch for to-be and groom to celebrate their special day in grand way.',
     to: '/services'
   },
   {

@@ -18,7 +18,7 @@ const postImage = computed(() =>
 )
 
 useSeoMeta({
-  title: () => post.value?.seo?.title || (post.value?.title ? `${post.value.title} | Balaji Events` : 'Blog | Balaji Events'),
+  title: () => post.value?.seo?.title || (post.value?.title ? `${post.value.title} | Balaji Royal Events` : 'Blog | Balaji Royal Events'),
   description: () => post.value?.seo?.description
     || post.value?.excerpt
     || settings.value?.seo?.meta_description

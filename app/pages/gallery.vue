@@ -4,12 +4,12 @@ import { galleryBreadcrumbs, galleryPageHeader } from '~/data/gallery'
 const { data: settings } = await useSettings()
 
 useSeoMeta({
-  title: 'Gallery | Balaji Events',
+  title: 'Gallery | Balaji Royal Events',
   description: () => settings.value?.seo?.meta_description
-    || 'Browse Balaji Events gallery photos from weddings and celebrations.',
-  ogTitle: 'Gallery | Balaji Events',
+    || 'Browse Balaji Royal Events gallery photos from weddings and celebrations.',
+  ogTitle: 'Gallery | Balaji Royal Events',
   ogDescription: () => settings.value?.seo?.meta_description
-    || 'Browse Balaji Events gallery photos from weddings and celebrations.',
+    || 'Browse Balaji Royal Events gallery photos from weddings and celebrations.',
   ogImage: () => settings.value?.seo?.opengraph_image || undefined,
   twitterCard: 'summary_large_image'
 })

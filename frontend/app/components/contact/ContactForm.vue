@@ -73,8 +73,8 @@ const applyEnquiryContext = () => {
 
 watch(enquiryContext, applyEnquiryContext, { immediate: true })
 
-watch([customer, loaded, enquiryContext], () => {
-  if (!enquiryContext.value || !customer.value) {
+watch([customer, loaded], () => {
+  if (!customer.value) {
     return
   }
   form.name = customer.value.name || form.name
@@ -82,13 +82,11 @@ watch([customer, loaded, enquiryContext], () => {
   form.mobile = customer.value.phone || form.mobile
 }, { immediate: true })
 
-const identityLocked = computed(() => Boolean(enquiryContext.value && customer.value))
+const identityLocked = computed(() => Boolean(customer.value))
 
 const validate = () => {
   errors.name = form.name.trim() ? '' : 'Name cannot be blank.'
-  errors.mobile = enquiryContext.value
-    ? (isExactTenDigitMobile(form.mobile.trim()) ? '' : 'Enter exactly 10 digits with no +91, spaces, or punctuation.')
-    : (form.mobile.trim() ? '' : 'Phone cannot be blank.')
+  errors.mobile = isExactTenDigitMobile(form.mobile.trim()) ? '' : 'Enter exactly 10 digits with no +91, spaces, or punctuation.'
   errors.email = !form.email.trim()
     ? 'Email address is required.'
     : (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim()) ? '' : 'Enter a valid email address.')
@@ -106,14 +104,14 @@ const onSubmit = async (event: Event) => {
     return
   }
 
-  if (enquiryContext.value && !customer.value) {
-    apiError.value = 'Sign in with a verified account to send this inquiry.'
+  if (!customer.value) {
+    apiError.value = 'Please verify your account before submitting an enquiry.'
     openLogin()
     return
   }
 
-  if (enquiryContext.value && customer.value && !customer.value.email_verified) {
-    apiError.value = 'Verify your email address before sending an inquiry.'
+  if (!(customer.value.verified_for_enquiry || customer.value.email_verified)) {
+    apiError.value = 'Please verify your account before submitting an enquiry.'
     return
   }
 
@@ -124,9 +122,9 @@ const onSubmit = async (event: Event) => {
   submitting.value = true
   try {
     await submitContact({
-      name: (enquiryContext.value ? customer.value?.name : null) || form.name.trim(),
-      mobile: (enquiryContext.value ? customer.value?.phone : null) || form.mobile.trim(),
-      email: (enquiryContext.value ? customer.value?.email : null) || form.email.trim(),
+      name: customer.value.name || form.name.trim(),
+      mobile: customer.value.phone || form.mobile.trim(),
+      email: customer.value.email || form.email.trim(),
       subject: form.subject.trim(),
       message: form.message.trim(),
       service_interested: enquiryContext.value?.interested ?? null,
@@ -179,7 +177,7 @@ const onSubmit = async (event: Event) => {
         <strong class="font-semibold text-[#333]">{{ enquiryContext.label }}</strong>
       </p>
       <p
-        v-if="enquiryContext && loaded && !customer"
+        v-if="loaded && !customer"
         class="mb-6 text-sm text-[#555]"
         role="status"
       >
@@ -199,6 +197,13 @@ const onSubmit = async (event: Event) => {
         >
           Register
         </button>
+      </p>
+      <p
+        v-else-if="loaded && customer && !(customer.verified_for_enquiry || customer.email_verified)"
+        class="mb-6 text-sm text-[#555]"
+        role="status"
+      >
+        Verification required. Please verify your account before submitting an enquiry.
       </p>
 
       <form

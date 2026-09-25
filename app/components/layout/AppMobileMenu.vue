@@ -74,12 +74,12 @@ const submitSearch = async () => {
         <div class="flex items-center justify-between border-b border-[#e5e5e5] px-5 py-4">
           <NuxtLink
             to="/"
-            aria-label="Balaji Events home"
+            aria-label="Balaji Royal Events home"
             @click="close"
           >
             <img
               :src="logoSrc"
-              alt="Balaji Events"
+              alt="Balaji Royal Events"
               width="140"
               height="56"
               loading="eager"

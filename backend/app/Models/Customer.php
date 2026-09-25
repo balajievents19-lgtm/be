@@ -70,6 +70,35 @@ class Customer extends Authenticatable implements CanResetPasswordContract
         return $this->email_verified_at !== null;
     }
 
+    public function hasVerifiedMobile(): bool
+    {
+        return $this->mobile_verified_at !== null;
+    }
+
+    public function hasTrustedOAuthProvider(): bool
+    {
+        $providers = ['google', 'facebook'];
+
+        if ($this->relationLoaded('socialAccounts')) {
+            return $this->socialAccounts->contains(
+                fn (CustomerSocialAccount $account): bool => in_array($account->provider, $providers, true)
+            );
+        }
+
+        return $this->socialAccounts()->whereIn('provider', $providers)->exists();
+    }
+
+    /**
+     * Server-side enquiry eligibility. Never trust client flags.
+     * Email OTP, SMS OTP (mobile_verified_at), or Google/Facebook OAuth.
+     */
+    public function isVerifiedForEnquiry(): bool
+    {
+        return $this->hasVerifiedEmail()
+            || $this->hasVerifiedMobile()
+            || $this->hasTrustedOAuthProvider();
+    }
+
     public function sendPasswordResetNotification($token): void
     {
         $this->notify(new CustomerResetPassword($token));

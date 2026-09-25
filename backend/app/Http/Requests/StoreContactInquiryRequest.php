@@ -10,7 +10,7 @@ use Illuminate\Validation\Validator;
 
 class StoreContactInquiryRequest extends FormRequest
 {
-    public const CUSTOMER_REQUIRED_SOURCES = ['service_inquiry', 'package_inquiry'];
+    public const CUSTOMER_REQUIRED_SOURCES = ['service_inquiry', 'package_inquiry', 'slider', 'contact_page', 'mobile'];
 
     public function authorize(): bool
     {
@@ -19,7 +19,7 @@ class StoreContactInquiryRequest extends FormRequest
 
     public function requiresAuthenticatedCustomer(): bool
     {
-        return in_array((string) $this->input('source'), self::CUSTOMER_REQUIRED_SOURCES, true);
+        return true;
     }
 
     /**
@@ -58,17 +58,8 @@ class StoreContactInquiryRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator): void {
-            if ($this->requiresAuthenticatedCustomer()) {
-                if ($this->filled('mobile') && ! PhoneNumber::isExactTenDigits((string) $this->input('mobile'))) {
-                    $validator->errors()->add('mobile', 'Enter exactly 10 digits with no +91, spaces, or punctuation.');
-                }
-
-                return;
-            }
-
-            $digits = preg_replace('/\D+/', '', (string) $this->input('mobile', '')) ?? '';
-            if ($this->filled('mobile') && (strlen($digits) < 10 || strlen($digits) > 15)) {
-                $validator->errors()->add('mobile', 'Enter a valid phone number with at least 10 digits.');
+            if ($this->filled('mobile') && ! PhoneNumber::isExactTenDigits((string) $this->input('mobile'))) {
+                $validator->errors()->add('mobile', 'Enter exactly 10 digits with no +91, spaces, or punctuation.');
             }
 
             if ($this->input('source') !== 'slider') {

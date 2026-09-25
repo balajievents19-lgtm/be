@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import FormsAppDatePicker from '~/components/forms/AppDatePicker.vue'
 import FormsAppEventTypeSelect from '~/components/forms/AppEventTypeSelect.vue'
 import FormsAppLocationPicker from '~/components/forms/AppLocationPicker.vue'
+import { isExactTenDigitMobile, sanitizeIndianMobileDigits } from '~/utils/formFields'
 
 interface SearchForm {
   name: string
@@ -16,6 +17,12 @@ interface SearchForm {
 
 const { submitContact } = usePublicForms()
 const { data: eventTypes } = useEventTypes()
+const { customer, loaded, openLogin, openRegister } = useCustomerAuth()
+
+const canSubmitEnquiry = computed(() => Boolean(
+  customer.value
+  && (customer.value.verified_for_enquiry || customer.value.email_verified)
+))
 
 const form = reactive<SearchForm>({
   name: '',
@@ -30,12 +37,44 @@ const form = reactive<SearchForm>({
 const submitting = ref(false)
 const submitted = ref(false)
 const apiError = ref('')
+const mobileError = ref('')
+const mobileTouched = ref(false)
+
+const mobileHint = computed(() => {
+  if (!mobileTouched.value && !form.mobile) {
+    return ''
+  }
+  if (isExactTenDigitMobile(form.mobile)) {
+    return ''
+  }
+  return 'Enter a valid 10-digit Indian mobile number.'
+})
+
+const onMobileInput = (event: Event) => {
+  const el = event.target as HTMLInputElement
+  form.mobile = sanitizeIndianMobileDigits(el.value)
+  mobileTouched.value = true
+  mobileError.value = mobileHint.value
+}
 
 const search = async () => {
   submitted.value = false
   apiError.value = ''
+  mobileTouched.value = true
+  mobileError.value = mobileHint.value
 
   if (form.website.trim()) {
+    return
+  }
+
+  if (!customer.value) {
+    apiError.value = 'Please verify your account before submitting an enquiry.'
+    openLogin()
+    return
+  }
+
+  if (!canSubmitEnquiry.value) {
+    apiError.value = 'Please verify your account before submitting an enquiry.'
     return
   }
 
@@ -44,8 +83,13 @@ const search = async () => {
     return
   }
 
-  if (!form.name.trim() || !form.mobile.trim()) {
+  if (!form.name.trim()) {
     apiError.value = 'Name and phone are required so we can contact you.'
+    return
+  }
+
+  if (!isExactTenDigitMobile(form.mobile)) {
+    apiError.value = 'Enter a valid 10-digit Indian mobile number.'
     return
   }
 
@@ -58,8 +102,9 @@ const search = async () => {
   submitting.value = true
   try {
     await submitContact({
-      name: form.name.trim(),
-      mobile: form.mobile.trim(),
+      name: (customer.value.name || form.name).trim(),
+      mobile: (customer.value.phone || form.mobile).trim(),
+      email: customer.value.email,
       subject: `Slider inquiry: ${selected.name}`,
       message: [
         `Event Type: ${selected.name}`,
@@ -84,6 +129,8 @@ const search = async () => {
     form.date = ''
     form.budget = ''
     form.website = ''
+    mobileTouched.value = false
+    mobileError.value = ''
   } catch (error: unknown) {
     const err = error as { data?: { message?: string, errors?: Record<string, string[]> }, message?: string }
     const firstValidation = err?.data?.errors
@@ -135,14 +182,26 @@ const search = async () => {
           aria-hidden="true"
         />
         <input
-          v-model="form.mobile"
+          :value="form.mobile"
           type="tel"
           name="mobile"
-          placeholder="Phone Number"
-          aria-label="Phone number"
+          inputmode="numeric"
           autocomplete="tel"
+          maxlength="10"
+          pattern="[0-9]{10}"
+          placeholder="Mobile Number (10 digits)"
+          aria-label="Mobile Number (10 digits)"
+          :aria-invalid="Boolean(mobileHint)"
           class="box-border h-[50px] w-full rounded border border-solid border-[#b8b8b8] bg-white py-[15px] pr-2.5 pl-[38px] text-base leading-5 text-[#333] outline-none"
+          @input="onMobileInput"
         >
+        <p
+          v-if="mobileHint"
+          class="mt-1 text-xs leading-4 text-red-600"
+          role="alert"
+        >
+          {{ mobileHint }}
+        </p>
       </div>
 
       <div class="min-w-0 w-full">
@@ -181,6 +240,24 @@ const search = async () => {
         >
       </div>
     </div>
+
+    <p
+      v-if="loaded && !customer"
+      class="mb-2.5 text-center text-sm text-[#555]"
+      role="status"
+    >
+      Sign in with a verified account to send this enquiry.
+      <button type="button" class="text-brand-500 underline" @click="openLogin()">Login</button>
+      or
+      <button type="button" class="text-brand-500 underline" @click="openRegister()">Register</button>
+    </p>
+    <p
+      v-else-if="loaded && customer && !canSubmitEnquiry"
+      class="mb-2.5 text-center text-sm text-[#555]"
+      role="status"
+    >
+      Verification required before you can submit an enquiry.
+    </p>
 
     <p
       v-if="apiError"

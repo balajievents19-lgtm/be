@@ -80,7 +80,7 @@ const updateText = (post: BlogPostItem) => post.excerpt || post.title
 
 const copyrightText = computed(() =>
   props.settings?.footer?.copyright_text
-  || `Copyright © ${copyrightYear} - BalajiEvents | All Rights Reserved`
+  || `Copyright © ${copyrightYear} - Balaji Royal Events | All Rights Reserved`
 )
 
 const onNewsletterSubmit = async (event: Event) => {

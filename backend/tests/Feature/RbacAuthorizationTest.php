@@ -182,9 +182,10 @@ class RbacAuthorizationTest extends TestCase
         $this->postJson('/api/contact', [
             'name' => 'Public Lead',
             'mobile' => '9000000099',
+            'email' => 'public.lead@example.com',
             'message' => 'Public contact still works.',
             'website' => '',
-        ])->assertCreated();
+        ])->assertUnauthorized();
 
         $this->postJson('/api/newsletter', [
             'email' => 'public.newsletter.rbac@example.com',

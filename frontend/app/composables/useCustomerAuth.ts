@@ -11,6 +11,8 @@ export interface Customer {
   avatar: string | null
   email_verified_at?: string | null
   email_verified?: boolean
+  mobile_verified?: boolean
+  verified_for_enquiry?: boolean
   last_login_at?: string | null
   pending_email?: string | null
   needs_email_verification?: boolean

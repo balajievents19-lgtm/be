@@ -9,13 +9,13 @@ const filterQuery = computed(() =>
 )
 
 useSeoMeta({
-  title: 'Services | Balaji Events',
+  title: 'Services | Balaji Royal Events',
   description: () => settings.value?.seo?.meta_description
-    || 'Explore Balaji Events wedding and event services.',
-  ogTitle: 'Services | Balaji Events',
+    || 'Explore Balaji Royal Events wedding and event services.',
+  ogTitle: 'Services | Balaji Royal Events',
   ogDescription: () => settings.value?.seo?.meta_description
     || settings.value?.company?.description
-    || 'Explore Balaji Events wedding and event services.',
+    || 'Explore Balaji Royal Events wedding and event services.',
   ogImage: () => settings.value?.seo?.opengraph_image || undefined,
   twitterCard: 'summary_large_image'
 })

@@ -13,12 +13,12 @@ const postImage = (post: { featured_image: string | null, thumbnail: string | nu
   post.featured_image || post.thumbnail || ''
 
 useSeoMeta({
-  title: 'Blog | Balaji Events',
+  title: 'Blog | Balaji Royal Events',
   description: () => settings.value?.seo?.meta_description
-    || 'Latest news and updates from Balaji Events.',
-  ogTitle: 'Blog | Balaji Events',
+    || 'Latest news and updates from Balaji Royal Events.',
+  ogTitle: 'Blog | Balaji Royal Events',
   ogDescription: () => settings.value?.seo?.meta_description
-    || 'Latest news and updates from Balaji Events.',
+    || 'Latest news and updates from Balaji Royal Events.',
   ogImage: () => settings.value?.seo?.opengraph_image || undefined,
   twitterCard: 'summary_large_image'
 })

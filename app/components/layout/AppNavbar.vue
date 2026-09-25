@@ -124,11 +124,11 @@ onUnmounted(() => {
           to="/"
           class="shrink-0 transition-all duration-1000 ease-in-out"
           :class="props.isScrolled ? 'my-[10px]' : 'my-[15px] md:mt-[15px] md:mb-0'"
-          aria-label="Balaji Events home"
+          aria-label="Balaji Royal Events home"
         >
           <img
             :src="logoSrc"
-            alt="Balaji Events"
+            alt="Balaji Royal Events"
             width="160"
             height="70"
             loading="eager"

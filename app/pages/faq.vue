@@ -5,12 +5,12 @@ const { data: faqs } = await useFaqs()
 const { data: settings } = await useSettings()
 
 useSeoMeta({
-  title: 'FAQ’s | Balaji Events',
+  title: 'FAQ’s | Balaji Royal Events',
   description: () => settings.value?.seo?.meta_description
-    || 'Frequently asked questions about Balaji Events services and contact details.',
-  ogTitle: 'FAQ’s | Balaji Events',
+    || 'Frequently asked questions about Balaji Royal Events services and contact details.',
+  ogTitle: 'FAQ’s | Balaji Royal Events',
   ogDescription: () => settings.value?.seo?.meta_description
-    || 'Frequently asked questions about Balaji Events services and contact details.',
+    || 'Frequently asked questions about Balaji Royal Events services and contact details.',
   ogImage: () => settings.value?.seo?.opengraph_image || undefined,
   twitterCard: 'summary_large_image'
 })

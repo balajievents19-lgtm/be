@@ -9,13 +9,13 @@ const contactBoxes = computed(() => contactBoxesFromSettings(settings.value))
 
 useSeoMeta({
   title: () => settings.value?.seo?.meta_title
-    ? `About Us | ${settings.value.company?.name || 'Balaji Events'}`
-    : 'About Us | Balaji Events',
+    ? `About Us | ${settings.value.company?.name || 'Balaji Royal Events'}`
+    : 'About Us | Balaji Royal Events',
   description: () => about.value?.description
     || settings.value?.seo?.meta_description
     || settings.value?.company?.description
-    || 'Learn about Balaji Events — wedding and event management.',
-  ogTitle: 'About Us | Balaji Events',
+    || 'Learn about Balaji Royal Events — wedding and event management.',
+  ogTitle: 'About Us | Balaji Royal Events',
   ogDescription: () => about.value?.description
     || settings.value?.company?.description
     || undefined,

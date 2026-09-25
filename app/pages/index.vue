@@ -13,11 +13,11 @@ const successStories = computed(() => home.value?.success_stories ?? [])
 const featuredBlog = computed(() => home.value?.featured_blog ?? [])
 
 useSeoMeta({
-  title: () => settings.value?.seo?.meta_title || 'Balaji Events | Every Event Should be Perfect',
+  title: () => settings.value?.seo?.meta_title || 'Balaji Royal Events | Every Event Should be Perfect',
   description: () => settings.value?.seo?.meta_description
     || settings.value?.company?.description
-    || 'Balaji Events wedding and event management.',
-  ogTitle: () => settings.value?.seo?.meta_title || settings.value?.company?.name || 'Balaji Events',
+    || 'Balaji Royal Events wedding and event management.',
+  ogTitle: () => settings.value?.seo?.meta_title || settings.value?.company?.name || 'Balaji Royal Events',
   ogDescription: () => settings.value?.seo?.meta_description
     || settings.value?.company?.description
     || undefined,

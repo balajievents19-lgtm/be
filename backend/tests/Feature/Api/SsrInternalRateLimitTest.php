@@ -61,6 +61,20 @@ class SsrInternalRateLimitTest extends TestCase
             ->assertStatus(429);
     }
 
+    public function test_ssr_secret_does_not_bypass_contact_authentication(): void
+    {
+        $this->withHeaders([SsrInternalAuth::headerName() => self::SECRET])
+            ->postJson('/api/contact', [
+                'name' => 'SSR Probe',
+                'mobile' => '9876543210',
+                'email' => 'ssr@example.com',
+                'message' => 'Should still require a verified customer.',
+                'website' => '',
+            ])
+            ->assertUnauthorized()
+            ->assertJsonPath('code', 'customer_auth_required');
+    }
+
     public function test_ssr_secret_does_not_exempt_contact_post_throttle(): void
     {
         RateLimiter::clear('contact:127.0.0.1');
@@ -68,17 +82,28 @@ class SsrInternalRateLimitTest extends TestCase
         $payload = [
             'name' => 'SSR Probe',
             'mobile' => '9876543210',
+            'email' => 'ssr@example.com',
             'message' => 'Should still hit contact throttle.',
             'website' => '',
         ];
 
+        $customer = \App\Models\Customer::factory()->create([
+            'name' => 'SSR Probe',
+            'email' => 'ssr@example.com',
+            'phone' => '9876543210',
+        ]);
+
         for ($i = 0; $i < 5; $i++) {
-            $this->withHeaders([SsrInternalAuth::headerName() => self::SECRET])
-                ->postJson('/api/contact', $payload)
+            $this->actingAs($customer, 'customer')
+                ->withHeaders([SsrInternalAuth::headerName() => self::SECRET])
+                ->postJson('/api/contact', array_merge($payload, [
+                    'message' => 'Should still hit contact throttle. '.$i,
+                ]))
                 ->assertCreated();
         }
 
-        $this->withHeaders([SsrInternalAuth::headerName() => self::SECRET])
+        $this->actingAs($customer, 'customer')
+            ->withHeaders([SsrInternalAuth::headerName() => self::SECRET])
             ->postJson('/api/contact', $payload)
             ->assertStatus(429);
     }

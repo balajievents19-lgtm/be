@@ -106,7 +106,7 @@ onUnmounted(() => {
           <div class="relative max-h-[850px] w-full">
             <img
               :src="slide.desktop_image"
-              :alt="slide.title || 'Balaji Events'"
+              :alt="slide.title || 'Balaji Royal Events'"
               :fetchpriority="index === 0 ? 'high' : 'auto'"
               :loading="index === 0 ? 'eager' : 'lazy'"
               decoding="async"

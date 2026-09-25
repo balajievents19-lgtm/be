@@ -28,13 +28,13 @@ useSeoMeta({
     if (seoTitle) {
       return seoTitle
     }
-    return service.value ? `${service.value.name} | Balaji Events` : 'Service | Balaji Events'
+    return service.value ? `${service.value.name} | Balaji Royal Events` : 'Service | Balaji Royal Events'
   },
   description: () =>
     service.value?.seo?.description
     || service.value?.short_description
-    || 'Balaji Events service details.',
-  ogTitle: () => service.value ? `${service.value.name} | Balaji Events` : 'Service | Balaji Events',
+    || 'Balaji Royal Events service details.',
+  ogTitle: () => service.value ? `${service.value.name} | Balaji Royal Events` : 'Service | Balaji Royal Events',
   ogDescription: () =>
     service.value?.seo?.description
     || service.value?.short_description

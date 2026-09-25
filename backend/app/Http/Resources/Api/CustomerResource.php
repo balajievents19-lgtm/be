@@ -25,6 +25,8 @@ class CustomerResource extends JsonResource
             'avatar' => $this->avatar,
             'email_verified_at' => $this->email_verified_at,
             'email_verified' => $this->email_verified_at !== null,
+            'mobile_verified' => $this->mobile_verified_at !== null,
+            'verified_for_enquiry' => $this->isVerifiedForEnquiry(),
             'last_login_at' => $this->last_login_at,
             'pending_email' => $this->pending_email,
             'needs_email_verification' => $this->email_verified_at === null,
