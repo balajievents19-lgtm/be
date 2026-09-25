@@ -45,6 +45,7 @@ class GalleryItem extends Model
         'unpublish_at',
         'seo_title',
         'seo_description',
+        'seo_keywords',
         'opengraph_image',
         'created_by',
         'updated_by',

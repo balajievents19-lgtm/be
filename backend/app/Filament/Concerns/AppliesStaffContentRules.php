@@ -24,14 +24,18 @@ trait AppliesStaffContentRules
             throw new AuthorizationException('Unauthenticated.');
         }
         $this->assertAssignedTargets($data, null);
+        $submit = property_exists($this, 'submitForReview') ? (bool) $this->submitForReview : true;
         if (StaffContentAccess::isSuperAdmin($user)) {
             $data['created_by'] = $data['created_by'] ?? $user->id;
             $data['updated_by'] = $user->id;
+            if (($data['status'] ?? true) && blank($data['moderation_status'] ?? null)) {
+                $data['moderation_status'] = \App\Enums\ContentModerationStatus::Published->value;
+            }
 
             return $data;
         }
 
-        return ContentModeration::prepareStaffCreate($user, $data);
+        return ContentModeration::prepareStaffCreate($user, $data, $submit);
     }
 
     /**
@@ -45,13 +49,14 @@ trait AppliesStaffContentRules
             throw new AuthorizationException('Unauthenticated.');
         }
         $this->assertAssignedTargets($data, $record);
+        $submit = property_exists($this, 'submitForReview') ? (bool) $this->submitForReview : true;
         if (StaffContentAccess::isSuperAdmin($user)) {
             $data['updated_by'] = $user->id;
 
             return $data;
         }
 
-        return ContentModeration::prepareStaffUpdate($user, $record, $data);
+        return ContentModeration::prepareStaffUpdate($user, $record, $data, $submit);
     }
 
     protected function notifyModerationIfNeeded(Model $record): void

@@ -31,6 +31,8 @@ final class AdminModules
         'Catering Manager',
         'Bridal/Mehndi Manager',
         'SFX Manager',
+        'Content Writer',
+        'Editor',
     ];
 
     /**

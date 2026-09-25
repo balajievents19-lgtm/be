@@ -74,9 +74,25 @@ class WebsitePublishFields
             Placeholder::make('created_at_display')
                 ->label('Created')
                 ->content(fn (?Model $record): string => $record?->created_at?->toDayDateTimeString() ?? '—'),
+            Placeholder::make('creator_display')
+                ->label('Created by')
+                ->content(fn (?Model $record): string => $record?->creator?->name ?? '—'),
             Placeholder::make('updated_at_display')
                 ->label('Last Updated')
                 ->content(fn (?Model $record): string => $record?->updated_at?->toDayDateTimeString() ?? '—'),
+            Placeholder::make('editor_display')
+                ->label('Last edited by')
+                ->content(fn (?Model $record): string => $record?->editor?->name ?? '—'),
+            Placeholder::make('reviewer_display')
+                ->label('Reviewed by')
+                ->content(fn (?Model $record): string => $record?->reviewer?->name ?? '—'),
+            Placeholder::make('reviewed_at_display')
+                ->label('Reviewed at')
+                ->content(fn (?Model $record): string => $record?->reviewed_at?->toDayDateTimeString() ?? '—'),
+            Placeholder::make('moderation_notes_display')
+                ->label('Rejection reason')
+                ->content(fn (?Model $record): string => filled($record?->moderation_notes) ? (string) $record->moderation_notes : '—')
+                ->columnSpanFull(),
         ];
     }
 

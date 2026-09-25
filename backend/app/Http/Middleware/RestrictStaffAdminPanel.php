@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Filament\Resources\StaffPosts\StaffPostResource;
+use App\Support\Staff\AdminLanding;
 use App\Support\Staff\StaffPanelAccess;
 use Closure;
 use Illuminate\Http\Request;
@@ -23,12 +23,17 @@ class RestrictStaffAdminPanel
 
         $routeName = (string) $request->route()?->getName();
 
-        if ($request->is('admin/staff-posts') || $request->is('admin/staff-posts/*') || $request->is('livewire/*')) {
+        if ($request->is('admin/staff-posts')
+            || $request->is('admin/staff-posts/*')
+            || $request->is('admin/staff-access')
+            || $request->is('admin/staff-access/*')
+            || $request->is('livewire/*')) {
             return $next($request);
         }
 
         if ($routeName !== '' && (
             str_starts_with($routeName, 'filament.admin.resources.staff-posts.')
+            || $routeName === 'filament.admin.pages.staff-access'
             || str_starts_with($routeName, 'filament.admin.auth.')
             || str_starts_with($routeName, 'livewire.')
         )) {
@@ -36,7 +41,7 @@ class RestrictStaffAdminPanel
         }
 
         if ($routeName === 'filament.admin.pages.dashboard' || $request->is('admin') || $request->is('admin/')) {
-            return redirect()->to(StaffPostResource::getUrl());
+            return redirect()->to(AdminLanding::url($user));
         }
 
         abort(403);

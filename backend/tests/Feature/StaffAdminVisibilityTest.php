@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Filament\Clusters\GalleryCluster;
 use App\Filament\Clusters\HomeCluster;
+use App\Filament\Pages\AccessNotAssigned;
 use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\MediaApprovals;
 use App\Filament\Resources\GalleryItems\GalleryItemResource;
@@ -16,6 +17,7 @@ use App\Models\GalleryItem;
 use App\Models\Service;
 use App\Models\User;
 use App\Support\Rbac\AdminModules;
+use App\Support\Staff\AdminLanding;
 use App\Support\Staff\StaffAccessSync;
 use Database\Seeders\RBACSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -36,7 +38,7 @@ class StaffAdminVisibilityTest extends TestCase
 
     public function test_staff_member_sees_only_staff_post_resources(): void
     {
-        $staff = $this->staffMember();
+        $staff = $this->assignedStaff();
         $this->actingAs($staff);
 
         $this->assertTrue(StaffPostResource::canAccess());
@@ -48,15 +50,17 @@ class StaffAdminVisibilityTest extends TestCase
         $this->assertFalse(HeroSlideResource::canViewAny());
         $this->assertFalse(UserResource::canViewAny());
         $this->assertFalse(MediaApprovals::canAccess());
+        $this->assertFalse(AccessNotAssigned::canAccess());
         $this->assertSame(['My Posts', 'Create Post'], array_map(
             fn ($item) => $item->getLabel(),
             StaffPostResource::getNavigationItems()
         ));
+        $this->assertStringContainsString('/admin/staff-posts', AdminLanding::url($staff));
     }
 
     public function test_staff_member_urls_are_forbidden_except_own_posts(): void
     {
-        $staff = $this->staffMember();
+        $staff = $this->assignedStaff();
 
         $this->actingAs($staff)
             ->get(StaffPostResource::getUrl('index'))
@@ -81,6 +85,31 @@ class StaffAdminVisibilityTest extends TestCase
         $this->actingAs($staff)
             ->get(ServiceResource::getUrl('index'))
             ->assertForbidden();
+    }
+
+    public function test_unassigned_staff_gets_access_not_assigned_not_403_on_landing(): void
+    {
+        $staff = $this->staffMember('No Scope');
+        $this->actingAs($staff);
+
+        $this->assertFalse(StaffPostResource::canAccess());
+        $this->assertTrue(AccessNotAssigned::canAccess());
+        $this->assertStringContainsString('/admin/staff-access', AdminLanding::url($staff));
+
+        $this->get(AccessNotAssigned::getUrl())->assertOk();
+        $this->get(StaffPostResource::getUrl('index'))->assertForbidden();
+        $this->get(GalleryItemResource::getUrl('index'))->assertForbidden();
+    }
+
+    public function test_content_manager_lands_on_first_authorized_content_module(): void
+    {
+        $manager = User::factory()->create(['email' => 'cm.'.$this->n().'@balaji.test']);
+        $manager->assignRole(AdminModules::ROLE_CONTENT_MANAGER);
+        $this->actingAs($manager);
+
+        $this->assertTrue(GalleryItemResource::canAccess());
+        $this->assertStringContainsString('/admin/gallery', AdminLanding::url($manager));
+        $this->assertFalse(StaffPostResource::canAccess());
     }
 
     public function test_staff_cannot_open_other_staff_posts_by_id(): void
@@ -163,6 +192,24 @@ class StaffAdminVisibilityTest extends TestCase
         $this->assertTrue(UserResource::canViewAny());
         $this->assertTrue(MediaApprovals::canAccess());
         $this->assertFalse(StaffPostResource::canAccess());
+    }
+
+    private function assignedStaff(string $name = 'Staff Member'): User
+    {
+        $staff = $this->staffMember($name);
+        $category = GalleryCategory::query()->create([
+            'name' => 'Assigned '.$name,
+            'slug' => 'assigned-'.fake()->unique()->numerify('######'),
+            'status' => true,
+        ]);
+        $this->grant($staff, $this->createService(['name' => 'Assigned Svc '.$name, 'slug' => 'asvc-'.fake()->unique()->numerify('######')]), $category);
+
+        return $staff;
+    }
+
+    private function n(): string
+    {
+        return (string) fake()->unique()->numerify('######');
     }
 
     private function staffMember(string $name = 'Staff Member'): User

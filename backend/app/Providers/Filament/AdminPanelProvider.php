@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use App\Filament\Pages\Dashboard;
 use App\Http\Middleware\DenyCustomerAdminAccess;
 use App\Http\Middleware\RestrictStaffAdminPanel;
+use App\Support\Staff\AdminLanding;
 use App\Models\Setting;
 use App\Support\Media\PublicStorageUrl;
 use Filament\Http\Middleware\Authenticate;
@@ -32,6 +33,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->homeUrl(fn (): string => AdminLanding::url())
             ->brandName(\App\Support\Brand::NAME)
             ->favicon(function (): ?string {
                 try {

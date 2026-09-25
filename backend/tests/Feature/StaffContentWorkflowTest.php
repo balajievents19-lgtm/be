@@ -362,4 +362,92 @@ class StaffContentWorkflowTest extends TestCase
         $this->assertTrue($apiTitles->contains('Live film'));
         $this->assertFalse($apiTitles->contains('Pending film'));
     }
+
+    public function test_staff_draft_is_not_public_until_submit_and_approve(): void
+    {
+        $category = GalleryCategory::query()->create(['name' => 'Draft Cat', 'slug' => 'draft-cat', 'status' => true]);
+        $staff = $this->staff('Photographer', 'Drafty');
+        $this->grantCategory($staff, $category);
+
+        $draftId = $this->actingAs($staff)->postJson('/api/staff-content/gallery-items', [
+            'gallery_category_id' => $category->id,
+            'title' => 'Draft only',
+            'slug' => 'draft-only-item',
+            'image' => 'gallery/draft.jpg',
+            'as_draft' => true,
+        ])->assertCreated()->assertJsonPath('data.moderation_status', 'draft')->json('data.id');
+
+        $this->assertFalse(collect($this->getJson('/api/gallery')->json('data'))->pluck('slug')->contains('draft-only-item'));
+        $this->getJson('/api/seo/resolve?type=gallery-item&slug=draft-only-item')->assertNotFound();
+
+        $this->actingAs($staff)->putJson('/api/staff-content/gallery-items/'.$draftId, [
+            'title' => 'Draft submitted',
+            'as_draft' => false,
+        ])->assertOk()->assertJsonPath('data.moderation_status', 'pending_review');
+
+        $this->assertFalse(collect($this->getJson('/api/gallery')->json('data'))->pluck('slug')->contains('draft-only-item'));
+    }
+
+    public function test_super_admin_reject_reason_unpublish_and_whatsapp_url(): void
+    {
+        $admin = $this->superAdmin();
+        $category = GalleryCategory::query()->create(['name' => 'Planner', 'slug' => 'planner-share', 'status' => true]);
+        $staff = $this->staff('Wedding Planner', 'Share Staff');
+        $this->grantCategory($staff, $category);
+
+        $id = $this->actingAs($staff)->postJson('/api/staff-content/gallery-items', [
+            'gallery_category_id' => $category->id,
+            'title' => 'Share post',
+            'slug' => 'share-post-live',
+            'image' => 'gallery/share.jpg',
+            'description' => 'Royal wedding decor in Rajasthan.',
+        ])->assertCreated()->json('data.id');
+
+        $this->actingAs($admin)->postJson('/api/staff-content/gallery-items/'.$id.'/reject', [
+            'notes' => 'Please replace this image with a higher quality original.',
+        ])->assertOk()
+            ->assertJsonPath('data.moderation_status', 'rejected')
+            ->assertJsonPath('data.moderation_notes', 'Please replace this image with a higher quality original.');
+
+        $this->actingAs($staff)->putJson('/api/staff-content/gallery-items/'.$id, [
+            'title' => 'Share post revised',
+        ])->assertOk()->assertJsonPath('data.moderation_status', 'pending_review');
+
+        $this->actingAs($admin)->postJson('/api/staff-content/gallery-items/'.$id.'/approve')->assertOk();
+        $item = GalleryItem::query()->findOrFail($id);
+        $this->assertTrue($item->isPubliclyVisible());
+        $this->assertStringContainsString('wa.me', \App\Support\Staff\WhatsAppShare::url($item));
+        $this->assertStringContainsString('Share post', \App\Support\Staff\WhatsAppShare::message($item));
+
+        $this->actingAs($staff)->postJson('/api/staff-content/gallery-items/'.$id.'/unpublish')->assertForbidden();
+        $this->actingAs($admin)->postJson('/api/staff-content/gallery-items/'.$id.'/unpublish')->assertOk()
+            ->assertJsonPath('data.moderation_status', 'unpublished')
+            ->assertJsonPath('data.status', false);
+
+        Cache::flush();
+        $this->assertFalse(collect($this->getJson('/api/gallery')->json('data'))->pluck('slug')->contains('share-post-live'));
+    }
+
+    public function test_assigned_staff_landing_and_multiple_scope_ids(): void
+    {
+        $catA = GalleryCategory::query()->create(['name' => 'Wedding Planner', 'slug' => 'wp-multi', 'status' => true]);
+        $catB = GalleryCategory::query()->create(['name' => 'Decorator & Florist', 'slug' => 'dec-multi', 'status' => true]);
+        $svcA = $this->createService(['name' => 'Wedding Planning', 'slug' => 'wp-svc-multi']);
+        $svcB = $this->createService(['name' => 'Wedding Decor', 'slug' => 'wd-svc-multi']);
+        $staff = $this->staff(AdminModules::ROLE_STAFF_MEMBER, 'Multi Scope');
+        StaffAccessSync::sync($staff, [
+            $svcA->id => ['can_access' => true, 'can_create' => true, 'can_edit_own' => true],
+            $svcB->id => ['can_access' => true, 'can_create' => true, 'can_edit_own' => true],
+        ], [
+            $catA->id => ['can_access' => true, 'can_create' => true, 'can_edit_own' => true],
+            $catB->id => ['can_access' => true, 'can_create' => true, 'can_edit_own' => true],
+        ]);
+        $staff->unsetRelation('serviceAccesses');
+        $staff->unsetRelation('galleryCategoryAccesses');
+
+        $this->actingAs($staff);
+        $this->assertEqualsCanonicalizing([$catA->id, $catB->id], StaffContentAccess::accessibleGalleryCategoryIds($staff));
+        $this->assertEqualsCanonicalizing([$svcA->id, $svcB->id], StaffContentAccess::accessibleServiceIds($staff));
+        $this->assertStringContainsString('/admin/staff-posts', \App\Support\Staff\AdminLanding::url($staff));
+    }
 }

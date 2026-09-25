@@ -62,6 +62,7 @@ class GalleryItemResource extends JsonResource
             'seo' => $this->when($request->routeIs('api.gallery.show'), [
                 'title' => Brand::rewrite($this->seo_title),
                 'description' => Brand::rewrite($this->seo_description),
+                'keywords' => Brand::rewrite($this->seo_keywords),
                 'opengraph_image' => $this->imageUrl($this->opengraph_image),
             ]),
         ];

@@ -8,6 +8,7 @@ use App\Models\GalleryItem;
 use App\Models\Service;
 use App\Models\Setting;
 use App\Support\Brand;
+use App\Support\Media\GalleryVideoEmbed;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
@@ -299,6 +300,41 @@ class SchemaBuilder
                 $item->caption ?: $item->alt_text
             ),
             'url' => $pageUrl,
+            'datePublished' => $item->created_at?->toIso8601String(),
+            'dateModified' => $item->updated_at?->toIso8601String(),
+        ]);
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    public function galleryVideo(GalleryItem $item): ?array
+    {
+        if (! $item->isVideo()) {
+            return null;
+        }
+
+        $embed = GalleryVideoEmbed::resolve($item->video_source?->value, $item->video_url ?: $item->youtube_url);
+        $contentUrl = $embed['open_url'] ?? $embed['embed_url'] ?? null;
+        if (! filled($contentUrl)) {
+            return null;
+        }
+
+        $coverPath = $item->publicCoverPath();
+        $thumb = $coverPath ? $this->meta->absoluteMedia($item->imageUrl($coverPath)) : ($embed['poster_url'] ?? null);
+        $pageUrl = $this->meta->absolute('/gallery/'.$item->slug);
+
+        return $this->filterNull([
+            '@context' => 'https://schema.org',
+            '@type' => 'VideoObject',
+            'name' => $item->title,
+            'description' => $item->seo_description ?: ($item->caption ?: $item->description),
+            'thumbnailUrl' => $thumb,
+            'contentUrl' => $contentUrl,
+            'embedUrl' => $embed['embed_url'] ?? null,
+            'url' => $pageUrl,
+            'uploadDate' => $item->created_at?->toIso8601String(),
+            'dateModified' => $item->updated_at?->toIso8601String(),
         ]);
     }
 

@@ -10,6 +10,7 @@ enum ContentModerationStatus: string
     case Approved = 'approved';
     case Rejected = 'rejected';
     case Published = 'published';
+    case Unpublished = 'unpublished';
 
     /**
      * @return list<string>
@@ -30,7 +31,6 @@ enum ContentModerationStatus: string
         return [
             self::PendingReview->value,
             self::BrandReview->value,
-            self::Draft->value,
         ];
     }
 
@@ -43,6 +43,7 @@ enum ContentModerationStatus: string
             self::Approved => 'Approved',
             self::Rejected => 'Rejected',
             self::Published => 'Published',
+            self::Unpublished => 'Unpublished',
         };
     }
 }

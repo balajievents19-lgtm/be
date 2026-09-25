@@ -15,18 +15,19 @@ final class ContentModeration
      * @param  array<string, mixed>  $data
      * @return array<string, mixed>
      */
-    public static function prepareStaffCreate(User $user, array $data): array
+    public static function prepareStaffCreate(User $user, array $data, bool $submitForReview = true): array
     {
         $data['created_by'] = $user->id;
         $data['updated_by'] = $user->id;
         $data['status'] = false;
         $needsBrandReview = BrandReviewScanner::mightContainExternalBranding($data);
         $data['brand_review_required'] = $needsBrandReview;
-        $data['moderation_status'] = $needsBrandReview
-            ? ContentModerationStatus::BrandReview->value
-            : ContentModerationStatus::PendingReview->value;
+        $data['moderation_status'] = $submitForReview
+            ? ($needsBrandReview ? ContentModerationStatus::BrandReview->value : ContentModerationStatus::PendingReview->value)
+            : ContentModerationStatus::Draft->value;
         $data['reviewed_by'] = null;
         $data['reviewed_at'] = null;
+        unset($data['submit_for_review']);
 
         return $data;
     }
@@ -35,7 +36,7 @@ final class ContentModeration
      * @param  array<string, mixed>  $data
      * @return array<string, mixed>
      */
-    public static function prepareStaffUpdate(User $user, Model $record, array $data): array
+    public static function prepareStaffUpdate(User $user, Model $record, array $data, bool $submitForReview = true): array
     {
         $data['updated_by'] = $user->id;
         unset($data['created_by'], $data['status'], $data['moderation_status'], $data['reviewed_by'], $data['reviewed_at']);
@@ -43,11 +44,19 @@ final class ContentModeration
         $merged = array_merge($record->only(['title', 'description', 'caption', 'alt_text', 'image', 'thumbnail', 'url', 'video_url']), $data);
         $needsBrandReview = BrandReviewScanner::mightContainExternalBranding($merged);
         $data['brand_review_required'] = $needsBrandReview;
-        $data['moderation_status'] = $needsBrandReview
-            ? ContentModerationStatus::BrandReview->value
-            : ContentModerationStatus::PendingReview->value;
+        $data['moderation_status'] = $submitForReview
+            ? ($needsBrandReview ? ContentModerationStatus::BrandReview->value : ContentModerationStatus::PendingReview->value)
+            : ContentModerationStatus::Draft->value;
+        unset($data['submit_for_review']);
 
         return $data;
+    }
+
+    public static function shouldNotifyReviewers(Model $record): bool
+    {
+        $status = (string) $record->getAttribute('moderation_status');
+
+        return in_array($status, ContentModerationStatus::reviewQueueValues(), true);
     }
 
     public static function approve(User $reviewer, Model $record): Model
@@ -63,6 +72,7 @@ final class ContentModeration
             'reviewed_by' => $reviewer->id,
             'reviewed_at' => now(),
             'updated_by' => $reviewer->id,
+            'moderation_notes' => null,
         ]);
         $record->save();
 
@@ -88,8 +98,28 @@ final class ContentModeration
         return $record;
     }
 
+    public static function unpublish(User $reviewer, Model $record): Model
+    {
+        if (! StaffContentAccess::canPublish($reviewer)) {
+            abort(403, 'Only Super Admin can unpublish content.');
+        }
+
+        $record->fill([
+            'moderation_status' => ContentModerationStatus::Unpublished->value,
+            'status' => false,
+            'updated_by' => $reviewer->id,
+        ]);
+        $record->save();
+
+        return $record;
+    }
+
     public static function notifySuperAdmins(Model $record, User $uploader, bool $brandReview): void
     {
+        if (! self::shouldNotifyReviewers($record)) {
+            return;
+        }
+
         $admins = User::role(AdminModules::ROLE_SUPER_ADMIN)->get();
         if ($admins->isEmpty()) {
             return;

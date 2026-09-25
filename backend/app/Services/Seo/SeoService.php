@@ -262,9 +262,10 @@ class SeoService
             'meta' => $this->meta()->build([
                 'title' => $item->seo_title ?: ($item->title.' | Gallery | '.(Brand::name($this->settings()->company_name))),
                 'description' => $item->seo_description ?: ($item->caption ?: $item->description),
+                'keywords' => $item->seo_keywords,
                 'canonical' => $path,
                 'image' => $item->imageUrl($item->opengraph_image) ?: $image,
-                'type' => 'website',
+                'type' => $item->isVideo() ? 'video.other' : 'website',
             ]),
             'schema' => array_values(array_filter([
                 ...$this->globalSchemas(),
@@ -273,7 +274,7 @@ class SeoService
                     ['name' => 'Gallery', 'url' => '/gallery'],
                     ['name' => $item->title, 'url' => $path],
                 ]),
-                $image ? $this->schema()->galleryImage($item) : null,
+                $item->isVideo() ? $this->schema()->galleryVideo($item) : ($image ? $this->schema()->galleryImage($item) : null),
             ])),
         ];
     }

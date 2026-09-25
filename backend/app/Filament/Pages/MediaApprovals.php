@@ -9,6 +9,7 @@ use App\Support\Rbac\AdminUserSecurity;
 use App\Support\Staff\ContentModeration;
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
@@ -40,6 +41,13 @@ class MediaApprovals extends Page implements HasTable
         return AdminUserSecurity::isSuperAdmin(Auth::user());
     }
 
+    public static function getNavigationBadge(): ?string
+    {
+        $count = GalleryItem::query()->needsReview()->count();
+
+        return $count > 0 ? (string) $count : null;
+    }
+
     public function table(Table $table): Table
     {
         return $table
@@ -51,34 +59,43 @@ class MediaApprovals extends Page implements HasTable
             )
             ->columns([
                 TextColumn::make('title')->searchable()->wrap(),
-                TextColumn::make('category.name')->label('Category'),
+                TextColumn::make('creator.name')->label('Creator'),
                 TextColumn::make('services.name')->label('Service')->badge()->limitList(2),
-                TextColumn::make('creator.name')->label('Uploaded by'),
-                TextColumn::make('created_at')->dateTime()->label('Date'),
+                TextColumn::make('category.name')->label('Category'),
                 TextColumn::make('media_type')->label('Media type')->badge(),
+                TextColumn::make('created_at')->dateTime()->label('Created'),
                 TextColumn::make('moderation_status')
                     ->label('Status')
                     ->badge()
                     ->formatStateUsing(fn (?string $state): string => ContentModerationStatus::tryFrom((string) $state)?->label() ?? (string) $state),
                 TextColumn::make('brand_review_required')
-                    ->label('Moderation')
-                    ->formatStateUsing(fn ($state): string => $state ? 'Brand review required' : 'Pending review'),
+                    ->label('Brand flag')
+                    ->formatStateUsing(fn ($state): string => $state ? 'Needs brand review' : '—'),
             ])
             ->recordActions([
                 Action::make('view')
                     ->url(fn (GalleryItem $record): string => \App\Filament\Resources\GalleryItems\GalleryItemResource::getUrl('edit', ['record' => $record])),
+                Action::make('edit')
+                    ->url(fn (GalleryItem $record): string => \App\Filament\Resources\GalleryItems\GalleryItemResource::getUrl('edit', ['record' => $record])),
                 Action::make('approve')
+                    ->label('Approve & Publish')
                     ->color('success')
                     ->requiresConfirmation()
                     ->action(function (GalleryItem $record): void {
                         ContentModeration::approve(Auth::user(), $record);
-                        Notification::make()->title('Approved')->success()->send();
+                        Notification::make()->title('Approved and published')->success()->send();
                     }),
                 Action::make('reject')
                     ->color('danger')
-                    ->requiresConfirmation()
-                    ->action(function (GalleryItem $record): void {
-                        ContentModeration::reject(Auth::user(), $record);
+                    ->form([
+                        Textarea::make('notes')
+                            ->label('Rejection reason')
+                            ->required()
+                            ->maxLength(500)
+                            ->rows(3),
+                    ])
+                    ->action(function (GalleryItem $record, array $data): void {
+                        ContentModeration::reject(Auth::user(), $record, $data['notes'] ?? null);
                         Notification::make()->title('Rejected')->danger()->send();
                     }),
             ]);

@@ -30,12 +30,14 @@ class StaffContentController extends Controller
             'alt_text' => ['nullable', 'string', 'max:255'],
             'seo_title' => ['nullable', 'string', 'max:255'],
             'seo_description' => ['nullable', 'string'],
+            'seo_keywords' => ['nullable', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255'],
             'youtube_url' => ['nullable', 'string', 'max:2048'],
             'video_url' => ['nullable', 'string', 'max:2048'],
             'services' => ['nullable', 'array'],
             'services.*' => ['integer', 'exists:services,id'],
             'status' => ['sometimes', 'boolean'],
+            'as_draft' => ['sometimes', 'boolean'],
         ]);
 
         $categoryId = (int) $data['gallery_category_id'];
@@ -53,9 +55,17 @@ class StaffContentController extends Controller
         }
 
         unset($data['services']);
+        $submit = ! $request->boolean('as_draft');
+        unset($data['as_draft']);
         $payload = StaffContentAccess::isSuperAdmin($user)
-            ? array_merge($data, ['created_by' => $user->id, 'updated_by' => $user->id])
-            : ContentModeration::prepareStaffCreate($user, $data);
+            ? array_merge($data, [
+                'created_by' => $user->id,
+                'updated_by' => $user->id,
+                'moderation_status' => ($data['status'] ?? true)
+                    ? \App\Enums\ContentModerationStatus::Published->value
+                    : \App\Enums\ContentModerationStatus::Draft->value,
+            ])
+            : ContentModeration::prepareStaffCreate($user, $data, $submit);
 
         if (blank($payload['slug'] ?? null)) {
             $payload['slug'] = Str::slug($payload['title']).'-'.Str::random(6);
@@ -86,10 +96,12 @@ class StaffContentController extends Controller
             'description' => ['nullable', 'string'],
             'seo_title' => ['nullable', 'string', 'max:255'],
             'seo_description' => ['nullable', 'string'],
+            'seo_keywords' => ['nullable', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255'],
             'alt_text' => ['nullable', 'string', 'max:255'],
             'status' => ['sometimes', 'boolean'],
             'moderation_status' => ['sometimes', 'string'],
+            'as_draft' => ['sometimes', 'boolean'],
         ]);
 
         if (isset($data['gallery_category_id'])
@@ -103,7 +115,9 @@ class StaffContentController extends Controller
                 || in_array($data['moderation_status'] ?? null, ['published', 'approved'], true)) {
                 abort(403, 'Staff cannot publish content.');
             }
-            $data = ContentModeration::prepareStaffUpdate($user, $galleryItem, $data);
+            $submit = ! $request->boolean('as_draft');
+            unset($data['as_draft']);
+            $data = ContentModeration::prepareStaffUpdate($user, $galleryItem, $data, $submit);
         }
 
         $galleryItem->fill($data)->save();
@@ -134,6 +148,15 @@ class StaffContentController extends Controller
     {
         $this->authorize('approve', $galleryItem);
         ContentModeration::reject($request->user(), $galleryItem, $request->string('notes')->toString() ?: null);
+        $this->flushContent();
+
+        return response()->json(['data' => $galleryItem->fresh()]);
+    }
+
+    public function unpublishGalleryItem(Request $request, GalleryItem $galleryItem): JsonResponse
+    {
+        $this->authorize('approve', $galleryItem);
+        ContentModeration::unpublish($request->user(), $galleryItem);
         $this->flushContent();
 
         return response()->json(['data' => $galleryItem->fresh()]);
@@ -201,7 +224,7 @@ class StaffContentController extends Controller
     {
         $record = $this->resolve($type, $id);
         $this->authorize('approve', $record);
-        ContentModeration::reject($request->user(), $record);
+        ContentModeration::reject($request->user(), $record, $request->string('notes')->toString() ?: null);
         $this->flushContent();
 
         return response()->json(['data' => $record->fresh()]);

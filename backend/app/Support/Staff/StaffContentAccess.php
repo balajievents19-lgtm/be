@@ -178,6 +178,19 @@ final class StaffContentAccess
             || $user->serviceAccesses->contains(fn ($row) => $row->can_access && $row->can_create);
     }
 
+    public static function hasAssignedContentScope(?User $user): bool
+    {
+        if ($user === null) {
+            return false;
+        }
+        if (self::isSuperAdmin($user)) {
+            return true;
+        }
+
+        return self::accessibleGalleryCategoryIds($user) !== []
+            || self::accessibleServiceIds($user) !== [];
+    }
+
     /**
      * @param  Collection<int, \App\Models\Service>|iterable<int>|null  $services
      */

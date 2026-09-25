@@ -2,19 +2,24 @@
 
 namespace App\Filament\Resources\GalleryItems\Schemas;
 
+use App\Enums\ContentModerationStatus;
 use App\Enums\GalleryMediaType;
 use App\Enums\GalleryVideoSource;
 use App\Filament\Support\WebsitePublishFields;
+use App\Models\GalleryCategory;
+use App\Models\GalleryItem;
 use App\Support\Media\GalleryVideoEmbed;
 use App\Support\Staff\StaffContentAccess;
 use Closure;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -54,6 +59,28 @@ class GalleryItemForm
                     ->tabs([
                         Tab::make('General')
                             ->schema([
+                                Section::make('Moderation')
+                                    ->visible($staffMode)
+                                    ->schema([
+                                        Placeholder::make('staff_moderation_status')
+                                            ->label('Status')
+                                            ->content(function (?GalleryItem $record): string {
+                                                if ($record === null) {
+                                                    return 'New post — save as draft or submit for review.';
+                                                }
+                                                $status = ContentModerationStatus::tryFrom((string) $record->moderation_status);
+
+                                                return $status?->label() ?? 'Draft';
+                                            }),
+                                        Placeholder::make('staff_rejection_reason')
+                                            ->label('Rejection reason')
+                                            ->visible(fn (?GalleryItem $record): bool => $record !== null
+                                                && (string) $record->moderation_status === ContentModerationStatus::Rejected->value)
+                                            ->content(fn (?GalleryItem $record): string => filled($record?->moderation_notes)
+                                                ? (string) $record->moderation_notes
+                                                : 'No reason provided.')
+                                            ->columnSpanFull(),
+                                    ]),
                                 Section::make()
                                     ->columns(2)
                                     ->schema([
@@ -75,7 +102,7 @@ class GalleryItemForm
                                                     $query->ordered();
                                                     if ($user && ! StaffContentAccess::isSuperAdmin($user)) {
                                                         $ids = StaffContentAccess::accessibleGalleryCategoryIds($user);
-                                                        $query->whereIn('id', $ids !== [] ? $ids : [0]);
+                                                        $query->whereIn('gallery_categories.id', $ids !== [] ? $ids : [0]);
                                                     }
 
                                                     return $query;
@@ -84,9 +111,38 @@ class GalleryItemForm
                                             ->searchable()
                                             ->preload()
                                             ->required()
-                                            ->default(fn (): ?int => $assignedCategoryIds()[0] ?? null)
-                                            ->disabled(fn (): bool => $staffMode && count($assignedCategoryIds()) <= 1)
-                                            ->dehydrated(),
+                                            ->default(function () use ($assignedCategoryIds): ?int {
+                                                $ids = $assignedCategoryIds();
+
+                                                return count($ids) === 1 ? $ids[0] : null;
+                                            })
+                                            ->visible(fn (): bool => ! $staffMode || count($assignedCategoryIds()) <= 1)
+                                            ->disabled(fn (): bool => $staffMode && count($assignedCategoryIds()) === 1)
+                                            ->dehydrated(fn (): bool => ! $staffMode || count($assignedCategoryIds()) <= 1),
+                                        ToggleButtons::make('gallery_category_id')
+                                            ->label('Gallery Category')
+                                            ->options(function () use ($assignedCategoryIds): array {
+                                                $ids = $assignedCategoryIds();
+                                                if ($ids === []) {
+                                                    return [];
+                                                }
+
+                                                return GalleryCategory::query()
+                                                    ->whereIn('id', $ids)
+                                                    ->ordered()
+                                                    ->pluck('name', 'id')
+                                                    ->all();
+                                            })
+                                            ->inline()
+                                            ->required()
+                                            ->default(function () use ($assignedCategoryIds): ?int {
+                                                $ids = $assignedCategoryIds();
+
+                                                return count($ids) === 1 ? $ids[0] : null;
+                                            })
+                                            ->visible(fn (): bool => $staffMode && count($assignedCategoryIds()) > 1)
+                                            ->dehydrated(fn (): bool => $staffMode && count($assignedCategoryIds()) > 1)
+                                            ->columnSpanFull(),
                                         CheckboxList::make('services')
                                             ->label(fn (Get $get): string => $isVideo($get)
                                                 ? 'Show this video in Services'
@@ -99,9 +155,7 @@ class GalleryItemForm
                                                     $user = Auth::user();
                                                     if ($user && ! StaffContentAccess::isSuperAdmin($user)) {
                                                         $ids = StaffContentAccess::accessibleServiceIds($user);
-                                                        if ($ids !== []) {
-                                                            $query->whereIn('id', $ids);
-                                                        }
+                                                        $query->whereIn('services.id', $ids !== [] ? $ids : [0]);
                                                     }
 
                                                     return $query;
@@ -109,9 +163,14 @@ class GalleryItemForm
                                             )
                                             ->searchable()
                                             ->bulkToggleable()
-                                            ->columns(2)
+                                            ->columns(fn (): int => $staffMode ? 3 : 2)
                                             ->columnSpanFull()
-                                            ->default(fn (): array => $assignedServiceIds())
+                                            ->extraAttributes(['class' => 'overflow-x-auto'])
+                                            ->default(function () use ($assignedServiceIds): array {
+                                                $ids = $assignedServiceIds();
+
+                                                return count($ids) === 1 ? $ids : [];
+                                            })
                                             ->helperText(fn (Get $get): string => $isVideo($get)
                                                 ? 'The video is added once. It will appear in this Gallery Category and on every selected Service page.'
                                                 : 'The photo is uploaded once. It will appear in this Gallery Category and on every selected Service page.'),
@@ -221,8 +280,30 @@ class GalleryItemForm
                             ]),
 
                         Tab::make('SEO')
-                            ->hidden($staffMode)
                             ->schema([
+                                Section::make('SEO preview')
+                                    ->columns(2)
+                                    ->schema([
+                                        Placeholder::make('seo_title_preview')
+                                            ->label('Title preview')
+                                            ->content(fn (Get $get): string => (string) ($get('seo_title') ?: $get('title') ?: '—')),
+                                        Placeholder::make('seo_url_preview')
+                                            ->label('URL / slug')
+                                            ->content(fn (Get $get): string => WebsitePublishFields::previewUrl(
+                                                filled($get('slug')) ? '/gallery/'.$get('slug') : '/gallery'
+                                            )),
+                                        Placeholder::make('seo_description_preview')
+                                            ->label('Description preview')
+                                            ->content(fn (Get $get): string => Str::limit((string) ($get('seo_description') ?: $get('description') ?: $get('caption') ?: '—'), 160))
+                                            ->columnSpanFull(),
+                                        Placeholder::make('seo_social_preview')
+                                            ->label('Social preview')
+                                            ->content(fn (Get $get): string => trim(
+                                                (string) ($get('seo_title') ?: $get('title') ?: 'Title')."\n".
+                                                Str::limit((string) ($get('seo_description') ?: $get('description') ?: ''), 120)
+                                            ))
+                                            ->columnSpanFull(),
+                                    ]),
                                 Section::make()
                                     ->columns(2)
                                     ->schema([
@@ -233,6 +314,11 @@ class GalleryItemForm
                                         Textarea::make('seo_description')
                                             ->label('SEO Description')
                                             ->rows(3)
+                                            ->columnSpanFull(),
+                                        TextInput::make('seo_keywords')
+                                            ->label('Primary / related keywords')
+                                            ->maxLength(255)
+                                            ->helperText('Short, natural keywords. Do not stuff.')
                                             ->columnSpanFull(),
                                         FileUpload::make('opengraph_image')
                                             ->label('OpenGraph Image')

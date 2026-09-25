@@ -45,10 +45,6 @@ class GalleryItemPolicy
             return false;
         }
 
-        if (StaffPanelAccess::isRestrictedStaff($user)) {
-            return true;
-        }
-
         return StaffContentAccess::canCreateAnyGalleryContent($user);
     }
 

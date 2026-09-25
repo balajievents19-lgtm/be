@@ -265,9 +265,9 @@ class SeoApiTest extends TestCase
         $this->assertTrue(ManageHomepageSeo::canAccess());
 
         $this->actingAs($content);
-        $this->assertTrue($content->can('seo.view'));
-        $this->assertTrue(SeoCluster::canAccess());
-        $this->assertTrue(ManageGlobalSeo::canAccess());
+        $this->assertFalse($content->can('seo.view'));
+        $this->assertFalse(SeoCluster::canAccess());
+        $this->assertFalse(ManageGlobalSeo::canAccess());
 
         $this->actingAs($lead);
         $this->assertFalse($lead->can('seo.view'));

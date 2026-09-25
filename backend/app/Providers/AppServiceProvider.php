@@ -35,6 +35,8 @@ use App\Support\Media\AdminPreviewMedia;
 use App\Support\Rbac\AdminModules;
 use App\Support\Rbac\AdminUserSecurity;
 use App\Support\SsrInternalAuth;
+use App\Filament\Auth\AdminLoginResponse;
+use Filament\Auth\Http\Responses\Contracts\LoginResponse as LoginResponseContract;
 use Filament\Forms\Components\BaseFileUpload;
 use Filament\Forms\Components\FileUpload;
 use Illuminate\Auth\Middleware\Authenticate;
@@ -54,6 +56,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(SeoService::class);
         $this->app->bind(NavigationRepository::class, EloquentNavigationRepository::class);
         $this->app->singleton(EmailVerificationService::class);
+        $this->app->bind(LoginResponseContract::class, AdminLoginResponse::class);
     }
 
     /**

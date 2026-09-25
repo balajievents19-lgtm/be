@@ -8,6 +8,7 @@ use App\Filament\Resources\StaffPosts\Pages\CreateStaffPost;
 use App\Filament\Resources\StaffPosts\Pages\EditStaffPost;
 use App\Filament\Resources\StaffPosts\Pages\ListStaffPosts;
 use App\Models\GalleryItem;
+use App\Support\Staff\StaffContentAccess;
 use App\Support\Staff\StaffEloquentScope;
 use App\Support\Staff\StaffPanelAccess;
 use BackedEnum;
@@ -43,7 +44,8 @@ class StaffPostResource extends Resource
 
         return $user !== null
             && StaffPanelAccess::isRestrictedStaff($user)
-            && $user->can('gallery.view');
+            && $user->can('gallery.view')
+            && StaffContentAccess::hasAssignedContentScope($user);
     }
 
     public static function form(Schema $schema): Schema
@@ -53,7 +55,7 @@ class StaffPostResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return GalleryItemsTable::configure($table);
+        return GalleryItemsTable::configure($table, staffMode: true);
     }
 
     public static function getPages(): array
