@@ -6,12 +6,15 @@ use App\Models\ExternalMedia;
 use App\Models\User;
 use App\Policies\Concerns\ChecksModulePermission;
 use App\Support\Staff\StaffContentAccess;
+use App\Support\Staff\StaffPanelAccess;
 
 class ExternalMediaPolicy
 {
     use ChecksModulePermission;
 
     protected static string $module = 'gallery';
+
+    protected const ALLOW_RESTRICTED_STAFF = true;
 
     public function viewAny(User $user): bool
     {
@@ -25,6 +28,9 @@ class ExternalMediaPolicy
         }
         if (StaffContentAccess::isSuperAdmin($user)) {
             return true;
+        }
+        if (StaffPanelAccess::isRestrictedStaff($user)) {
+            return $externalMedia->isOwnedBy($user);
         }
         if ($externalMedia->gallery_category_id) {
             return StaffContentAccess::canAccessGalleryCategory($user, (int) $externalMedia->gallery_category_id);

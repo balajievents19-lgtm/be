@@ -25,10 +25,26 @@ use Illuminate\Support\Str;
 
 class GalleryItemForm
 {
-    public static function configure(Schema $schema): Schema
+    public static function configure(Schema $schema, bool $staffMode = false): Schema
     {
         $isImage = fn (Get $get): bool => ($get('media_type') ?? GalleryMediaType::Image->value) !== GalleryMediaType::Video->value;
         $isVideo = fn (Get $get): bool => ($get('media_type') ?? GalleryMediaType::Image->value) === GalleryMediaType::Video->value;
+        $assignedCategoryIds = function (): array {
+            $user = Auth::user();
+            if ($user === null) {
+                return [];
+            }
+
+            return StaffContentAccess::accessibleGalleryCategoryIds($user);
+        };
+        $assignedServiceIds = function (): array {
+            $user = Auth::user();
+            if ($user === null) {
+                return [];
+            }
+
+            return StaffContentAccess::accessibleServiceIds($user);
+        };
 
         return $schema
             ->components([
@@ -67,7 +83,10 @@ class GalleryItemForm
                                             )
                                             ->searchable()
                                             ->preload()
-                                            ->required(),
+                                            ->required()
+                                            ->default(fn (): ?int => $assignedCategoryIds()[0] ?? null)
+                                            ->disabled(fn (): bool => $staffMode && count($assignedCategoryIds()) <= 1)
+                                            ->dehydrated(),
                                         CheckboxList::make('services')
                                             ->label(fn (Get $get): string => $isVideo($get)
                                                 ? 'Show this video in Services'
@@ -92,6 +111,7 @@ class GalleryItemForm
                                             ->bulkToggleable()
                                             ->columns(2)
                                             ->columnSpanFull()
+                                            ->default(fn (): array => $assignedServiceIds())
                                             ->helperText(fn (Get $get): string => $isVideo($get)
                                                 ? 'The video is added once. It will appear in this Gallery Category and on every selected Service page.'
                                                 : 'The photo is uploaded once. It will appear in this Gallery Category and on every selected Service page.'),
@@ -201,6 +221,7 @@ class GalleryItemForm
                             ]),
 
                         Tab::make('SEO')
+                            ->hidden($staffMode)
                             ->schema([
                                 Section::make()
                                     ->columns(2)
@@ -226,6 +247,7 @@ class GalleryItemForm
                             ]),
 
                         Tab::make('Publish')
+                            ->hidden($staffMode)
                             ->schema([
                                 Section::make()
                                     ->columns(2)

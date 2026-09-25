@@ -41,5 +41,10 @@ class CreateUser extends CreateRecord
             $this->data['service_access'] ?? [],
             $this->data['category_access'] ?? []
         );
+
+        $department = $this->data['staff_department'] ?? null;
+        if (is_string($department) && $department !== '') {
+            $this->getRecord()->assignRole($department);
+        }
     }
 }

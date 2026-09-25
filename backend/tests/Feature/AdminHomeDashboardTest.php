@@ -226,7 +226,7 @@ class AdminHomeDashboardTest extends TestCase
 
         Livewire::test(Dashboard::class)
             ->assertSuccessful()
-            ->assertActionVisible('cleanAndOptimize');
+            ->assertActionHidden('cleanAndOptimize');
     }
 
     public function test_lead_manager_does_not_see_clean_and_optimize_action(): void

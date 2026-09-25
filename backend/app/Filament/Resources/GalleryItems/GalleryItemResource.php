@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\GalleryItems;
 
 use App\Filament\Clusters\GalleryCluster;
+use App\Filament\Concerns\DeniesRestrictedStaff;
 use App\Filament\Resources\GalleryItems\Pages\CreateGalleryItem;
 use App\Filament\Resources\GalleryItems\Pages\EditGalleryItem;
 use App\Filament\Resources\GalleryItems\Pages\ListGalleryItems;
@@ -21,6 +22,8 @@ use UnitEnum;
 
 class GalleryItemResource extends Resource
 {
+    use DeniesRestrictedStaff;
+
     protected static ?string $model = GalleryItem::class;
 
     protected static ?string $cluster = GalleryCluster::class;

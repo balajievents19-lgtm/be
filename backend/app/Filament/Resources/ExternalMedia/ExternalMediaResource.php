@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ExternalMedia;
 
 use App\Filament\Clusters\GalleryCluster;
+use App\Filament\Concerns\DeniesRestrictedStaff;
 use App\Filament\Resources\ExternalMedia\Pages\CreateExternalMedia;
 use App\Filament\Resources\ExternalMedia\Pages\EditExternalMedia;
 use App\Filament\Resources\ExternalMedia\Pages\ListExternalMedia;
@@ -22,6 +23,8 @@ use UnitEnum;
 
 class ExternalMediaResource extends Resource
 {
+    use DeniesRestrictedStaff;
+
     protected static ?string $model = ExternalMedia::class;
 
     protected static ?string $cluster = GalleryCluster::class;

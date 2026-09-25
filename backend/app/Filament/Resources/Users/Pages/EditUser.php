@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Users\Pages;
 
 use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
+use App\Support\Rbac\AdminModules;
 use App\Support\Rbac\AdminUserSecurity;
 use App\Support\Staff\StaffAccessSync;
 use Filament\Actions\DeleteAction;
@@ -63,7 +64,10 @@ class EditUser extends EditRecord
         /** @var User $record */
         $record = $this->getRecord();
 
-        return array_merge($data, StaffAccessSync::formState($record));
+        return array_merge($data, StaffAccessSync::formState($record), [
+            'staff_department' => collect(AdminModules::SPECIALIST_ROLES)
+                ->first(fn (string $name): bool => $record->hasRole($name)),
+        ]);
     }
 
     protected function afterSave(): void
@@ -79,6 +83,11 @@ class EditUser extends EditRecord
             $this->data['service_access'] ?? [],
             $this->data['category_access'] ?? []
         );
+
+        $department = $this->data['staff_department'] ?? null;
+        if (is_string($department) && $department !== '') {
+            $record->assignRole($department);
+        }
     }
 
     protected function beforeSave(): void

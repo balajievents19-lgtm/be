@@ -4,7 +4,8 @@ namespace App\Filament\Pages;
 
 use App\Services\Maintenance\WebsiteCleanupService;
 use App\Support\Admin\LeadDashboardMetrics;
-use App\Support\Rbac\AdminModules;
+use App\Support\Rbac\AdminUserSecurity;
+use App\Support\Staff\StaffPanelAccess;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
@@ -28,6 +29,11 @@ class Dashboard extends BaseDashboard
 
     protected static ?int $navigationSort = -2;
 
+    public static function canAccess(): bool
+    {
+        return ! StaffPanelAccess::isRestrictedStaff(Auth::user());
+    }
+
     public function getTitle(): string|Htmlable
     {
         return 'Home';
@@ -43,7 +49,7 @@ class Dashboard extends BaseDashboard
                 ->label('Clean & Optimize Website')
                 ->icon(Heroicon::OutlinedSparkles)
                 ->color('gray')
-                ->visible(fn (): bool => Auth::user()?->can(AdminModules::permission('gallery', 'update')) === true)
+                ->visible(fn (): bool => AdminUserSecurity::isSuperAdmin(Auth::user()))
                 ->requiresConfirmation()
                 ->modalHeading('Clean & Optimize Website')
                 ->modalDescription('This operation safely removes only unnecessary temporary/orphan files and clears safe application caches. Referenced media, gallery originals, logos, system assets, and database records are not deleted. Files that cannot be verified as unused are skipped.')

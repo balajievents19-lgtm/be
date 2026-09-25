@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\GalleryVideos;
 
 use App\Filament\Clusters\GalleryCluster;
+use App\Filament\Concerns\DeniesRestrictedStaff;
 use App\Filament\Resources\GalleryItems\Schemas\GalleryItemForm;
 use App\Filament\Resources\GalleryItems\Tables\GalleryItemsTable;
 use App\Filament\Resources\GalleryVideos\Pages\CreateGalleryVideo;
@@ -21,6 +22,8 @@ use UnitEnum;
 
 class GalleryVideoResource extends Resource
 {
+    use DeniesRestrictedStaff;
+
     protected static ?string $model = GalleryItem::class;
 
     protected static ?string $cluster = GalleryCluster::class;

@@ -5,11 +5,16 @@ namespace App\Policies;
 use App\Models\User;
 use App\Support\Rbac\AdminModules;
 use App\Support\Rbac\AdminUserSecurity;
+use App\Support\Staff\StaffPanelAccess;
 
 class UserPolicy
 {
     public function viewAny(User $user): bool
     {
+        if (StaffPanelAccess::isRestrictedStaff($user)) {
+            return false;
+        }
+
         return $user->can(AdminModules::permission('users', 'view'));
     }
 

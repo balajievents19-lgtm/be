@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\BlogPosts;
 
 use App\Filament\Clusters\BlogCluster;
+use App\Filament\Concerns\DeniesRestrictedStaff;
 use App\Filament\Resources\BlogPosts\Pages\CreateBlogPost;
 use App\Filament\Resources\BlogPosts\Pages\EditBlogPost;
 use App\Filament\Resources\BlogPosts\Pages\ListBlogPosts;
@@ -21,6 +22,8 @@ use UnitEnum;
 
 class BlogPostResource extends Resource
 {
+    use DeniesRestrictedStaff;
+
     protected static ?string $model = BlogPost::class;
 
     protected static ?string $cluster = BlogCluster::class;

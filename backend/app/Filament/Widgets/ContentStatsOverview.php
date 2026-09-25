@@ -13,6 +13,7 @@ use App\Models\Service;
 use Filament\Support\Icons\Heroicon;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Support\Facades\Auth;
 
 class ContentStatsOverview extends StatsOverviewWidget
 {
@@ -22,6 +23,10 @@ class ContentStatsOverview extends StatsOverviewWidget
 
     public static function canView(): bool
     {
+        if (\App\Support\Staff\StaffPanelAccess::isRestrictedStaff(Auth::user())) {
+            return false;
+        }
+
         return ServiceResource::canViewAny()
             || GalleryItemResource::canViewAny()
             || BlogPostResource::canViewAny()

@@ -64,6 +64,7 @@ cd "$APP_ROOT/backend"
 as_app /usr/bin/composer install --no-dev --optimize-autoloader --no-interaction
 as_app /usr/bin/php artisan optimize:clear
 as_app /usr/bin/php artisan migrate --force
+as_app /usr/bin/php artisan db:seed --class=RBACSeeder --force
 # Image protection: do not expose storage/app/public through a web symlink.
 # Laravel serves display images at /protected-media and gates /storage for admin.
 if [[ -L public/storage ]]; then

@@ -6,12 +6,15 @@ use App\Models\GalleryItem;
 use App\Models\User;
 use App\Policies\Concerns\ChecksModulePermission;
 use App\Support\Staff\StaffContentAccess;
+use App\Support\Staff\StaffPanelAccess;
 
 class GalleryItemPolicy
 {
     use ChecksModulePermission;
 
     protected static string $module = 'gallery';
+
+    protected const ALLOW_RESTRICTED_STAFF = true;
 
     public function viewAny(User $user): bool
     {
@@ -28,12 +31,25 @@ class GalleryItemPolicy
             return true;
         }
 
+        if (StaffPanelAccess::isRestrictedStaff($user)) {
+            return $galleryItem->isOwnedBy($user)
+                && StaffContentAccess::canAccessGalleryCategory($user, (int) $galleryItem->gallery_category_id);
+        }
+
         return StaffContentAccess::canAccessGalleryCategory($user, (int) $galleryItem->gallery_category_id);
     }
 
     public function create(User $user): bool
     {
-        return $this->allows($user, 'create') && StaffContentAccess::canCreateAnyGalleryContent($user);
+        if (! $this->allows($user, 'create')) {
+            return false;
+        }
+
+        if (StaffPanelAccess::isRestrictedStaff($user)) {
+            return true;
+        }
+
+        return StaffContentAccess::canCreateAnyGalleryContent($user);
     }
 
     public function update(User $user, GalleryItem $galleryItem): bool

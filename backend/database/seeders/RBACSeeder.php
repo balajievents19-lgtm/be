@@ -39,7 +39,7 @@ class RBACSeeder extends Seeder
 
         $superAdmin->syncPermissions(array_values($permissionsByName));
         $contentManager->syncPermissions($this->resolvePermissions(
-            AdminModules::websitePermissions(),
+            AdminModules::contentManagerPermissions(),
             $permissionsByName
         ));
         $leadManager->syncPermissions($this->resolvePermissions(
@@ -55,6 +55,7 @@ class RBACSeeder extends Seeder
             \App\Support\Staff\StaffContentAccess::specialistGalleryPermissions(),
             $permissionsByName
         );
+        $this->role(AdminModules::ROLE_STAFF_MEMBER)->syncPermissions($specialistPermissions);
         foreach (AdminModules::SPECIALIST_ROLES as $roleName) {
             $this->role($roleName)->syncPermissions($specialistPermissions);
         }

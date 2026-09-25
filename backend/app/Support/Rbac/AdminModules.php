@@ -14,6 +14,8 @@ final class AdminModules
 
     public const ROLE_NEWSLETTER_MANAGER = 'Newsletter Manager';
 
+    public const ROLE_STAFF_MEMBER = 'Staff Member';
+
     /**
      * Specialist identities. Permissions are assigned per user via Content Access, not role name.
      *
@@ -29,6 +31,19 @@ final class AdminModules
         'Catering Manager',
         'Bridal/Mehndi Manager',
         'SFX Manager',
+    ];
+
+    /**
+     * Content Manager may manage published CMS content areas only — not site chrome, users, or settings.
+     *
+     * @var list<string>
+     */
+    public const CONTENT_MANAGER_MODULES = [
+        'gallery',
+        'blog',
+        'services',
+        'packages',
+        'testimonials',
     ];
 
     /**
@@ -108,6 +123,22 @@ final class AdminModules
 
         foreach (self::WEBSITE as $module) {
             foreach (self::ACTIONS as $action) {
+                $permissions[] = "{$module}.{$action}";
+            }
+        }
+
+        return $permissions;
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function contentManagerPermissions(): array
+    {
+        $permissions = [];
+
+        foreach (self::CONTENT_MANAGER_MODULES as $module) {
+            foreach (['view', 'create', 'update'] as $action) {
                 $permissions[] = "{$module}.{$action}";
             }
         }

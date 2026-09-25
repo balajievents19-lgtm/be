@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Services;
 
 use App\Filament\Clusters\ServicesCluster;
+use App\Filament\Concerns\DeniesRestrictedStaff;
 use App\Filament\Resources\Services\Pages\CreateService;
 use App\Filament\Resources\Services\Pages\EditService;
 use App\Filament\Resources\Services\Pages\ListServices;
@@ -18,6 +19,8 @@ use UnitEnum;
 
 class ServiceResource extends Resource
 {
+    use DeniesRestrictedStaff;
+
     protected static ?string $model = Service::class;
 
     protected static ?string $cluster = ServicesCluster::class;

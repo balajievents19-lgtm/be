@@ -58,22 +58,29 @@ class RbacAuthorizationTest extends TestCase
         $this->assertTrue(ManageTopBar::canAccess());
     }
 
-    public function test_content_manager_website_only(): void
+    public function test_content_manager_content_modules_only(): void
     {
         $user = $this->userWithRole(AdminModules::ROLE_CONTENT_MANAGER);
         $this->actingAs($user);
 
-        $this->assertTrue(HomeCluster::canAccess());
         $this->assertTrue(GalleryCluster::canAccess());
-        $this->assertTrue(HeroSlideResource::canViewAny());
-        $this->assertTrue(ManageTopBar::canAccess());
+        $this->assertTrue(\App\Filament\Clusters\ServicesCluster::canAccess());
+        $this->assertTrue(\App\Filament\Clusters\BlogCluster::canAccess());
+        $this->assertTrue(\App\Filament\Clusters\PackagesCluster::canAccess());
+        $this->assertTrue(\App\Filament\Clusters\ClientStoriesCluster::canAccess());
 
+        $this->assertFalse(HomeCluster::canAccess());
+        $this->assertFalse(HeroSlideResource::canViewAny());
+        $this->assertFalse(ManageTopBar::canAccess());
         $this->assertFalse(ContactInquiryResource::canViewAny());
         $this->assertFalse(NewsletterSubscriberResource::canViewAny());
         $this->assertFalse(UserResource::canViewAny());
         $this->assertFalse($user->can('leads.view'));
         $this->assertFalse($user->can('newsletter.view'));
         $this->assertFalse($user->can('users.view'));
+        $this->assertFalse($user->can('home.view'));
+        $this->assertFalse($user->can('header.view'));
+        $this->assertFalse($user->can('seo.view'));
     }
 
     public function test_lead_manager_can_view_lead_record(): void
@@ -147,7 +154,7 @@ class RbacAuthorizationTest extends TestCase
 
         $content = $this->userWithRole(AdminModules::ROLE_CONTENT_MANAGER);
         $this->actingAs($content)
-            ->get(HeroSlideResource::getUrl('index'))
+            ->get(\App\Filament\Resources\GalleryItems\GalleryItemResource::getUrl('index'))
             ->assertOk();
     }
 

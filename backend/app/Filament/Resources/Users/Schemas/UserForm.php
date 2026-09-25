@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Users\Schemas;
 
+use App\Support\Rbac\AdminModules;
 use App\Support\Rbac\AdminUserSecurity;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -56,6 +57,14 @@ class UserForm
                             ->visible(fn (): bool => AdminUserSecurity::canManageRoles(Auth::user()))
                             ->disabled(fn (): bool => ! AdminUserSecurity::canManageRoles(Auth::user()))
                             ->helperText('Only Super Admin can assign or change roles. Roles describe who the user is. Staff Access & Permissions below controls Services and Gallery Categories.')
+                            ->columnSpanFull(),
+                        Select::make('staff_department')
+                            ->label('Staff Type / Department')
+                            ->options(array_combine(AdminModules::SPECIALIST_ROLES, AdminModules::SPECIALIST_ROLES))
+                            ->searchable()
+                            ->dehydrated(false)
+                            ->visible(fn (): bool => AdminUserSecurity::canManageRoles(Auth::user()))
+                            ->helperText('Identity such as Tent Staff. Pair with Role = Staff Member, then assign the matching Service and Gallery Category below.')
                             ->columnSpanFull(),
                     ]),
                 ...UserContentAccessFields::sections(),

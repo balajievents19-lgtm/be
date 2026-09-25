@@ -1,0 +1,19 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "TEAMID.com.balajiroyalevents.app",
+        "paths": [
+          "/services/*",
+          "/gallery/*",
+          "/blog/*",
+          "/packages",
+          "/packages/*",
+          "/contact",
+          "/account"
+        ]
+      }
+    ]
+  }
+}

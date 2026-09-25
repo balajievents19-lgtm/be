@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\Pages\Dashboard;
 use App\Http\Middleware\DenyCustomerAdminAccess;
+use App\Http\Middleware\RestrictStaffAdminPanel;
 use App\Models\Setting;
 use App\Support\Media\PublicStorageUrl;
 use Filament\Http\Middleware\Authenticate;
@@ -75,6 +76,7 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
                 DenyCustomerAdminAccess::class,
+                RestrictStaffAdminPanel::class,
             ]);
     }
 }
