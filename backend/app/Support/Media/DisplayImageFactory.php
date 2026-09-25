@@ -418,13 +418,23 @@ final class DisplayImageFactory
 
     private function resolveBinary(string $name): ?string
     {
-        $command = PHP_OS_FAMILY === 'Windows' ? 'where '.escapeshellarg($name) : 'command -v '.escapeshellarg($name);
+        foreach ([
+            '/usr/bin/'.$name,
+            '/usr/local/bin/'.$name,
+            '/bin/'.$name,
+        ] as $path) {
+            if (is_executable($path)) {
+                return $path;
+            }
+        }
+
+        $command = PHP_OS_FAMILY === 'Windows' ? 'where '.$name : 'which '.$name;
         $line = @exec($command);
-        if (! is_string($line) || $line === '' || ! is_file($line)) {
+        if (! is_string($line) || $line === '' || ! is_file(trim($line))) {
             return null;
         }
 
-        return $line;
+        return trim($line);
     }
 
     private function flattenForJpeg(GdImage $canvas): ?GdImage
