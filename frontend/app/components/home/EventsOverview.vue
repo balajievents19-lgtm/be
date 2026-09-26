@@ -164,7 +164,7 @@ const eventLink = (item: EventOverviewItem) => item.link_url || '/services'
                   :aria-label="`Read more about ${event.title}`"
                   class="mt-1 inline-block text-sm font-medium leading-6 text-brand-500 no-underline transition-colors hover:text-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
                 >
-                  Read More
+                  Read More<span class="sr-only"> about {{ event.title }}</span>
                 </NuxtLink>
               </article>
             </div>
