@@ -22,6 +22,15 @@ const props = withDefaults(defineProps<{
 const { data: settings } = useSettings()
 const heroSearchEnabled = computed(() => settings.value?.hero_search?.enabled !== false)
 
+const heroMobileSrc = (slide: HeroSlide): string => {
+  const url = slide.mobile_image || slide.desktop_image
+  if (!url || !url.includes('/protected-media/')) {
+    return url
+  }
+
+  return `${url}${url.includes('?') ? '&' : '?'}w=1280`
+}
+
 const lcpPreloadLinks = computed(() => {
   const slide = props.slides[0]
   if (!slide || slide.video_url) {
@@ -67,15 +76,6 @@ const lcpPreloadLinks = computed(() => {
 useHead(() => ({
   link: lcpPreloadLinks.value
 }))
-
-const heroMobileSrc = (slide: HeroSlide): string => {
-  const url = slide.mobile_image || slide.desktop_image
-  if (!url || !url.includes('/protected-media/')) {
-    return url
-  }
-
-  return `${url}${url.includes('?') ? '&' : '?'}w=1280`
-}
 
 const modules = [A11y, Autoplay, EffectFade, Keyboard, Navigation]
 const prefersReducedMotion = ref(false)
