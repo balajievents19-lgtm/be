@@ -25,6 +25,16 @@ export default defineNuxtConfig({
     enabled: true
   },
 
+  app: {
+    head: {
+      htmlAttrs: {
+        lang: 'en'
+      },
+      charset: 'utf-8',
+      viewport: 'width=device-width, initial-scale=1'
+    }
+  },
+
   css: ['~/assets/css/main.css'],
 
   // Same-origin /storage, /protected-media, /api, and /sanctum during `nuxt dev`.

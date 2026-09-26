@@ -101,12 +101,36 @@ class HomeController extends Controller
                 ->active()
                 ->homepage()
                 ->ordered()
+                ->select([
+                    'id',
+                    'title',
+                    'media_type',
+                    'provider',
+                    'url',
+                    'thumbnail',
+                    'description',
+                    'sort_order',
+                    'homepage_featured',
+                    'status',
+                ])
                 ->get();
 
             if ($homepageExternalMedia->isEmpty()) {
                 $homepageExternalMedia = ExternalMedia::query()
                     ->active()
                     ->ordered()
+                    ->select([
+                        'id',
+                        'title',
+                        'media_type',
+                        'provider',
+                        'url',
+                        'thumbnail',
+                        'description',
+                        'sort_order',
+                        'homepage_featured',
+                        'status',
+                    ])
                     ->take(12)
                     ->get();
             }

@@ -2,6 +2,16 @@
 import { computed } from 'vue'
 import type { GalleryCategoryCard } from '~/composables/useGallery'
 
+const props = withDefaults(defineProps<{
+  categories?: GalleryCategoryCard[] | null
+  pending?: boolean
+  failed?: boolean
+}>(), {
+  categories: null,
+  pending: false,
+  failed: false
+})
+
 /** Presentation-only icon classes for known category slugs (not category data). */
 const CATEGORY_ICON_BY_SLUG: Record<string, string> = {
   'wedding': 'icon-heart',
@@ -18,10 +28,12 @@ const CATEGORY_ICON_BY_SLUG: Record<string, string> = {
   'other-events': 'icon-grid-view'
 }
 
-const { data: categories, pending, failed } = useGalleryCategories()
+const fetched = props.categories == null ? useGalleryCategories() : null
 
 /** Homepage shows the first 4 categories from existing API order. */
-const homepageCategories = computed(() => (categories.value ?? []).slice(0, 4))
+const homepageCategories = computed(() => (props.categories ?? fetched?.data.value ?? []).slice(0, 4))
+const pending = computed(() => props.categories == null ? Boolean(fetched?.pending.value) : props.pending)
+const failed = computed(() => props.categories == null ? Boolean(fetched?.failed.value) : props.failed)
 
 const categoryIcon = (slug: string) => CATEGORY_ICON_BY_SLUG[slug] || 'icon-thumb-image'
 

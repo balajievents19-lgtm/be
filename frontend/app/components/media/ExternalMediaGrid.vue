@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import ExternalMediaCard from '~/components/media/ExternalMediaCard.vue'
+import type { ExternalMediaItem } from '~/utils/externalMedia'
 
 const props = withDefaults(defineProps<{
   decorated?: boolean
@@ -7,18 +8,29 @@ const props = withDefaults(defineProps<{
   description?: string | null
   homepageOnly?: boolean
   limit?: number | null
+  items?: ExternalMediaItem[] | null
+  pending?: boolean
+  failed?: boolean
 }>(), {
   decorated: false,
   heading: 'Videos & Media',
   description: 'Watch highlights and social moments from Balaji Royal Events — streamed from YouTube and other platforms (no video files stored on this website).',
   homepageOnly: false,
-  limit: null
+  limit: null,
+  items: null,
+  pending: false,
+  failed: false
 })
 
-const { data, pending, failed } = useExternalMedia({ homepage: props.homepageOnly })
+const fetched = props.items == null
+  ? useExternalMedia({ homepage: props.homepageOnly })
+  : null
+
+const pending = computed(() => props.items == null ? Boolean(fetched?.pending.value) : props.pending)
+const failed = computed(() => props.items == null ? Boolean(fetched?.failed.value) : props.failed)
 
 const items = computed(() => {
-  const list = data.value ?? []
+  const list = props.items ?? fetched?.data.value ?? []
   if (props.limit && props.limit > 0) {
     return list.slice(0, props.limit)
   }

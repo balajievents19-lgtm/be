@@ -7,10 +7,11 @@ interface BlogListApiResponse {
 /**
  * Footer Latest Updates — reuses homepage featured_blog or the shared `blog` cache.
  */
-export const useLatestUpdates = () => {
+export const useLatestUpdates = (options?: { enabled?: boolean }) => {
   const homePayload = useNuxtData<HomePayload>('home')
   const fromHome = computed(() => homePayload.data.value?.featured_blog ?? [])
-  const needsBlogFetch = (fromHome.value.length === 0)
+  const enabled = options?.enabled !== false
+  const needsBlogFetch = enabled && fromHome.value.length === 0
 
   const asyncData = useAsyncData(
     'blog',

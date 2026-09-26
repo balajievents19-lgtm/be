@@ -18,6 +18,8 @@ const featuredFaqs = computed(() => home.value?.featured_faqs ?? [])
 const statistics = computed(() => home.value?.statistics ?? [])
 const ctaSections = computed(() => home.value?.cta_sections ?? [])
 const googleReviews = computed(() => home.value?.google_reviews ?? null)
+const galleryCategories = computed(() => home.value?.gallery_categories ?? [])
+const homepageMedia = computed(() => home.value?.external_media ?? [])
 const sections = computed(() => ({
   ...defaultHomepageSections(),
   ...(home.value?.sections ?? {})
@@ -59,12 +61,20 @@ const sections = computed(() => ({
         :pending="pending"
         :failed="failed"
       />
-      <HomeGallery v-if="sections.gallery" />
+      <HomeGallery
+        v-if="sections.gallery"
+        :categories="galleryCategories"
+        :pending="pending"
+        :failed="failed"
+      />
       <MediaExternalMediaGrid
         decorated
         homepage-only
         :limit="3"
         heading="Videos & Media"
+        :items="homepageMedia"
+        :pending="pending"
+        :failed="failed"
       />
       <HomeGoogleReviews
         :reviews="googleReviews"

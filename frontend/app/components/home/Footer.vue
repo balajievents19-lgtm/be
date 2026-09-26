@@ -72,7 +72,9 @@ const socialLinks = computed(() => {
     .filter((link): link is NonNullable<typeof link> => link !== null)
 })
 
-const { updates: sharedUpdates } = useLatestUpdates()
+const { updates: sharedUpdates } = useLatestUpdates({
+  enabled: !(props.updates && props.updates.length > 0)
+})
 
 const latestUpdates = computed(() => {
   if (props.updates && props.updates.length > 0) {
