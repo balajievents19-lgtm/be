@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { Swiper, SwiperSlide } from 'swiper/vue'
-import { A11y, Autoplay, EffectFade, Keyboard } from 'swiper/modules'
+import { A11y, Autoplay, EffectFade, Keyboard, Navigation } from 'swiper/modules'
 import HeroSearch from '~/components/home/HeroSearch.vue'
 import type { HeroSlide } from '~/types/home'
 
 import 'swiper/css'
 import 'swiper/css/effect-fade'
+import 'swiper/css/navigation'
 
 const props = withDefaults(defineProps<{
   slides?: HeroSlide[]
@@ -76,7 +77,7 @@ const heroMobileSrc = (slide: HeroSlide): string => {
   return `${url}${url.includes('?') ? '&' : '?'}w=1280`
 }
 
-const modules = [A11y, Autoplay, EffectFade, Keyboard]
+const modules = [A11y, Autoplay, EffectFade, Keyboard, Navigation]
 const prefersReducedMotion = ref(false)
 const swiperRef = ref<{ slideNext: () => void, slidePrev: () => void } | null>(null)
 
