@@ -9,7 +9,7 @@ import 'swiper/css'
 import 'swiper/css/effect-fade'
 import 'swiper/css/navigation'
 
-withDefaults(defineProps<{
+const props = withDefaults(defineProps<{
   slides?: HeroSlide[]
   pending?: boolean
   failed?: boolean
@@ -21,6 +21,51 @@ withDefaults(defineProps<{
 
 const { data: settings } = useSettings()
 const heroSearchEnabled = computed(() => settings.value?.hero_search?.enabled !== false)
+
+const lcpPreloadLinks = computed(() => {
+  const slide = props.slides[0]
+  if (!slide || slide.video_url) {
+    return [] as Array<{
+      rel: 'preload'
+      as: 'image'
+      href: string
+      media: string
+      fetchpriority: 'high'
+    }>
+  }
+
+  const links: Array<{
+    rel: 'preload'
+    as: 'image'
+    href: string
+    media: string
+    fetchpriority: 'high'
+  }> = []
+  if (slide.mobile_image) {
+    links.push({
+      rel: 'preload',
+      as: 'image',
+      href: slide.mobile_image,
+      media: '(max-width: 991px)',
+      fetchpriority: 'high'
+    })
+  }
+  if (slide.desktop_image) {
+    links.push({
+      rel: 'preload',
+      as: 'image',
+      href: slide.desktop_image,
+      media: slide.mobile_image ? '(min-width: 992px)' : 'all',
+      fetchpriority: 'high'
+    })
+  }
+
+  return links
+})
+
+useHead(() => ({
+  link: lcpPreloadLinks.value
+}))
 
 const modules = [A11y, Autoplay, EffectFade, Keyboard, Navigation]
 const prefersReducedMotion = ref(false)
@@ -89,7 +134,8 @@ onUnmounted(() => {
         v-else-if="slides.length"
         :modules="modules"
         :slides-per-view="1"
-        :loop="slides.length > 1"
+        :loop="false"
+        :rewind="slides.length > 1"
         effect="fade"
         :speed="600"
         :keyboard="{ enabled: true, onlyInViewport: true }"

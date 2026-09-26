@@ -180,11 +180,10 @@ onBeforeUnmount(() => {
       :class="[
         inputClass,
         'min-w-0 overflow-hidden whitespace-nowrap text-ellipsis text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500',
-        !model ? 'text-[#888]' : 'text-[#333]'
+        !model ? 'text-[#595959]' : 'text-[#333]'
       ]"
       :aria-expanded="open"
       aria-haspopup="dialog"
-      aria-label="Event location"
       @click="openPanel"
     >
       <span class="block min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">

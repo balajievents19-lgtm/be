@@ -78,13 +78,12 @@ const onSelect = (value: DateValue | DateValue[] | { start?: DateValue, end?: Da
         type="button"
         :class="[
           fieldClass,
-          !model ? 'text-[#888]' : '',
+          !model ? 'text-[#595959]' : '',
           'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500'
         ]"
         :aria-required="required || undefined"
         :aria-expanded="open"
         aria-haspopup="dialog"
-        aria-label="Event date"
         @click="open = true"
       >
         {{ displayValue }}

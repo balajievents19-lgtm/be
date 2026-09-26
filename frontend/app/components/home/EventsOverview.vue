@@ -154,13 +154,14 @@ const eventLink = (item: EventOverviewItem) => item.link_url || '/services'
                 </div>
 
                 <p
-                  class="m-0 inline-block text-center text-sm leading-6 text-[#888888]"
+                  class="m-0 inline-block text-center text-sm leading-6 text-[#595959]"
                 >
                   {{ event.description }}
                 </p>
 
                 <NuxtLink
                   :to="eventLink(event)"
+                  :aria-label="`Read more about ${event.title}`"
                   class="mt-1 inline-block text-sm font-medium leading-6 text-brand-500 no-underline transition-colors hover:text-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
                 >
                   Read More

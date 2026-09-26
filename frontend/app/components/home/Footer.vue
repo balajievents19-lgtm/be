@@ -194,6 +194,7 @@ const onNewsletterSubmit = async (event: Event) => {
                 </p>
                 <NuxtLink
                   :to="`/blog/${item.slug}`"
+                  :aria-label="`Read more: ${item.title}`"
                   class="mt-0.5 inline-block text-[13px] leading-[18px] text-brand-600 no-underline transition-colors hover:text-[#fffffe] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
                 >
                   Read More

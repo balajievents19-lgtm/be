@@ -142,7 +142,7 @@ const photoLabel = (category: GalleryCategoryCard) => {
                 <h3 class="m-0 font-['Domine',Georgia,'Times_New_Roman',serif] text-lg font-bold leading-7 text-[#333333]">
                   {{ category.name }}
                 </h3>
-                <p class="m-0 mt-2 text-sm leading-5 text-[#888888]">
+                <p class="m-0 mt-2 text-sm leading-5 text-[#595959]">
                   {{ photoLabel(category) }}
                 </p>
                 <NuxtLink

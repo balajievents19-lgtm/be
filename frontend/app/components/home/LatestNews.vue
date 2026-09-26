@@ -131,6 +131,7 @@ const postMeta = (post: BlogPostItem) => {
                   </p>
                   <NuxtLink
                     :to="`/blog/${featured.slug}`"
+                    :aria-label="`Read more: ${featured.title}`"
                     class="inline-block rounded-[3px] border border-solid border-brand-500 bg-brand-500 px-7 py-[9px] text-center text-lg leading-5 text-white shadow-[inset_0_1px_0_#e0a97f] transition-colors duration-1000 hover:bg-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
                   >
                     Read More
@@ -174,6 +175,7 @@ const postMeta = (post: BlogPostItem) => {
                   </p>
                   <NuxtLink
                     :to="`/blog/${card.slug}`"
+                    :aria-label="`Read more: ${card.title}`"
                     class="inline-block rounded-[3px] border border-solid border-brand-500 bg-brand-500 px-7 py-[9px] text-center text-lg leading-5 text-white shadow-[inset_0_1px_0_#e0a97f] transition-colors duration-1000 hover:bg-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
                   >
                     Read More
@@ -234,6 +236,7 @@ const postMeta = (post: BlogPostItem) => {
                 </p>
                 <NuxtLink
                   :to="`/blog/${sideCard.slug}`"
+                  :aria-label="`Read more: ${sideCard.title}`"
                   class="inline-block rounded-[3px] border border-solid border-brand-500 bg-brand-500 px-7 py-[9px] text-center text-lg leading-5 text-white shadow-[inset_0_1px_0_#e0a97f] transition-colors duration-1000 hover:bg-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
                 >
                   Read More
