@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\GalleryMediaType;
 use App\Enums\GalleryVideoSource;
+use App\Models\Concerns\HasAutoFirstSortOrder;
 use App\Models\Concerns\HasContentModeration;
 use App\Models\Concerns\HasPublicStorageUrl;
 use App\Models\Concerns\Publication\HasPublicationWindow;
@@ -16,6 +17,7 @@ use Illuminate\Support\Str;
 
 class GalleryItem extends Model
 {
+    use HasAutoFirstSortOrder;
     use HasContentModeration;
     use HasPublicationWindow;
     use HasPublicStorageUrl;
@@ -191,5 +193,13 @@ class GalleryItem extends Model
         }
 
         return null;
+    }
+
+    /**
+     * @return list<string>
+     */
+    protected function autoFirstSortScopeColumns(): array
+    {
+        return ['gallery_category_id'];
     }
 }

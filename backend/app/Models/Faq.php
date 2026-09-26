@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasAutoFirstSortOrder;
 use App\Models\Concerns\Publication\HasPublicationWindow;
 use App\Services\Seo\SeoService;
 use Illuminate\Database\Eloquent\Builder;
@@ -13,6 +14,7 @@ use Illuminate\Support\Str;
 
 class Faq extends Model
 {
+    use HasAutoFirstSortOrder;
     use HasPublicationWindow;
     use SoftDeletes;
 
@@ -106,5 +108,13 @@ class Faq extends Model
     public static function faqPageSchema(iterable $faqs): array
     {
         return app(SeoService::class)->schema()->faqPage($faqs);
+    }
+
+    /**
+     * @return list<string>
+     */
+    protected function autoFirstSortScopeColumns(): array
+    {
+        return ['faq_category_id'];
     }
 }

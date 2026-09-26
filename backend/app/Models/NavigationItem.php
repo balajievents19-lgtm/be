@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\NavigationLinkTarget;
+use App\Models\Concerns\HasAutoFirstSortOrder;
 use App\Models\Concerns\HasPublicStorageUrl;
 use App\Models\Concerns\Publication\HasPublicationWindow;
 use Illuminate\Database\Eloquent\Builder;
@@ -12,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class NavigationItem extends Model
 {
+    use HasAutoFirstSortOrder;
     use HasPublicationWindow;
     use HasPublicStorageUrl;
 
@@ -80,5 +82,13 @@ class NavigationItem extends Model
     public function scopeOrdered(Builder $query): Builder
     {
         return $query->orderBy('sort_order')->orderBy('id');
+    }
+
+    /**
+     * @return list<string>
+     */
+    protected function autoFirstSortScopeColumns(): array
+    {
+        return ['parent_id'];
     }
 }

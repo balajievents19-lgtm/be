@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasAutoFirstSortOrder;
 use App\Models\Concerns\HasPublicStorageUrl;
 use App\Models\Concerns\Publication\HasPublicationWindow;
 use Illuminate\Database\Eloquent\Builder;
@@ -9,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class HeroSlide extends Model
 {
+    use HasAutoFirstSortOrder;
     use HasPublicationWindow;
     use HasPublicStorageUrl;
 

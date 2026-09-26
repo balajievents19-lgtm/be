@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasAutoFirstSortOrder;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -10,6 +11,7 @@ use Illuminate\Support\Str;
 
 class FaqCategory extends Model
 {
+    use HasAutoFirstSortOrder;
     use SoftDeletes;
 
     protected $fillable = [

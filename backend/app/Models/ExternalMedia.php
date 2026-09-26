@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasAutoFirstSortOrder;
 use App\Models\Concerns\HasContentModeration;
 use App\Models\Concerns\HasPublicStorageUrl;
 use App\Models\Concerns\Publication\HasPublicationWindow;
@@ -13,6 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ExternalMedia extends Model
 {
+    use HasAutoFirstSortOrder;
     use HasContentModeration;
     use HasPublicationWindow;
     use HasPublicStorageUrl;

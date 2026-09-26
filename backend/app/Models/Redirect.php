@@ -3,12 +3,14 @@
 namespace App\Models;
 
 use App\Enums\RedirectStatusCode;
+use App\Models\Concerns\HasAutoFirstSortOrder;
 use App\Models\Concerns\Publication\HasPublicationWindow;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class Redirect extends Model
 {
+    use HasAutoFirstSortOrder;
     use HasPublicationWindow;
 
     protected $fillable = [

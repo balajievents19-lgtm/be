@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\TestimonialType;
+use App\Models\Concerns\HasAutoFirstSortOrder;
 use App\Models\Concerns\HasPublicStorageUrl;
 use App\Models\Concerns\HasPublishableScopes;
 use App\Models\Concerns\Publication\HasPublicationWindow;
@@ -12,6 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Testimonial extends Model
 {
+    use HasAutoFirstSortOrder;
     use HasPublicationWindow;
     use HasPublicStorageUrl;
     use HasPublishableScopes;

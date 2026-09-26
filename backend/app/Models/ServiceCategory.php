@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasAutoFirstSortOrder;
 use App\Models\Concerns\HasPublicStorageUrl;
 use App\Models\Concerns\Publication\HasPublicationWindow;
 use Illuminate\Database\Eloquent\Builder;
@@ -12,6 +13,7 @@ use Illuminate\Support\Str;
 
 class ServiceCategory extends Model
 {
+    use HasAutoFirstSortOrder;
     use HasPublicationWindow;
     use HasPublicStorageUrl;
     use SoftDeletes;
