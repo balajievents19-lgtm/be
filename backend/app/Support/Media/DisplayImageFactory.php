@@ -34,6 +34,9 @@ final class DisplayImageFactory
     /** Navbar/footer logos display at ~160×70 CSS; 2× is enough. Originals stay on disk. */
     public const LOGO_DISPLAY_MAX = 320;
 
+    /** Optional mobile/srcset cap (1600:700 → 1280:560). Query `w` must match this exactly. */
+    public const DISPLAY_WIDTH_1280 = 1280;
+
     /**
      * Pick a display encode format from Accept. Logos/GIF/SVG/ICO stay on their source type.
      */
@@ -70,7 +73,7 @@ final class DisplayImageFactory
     /**
      * @return array{contents: string, mime: string}
      */
-    public function make(?string $binary, string $relativePath, string $mode = self::MODE_DISPLAY, ?string $format = null): array
+    public function make(?string $binary, string $relativePath, string $mode = self::MODE_DISPLAY, ?string $format = null, int $maxWidth = 0): array
     {
         $fallbackMime = $this->guessMime($binary, $relativePath);
         $format ??= $mode === self::MODE_DOWNLOAD
@@ -125,8 +128,8 @@ final class DisplayImageFactory
                 $height = $targetHeight;
                 $skipWatermark = true;
             }
-        } elseif ($mode === self::MODE_DISPLAY && $width > self::MAX_WIDTH) {
-            $targetWidth = self::MAX_WIDTH;
+        } elseif ($mode === self::MODE_DISPLAY && $width > $this->displayCap($maxWidth)) {
+            $targetWidth = $this->displayCap($maxWidth);
             $targetHeight = max(1, (int) round($height * ($targetWidth / $width)));
             $resized = imagecreatetruecolor($targetWidth, $targetHeight);
             if ($resized instanceof GdImage) {
@@ -154,6 +157,16 @@ final class DisplayImageFactory
         }
 
         return $encoded;
+    }
+
+    public static function allowedDisplayWidth(int $width): int
+    {
+        return $width === self::DISPLAY_WIDTH_1280 ? self::DISPLAY_WIDTH_1280 : 0;
+    }
+
+    private function displayCap(int $maxWidth): int
+    {
+        return $maxWidth === self::DISPLAY_WIDTH_1280 ? self::DISPLAY_WIDTH_1280 : self::MAX_WIDTH;
     }
 
     /**

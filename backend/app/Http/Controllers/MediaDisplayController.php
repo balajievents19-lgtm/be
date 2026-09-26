@@ -31,7 +31,8 @@ class MediaDisplayController extends Controller
         }
 
         $format = $factory->negotiateDisplayFormat($request->header('Accept'), $path, $sourceMime);
-        $etag = $cache->etag($disk, $path, DisplayImageFactory::MODE_DISPLAY, $format);
+        $displayWidth = DisplayImageFactory::allowedDisplayWidth((int) $request->query('w', '0'));
+        $etag = $cache->etag($disk, $path, DisplayImageFactory::MODE_DISPLAY, $format, $displayWidth);
         $mtime = $disk->lastModified($path);
 
         $notModified = new Response();
@@ -51,7 +52,8 @@ class MediaDisplayController extends Controller
             $path,
             DisplayImageFactory::MODE_DISPLAY,
             $format,
-            fn (): array => $factory->make($disk->get($path), $path, DisplayImageFactory::MODE_DISPLAY, $format)
+            fn (): array => $factory->make($disk->get($path), $path, DisplayImageFactory::MODE_DISPLAY, $format, $displayWidth),
+            $displayWidth
         );
 
         return response($rendered['contents'], 200, [

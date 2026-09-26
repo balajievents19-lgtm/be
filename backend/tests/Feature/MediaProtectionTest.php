@@ -195,6 +195,44 @@ class MediaProtectionTest extends TestCase
             ->assertStatus(304);
     }
 
+    public function test_optional_display_width_1280_keeps_aspect_and_original(): void
+    {
+        Storage::fake('public');
+        Storage::fake('local');
+        $this->seed(RBACSeeder::class);
+
+        $original = $this->solidDarkJpeg(1600, 700);
+        Storage::disk('public')->put('hero-slides/desktop/wide.jpg', $original);
+        $token = basename((string) parse_url((string) PublicStorageUrl::make('hero-slides/desktop/wide.jpg'), PHP_URL_PATH));
+
+        $full = $this->withHeaders(['Accept' => 'image/jpeg'])->get('/protected-media/'.$token);
+        $full->assertOk();
+        $fullImage = imagecreatefromstring((string) $full->getContent());
+        $this->assertInstanceOf(\GdImage::class, $fullImage);
+        $this->assertSame(1600, imagesx($fullImage));
+        $this->assertSame(700, imagesy($fullImage));
+        imagedestroy($fullImage);
+
+        $capped = $this->withHeaders(['Accept' => 'image/jpeg'])->get('/protected-media/'.$token.'?w=1280');
+        $capped->assertOk();
+        $body = (string) $capped->getContent();
+        $this->assertLessThan(strlen((string) $full->getContent()), strlen($body));
+        $this->assertSame($original, Storage::disk('public')->get('hero-slides/desktop/wide.jpg'));
+
+        $decoded = imagecreatefromstring($body);
+        $this->assertInstanceOf(\GdImage::class, $decoded);
+        $this->assertSame(1280, imagesx($decoded));
+        $this->assertSame(560, imagesy($decoded));
+        imagedestroy($decoded);
+
+        $ignored = $this->withHeaders(['Accept' => 'image/jpeg'])->get('/protected-media/'.$token.'?w=999');
+        $ignored->assertOk();
+        $ignoredImage = imagecreatefromstring((string) $ignored->getContent());
+        $this->assertInstanceOf(\GdImage::class, $ignoredImage);
+        $this->assertSame(1600, imagesx($ignoredImage));
+        imagedestroy($ignoredImage);
+    }
+
     private function largeLogoPng(int $width, int $height): string
     {
         $image = imagecreatetruecolor($width, $height);

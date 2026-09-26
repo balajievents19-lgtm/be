@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { Swiper, SwiperSlide } from 'swiper/vue'
-import { A11y, Autoplay, EffectFade, Keyboard, Navigation } from 'swiper/modules'
+import { A11y, Autoplay, EffectFade, Keyboard } from 'swiper/modules'
 import HeroSearch from '~/components/home/HeroSearch.vue'
 import type { HeroSlide } from '~/types/home'
 
 import 'swiper/css'
 import 'swiper/css/effect-fade'
-import 'swiper/css/navigation'
 
 const props = withDefaults(defineProps<{
   slides?: HeroSlide[]
@@ -41,11 +40,12 @@ const lcpPreloadLinks = computed(() => {
     media: string
     fetchpriority: 'high'
   }> = []
-  if (slide.mobile_image) {
+  const mobileSrc = heroMobileSrc(slide)
+  if (mobileSrc) {
     links.push({
       rel: 'preload',
       as: 'image',
-      href: slide.mobile_image,
+      href: mobileSrc,
       media: '(max-width: 991px)',
       fetchpriority: 'high'
     })
@@ -55,7 +55,7 @@ const lcpPreloadLinks = computed(() => {
       rel: 'preload',
       as: 'image',
       href: slide.desktop_image,
-      media: slide.mobile_image ? '(min-width: 992px)' : 'all',
+      media: mobileSrc ? '(min-width: 992px)' : 'all',
       fetchpriority: 'high'
     })
   }
@@ -67,7 +67,16 @@ useHead(() => ({
   link: lcpPreloadLinks.value
 }))
 
-const modules = [A11y, Autoplay, EffectFade, Keyboard, Navigation]
+const heroMobileSrc = (slide: HeroSlide): string => {
+  const url = slide.mobile_image || slide.desktop_image
+  if (!url || !url.includes('/protected-media/')) {
+    return url
+  }
+
+  return `${url}${url.includes('?') ? '&' : '?'}w=1280`
+}
+
+const modules = [A11y, Autoplay, EffectFade, Keyboard]
 const prefersReducedMotion = ref(false)
 const swiperRef = ref<{ slideNext: () => void, slidePrev: () => void } | null>(null)
 
@@ -171,8 +180,8 @@ onUnmounted(() => {
             />
             <picture v-else>
               <source
-                v-if="slide.mobile_image"
-                :srcset="slide.mobile_image"
+                v-if="heroMobileSrc(slide)"
+                :srcset="heroMobileSrc(slide)"
                 media="(max-width: 991px)"
               >
               <img

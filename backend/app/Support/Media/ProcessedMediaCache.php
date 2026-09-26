@@ -17,9 +17,9 @@ final class ProcessedMediaCache
      * @param  callable(): array{contents: string, mime: string}  $producer
      * @return array{contents: string, mime: string, etag: string, last_modified: int, hit: bool}
      */
-    public function remember(Filesystem $sourceDisk, string $relativePath, string $mode, string $format, callable $producer): array
+    public function remember(Filesystem $sourceDisk, string $relativePath, string $mode, string $format, callable $producer, int $displayWidth = 0): array
     {
-        $etag = $this->etag($sourceDisk, $relativePath, $mode, $format);
+        $etag = $this->etag($sourceDisk, $relativePath, $mode, $format, $displayWidth);
         $payloadPath = $this->payloadPath($etag);
         $metaPath = $this->metaPath($etag);
         $cache = Storage::disk('local');
@@ -58,7 +58,7 @@ final class ProcessedMediaCache
         ];
     }
 
-    public function etag(Filesystem $sourceDisk, string $relativePath, string $mode, string $format): string
+    public function etag(Filesystem $sourceDisk, string $relativePath, string $mode, string $format, int $displayWidth = 0): string
     {
         $mtime = $this->mtime($sourceDisk, $relativePath);
         $size = 0;
@@ -68,7 +68,12 @@ final class ProcessedMediaCache
             $size = 0;
         }
 
-        return hash('sha256', self::VERSION.'|'.$mode.'|'.$format.'|'.$relativePath.'|'.$mtime.'|'.$size);
+        $key = self::VERSION.'|'.$mode.'|'.$format.'|'.$relativePath.'|'.$mtime.'|'.$size;
+        if ($displayWidth > 0) {
+            $key .= '|w'.$displayWidth;
+        }
+
+        return hash('sha256', $key);
     }
 
     public function payloadPath(string $etag): string
