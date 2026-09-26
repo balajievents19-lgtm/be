@@ -124,37 +124,37 @@ const onThumbError = (event: Event) => {
           v-if="pagedItems.length"
           class="gallery-row -mx-[2px] flex flex-wrap overflow-hidden"
         >
-        <button
-          v-for="(item, index) in pagedItems"
-          :key="item.id"
-          type="button"
-          class="gallery-box group relative w-1/2 bg-[#e1e8ed] p-[2px] min-[768px]:w-1/4"
-          :aria-label="`Open ${galleryItemAlt(item)}`"
-          @click="openLightbox((page - 1) * pageSize + index)"
-          @contextmenu.prevent
-        >
-          <span class="gallery-image-wrapper">
-            <img
-              :src="galleryItemSrc(item)"
-              :alt="galleryItemAlt(item)"
-              class="pointer-events-none select-none"
-              loading="lazy"
-              decoding="async"
-              draggable="false"
-              @error="onThumbError"
-            >
-          </span>
+          <button
+            v-for="(item, index) in pagedItems"
+            :key="item.id"
+            type="button"
+            class="gallery-box group relative w-1/2 bg-[#e1e8ed] p-[2px] min-[768px]:w-1/4"
+            :aria-label="`Open ${galleryItemAlt(item)}`"
+            @click="openLightbox((page - 1) * pageSize + index)"
+            @contextmenu.prevent
+          >
+            <span class="gallery-image-wrapper">
+              <img
+                :src="galleryItemSrc(item)"
+                :alt="galleryItemAlt(item)"
+                class="pointer-events-none select-none"
+                loading="lazy"
+                decoding="async"
+                draggable="false"
+                @error="onThumbError"
+              >
+            </span>
 
-          <span
-            class="pointer-events-none absolute inset-0 bg-[rgba(0,0,0,0.5)] opacity-0 transition-opacity duration-500 ease-in-out group-hover:opacity-100 group-focus-visible:opacity-100"
-            aria-hidden="true"
-          />
+            <span
+              class="pointer-events-none absolute inset-0 bg-[rgba(0,0,0,0.5)] opacity-0 transition-opacity duration-500 ease-in-out group-hover:opacity-100 group-focus-visible:opacity-100"
+              aria-hidden="true"
+            />
 
-          <span
-            class="icon icon-search pointer-events-none absolute top-1/2 left-1/2 z-[99] mt-[-20px] ml-[-20px] w-10 scale-0 text-center text-[40px] leading-10 text-white transition-transform duration-500 ease-in-out group-hover:scale-100 group-focus-visible:scale-100"
-            aria-hidden="true"
-          />
-        </button>
+            <span
+              class="icon icon-search pointer-events-none absolute top-1/2 left-1/2 z-[99] mt-[-20px] ml-[-20px] w-10 scale-0 text-center text-[40px] leading-10 text-white transition-transform duration-500 ease-in-out group-hover:scale-100 group-focus-visible:scale-100"
+              aria-hidden="true"
+            />
+          </button>
         </div>
 
         <nav

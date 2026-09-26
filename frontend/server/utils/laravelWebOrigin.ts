@@ -5,7 +5,7 @@ export const laravelWebOrigin = (): string => {
   const config = useRuntimeConfig()
   const apiBase = resolveApiBase({
     isServer: true,
-    isDev: import.meta.dev,
+    isDev: Boolean(import.meta.dev),
     publicBase: String(config.public.apiBase || ''),
     internalBase: String(config.apiInternalBase || '')
   })

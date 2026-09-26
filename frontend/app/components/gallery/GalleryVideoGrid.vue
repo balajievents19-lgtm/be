@@ -47,7 +47,10 @@ const openVideo = (item: GalleryItem) => {
             decoding="async"
             draggable="false"
           >
-          <span class="gallery-play-button" aria-hidden="true">▶</span>
+          <span
+            class="gallery-play-button"
+            aria-hidden="true"
+          >▶</span>
         </span>
         <span class="sr-only">{{ item.video_source || 'video' }}</span>
       </button>

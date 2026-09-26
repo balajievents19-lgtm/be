@@ -84,11 +84,11 @@ export const customerFetch = async <T>(
     headers['X-XSRF-TOKEN'] = xsrf
   }
 
-  const payload = await $fetch<T>(`${base}${path.startsWith('/') ? path : `/${path}`}`, {
+  const payload = await $fetch(`${base}${path.startsWith('/') ? path : `/${path}`}`, {
     ...opts,
     credentials: 'include',
     headers
-  })
+  }) as T
 
   return rewritePublicStorageUrls(payload)
 }

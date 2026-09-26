@@ -1,5 +1,6 @@
 // Local Laravel origin for `nuxt dev` proxies only (never baked into production client JS).
-const laravelDevOrigin = (process.env.NUXT_DEV_LARAVEL_ORIGIN || 'http://127.0.0.1:8000').replace(/\/$/, '')
+const nodeEnv = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env
+const laravelDevOrigin = (nodeEnv?.NUXT_DEV_LARAVEL_ORIGIN || 'http://127.0.0.1:8000').replace(/\/$/, '')
 
 const laravelDevProxy = {
   '/storage': { target: laravelDevOrigin, changeOrigin: true },
