@@ -33,7 +33,7 @@ class PublicStorageUrl
             return $value;
         }
 
-        $displayCache = 'd=v5';
+        $displayCache = 'd=v6';
         $combined = $query !== '' ? $query.'&'.$displayCache : $displayCache;
 
         return $url.'?'.$combined;

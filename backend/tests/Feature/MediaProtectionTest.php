@@ -164,6 +164,56 @@ class MediaProtectionTest extends TestCase
             ->assertStatus(304);
     }
 
+    public function test_brand_logo_display_is_resized_png_and_leaves_original_untouched(): void
+    {
+        Storage::fake('public');
+        Storage::fake('local');
+        $this->seed(RBACSeeder::class);
+
+        $original = $this->largeLogoPng(800, 400);
+        Storage::disk('public')->put('settings/brand/logo.png', $original);
+
+        $token = basename((string) parse_url((string) PublicStorageUrl::make('settings/brand/logo.png'), PHP_URL_PATH));
+        $response = $this->withHeaders(['Accept' => 'image/avif,image/webp,image/png'])
+            ->get('/protected-media/'.$token);
+        $response->assertOk()->assertHeader('Content-Type', 'image/png');
+
+        $body = (string) $response->getContent();
+        $this->assertNotSame($original, $body);
+        $this->assertLessThan(strlen($original), strlen($body));
+        $this->assertSame($original, Storage::disk('public')->get('settings/brand/logo.png'));
+
+        $decoded = imagecreatefromstring($body);
+        $this->assertInstanceOf(\GdImage::class, $decoded);
+        $this->assertSame(320, imagesx($decoded));
+        $this->assertSame(160, imagesy($decoded));
+        imagedestroy($decoded);
+
+        $etag = (string) $response->headers->get('etag');
+        $this->withHeaders(['If-None-Match' => $etag])
+            ->get('/protected-media/'.$token)
+            ->assertStatus(304);
+    }
+
+    private function largeLogoPng(int $width, int $height): string
+    {
+        $image = imagecreatetruecolor($width, $height);
+        $this->assertNotFalse($image);
+        imagealphablending($image, false);
+        imagesavealpha($image, true);
+        $transparent = imagecolorallocatealpha($image, 0, 0, 0, 127);
+        imagefilledrectangle($image, 0, 0, $width - 1, $height - 1, $transparent);
+        imagealphablending($image, true);
+        $ink = imagecolorallocate($image, 241, 91, 34);
+        imagefilledellipse($image, (int) ($width / 2), (int) ($height / 2), (int) ($width / 2), (int) ($height / 2), $ink);
+        ob_start();
+        imagepng($image);
+        $binary = (string) ob_get_clean();
+        imagedestroy($image);
+
+        return $binary;
+    }
+
     private function tinyJpeg(): string
     {
         $image = imagecreatetruecolor(48, 32);

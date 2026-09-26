@@ -158,11 +158,11 @@ const onNewsletterSubmit = async (event: Event) => {
       <UContainer class="mx-auto max-w-[1170px]">
         <div class="-mx-[15px] flex flex-wrap">
           <div class="mb-0 w-full px-[15px] max-[991px]:mb-6 sm:w-1/2 lg:w-1/4">
-            <h5
+            <p
               class="mb-[23px] font-['Domine',Georgia,'Times_New_Roman',serif] text-lg font-bold leading-[22px] text-white max-[767px]:my-5"
             >
               Latest Updates
-            </h5>
+            </p>
 
             <div
               v-for="item in latestUpdates"
@@ -204,11 +204,11 @@ const onNewsletterSubmit = async (event: Event) => {
 
           <div class="mb-0 w-full px-[15px] max-[991px]:mb-6 sm:w-1/2 lg:w-1/4">
             <div class="inline-block min-h-0 w-full max-w-[157px] text-left md:min-h-[260px] max-[639px]:min-h-0">
-              <h5
+              <p
                 class="mb-[23px] font-['Domine',Georgia,'Times_New_Roman',serif] text-lg font-bold leading-[22px] text-white max-[767px]:my-5"
               >
                 Company
-              </h5>
+              </p>
               <ul class="m-0 list-none p-0">
                 <li
                   v-for="link in companyLinks"
@@ -238,11 +238,11 @@ const onNewsletterSubmit = async (event: Event) => {
 
           <div class="mb-0 w-full px-[15px] max-[991px]:mb-6 sm:w-1/2 lg:w-1/4">
             <div>
-              <h5
+              <p
                 class="mb-[23px] font-['Domine',Georgia,'Times_New_Roman',serif] text-lg font-bold leading-[22px] text-white max-[767px]:my-5"
               >
                 Contact us
-              </h5>
+              </p>
 
               <div
                 v-if="contact.address"
@@ -293,11 +293,11 @@ const onNewsletterSubmit = async (event: Event) => {
 
           <div class="mb-0 w-full px-[15px] max-[991px]:mb-6 sm:w-1/2 lg:w-1/4">
             <div class="contact-form inline-block w-full">
-              <h5
+              <p
                 class="mb-[23px] font-['Domine',Georgia,'Times_New_Roman',serif] text-lg font-bold leading-[22px] text-white max-[767px]:my-5"
               >
                 Connect with us
-              </h5>
+              </p>
               <p
                 v-if="newsletterEnabled"
                 class="mb-3 max-w-[255px] text-[13px] leading-6 text-[#85889b]"

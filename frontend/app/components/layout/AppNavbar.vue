@@ -129,7 +129,6 @@ onUnmounted(() => {
             width="160"
             height="70"
             loading="eager"
-            fetchpriority="high"
             decoding="async"
             class="block h-auto w-auto max-h-[64px] object-contain object-left transition-all duration-1000 ease-in-out"
             :class="props.isScrolled ? '!h-[48px] max-h-[48px]' : ''"

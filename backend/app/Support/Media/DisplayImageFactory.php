@@ -31,6 +31,9 @@ final class DisplayImageFactory
 
     public const FAVICON_DISPLAY_SIZE = 48;
 
+    /** Navbar/footer logos display at ~160×70 CSS; 2× is enough. Originals stay on disk. */
+    public const LOGO_DISPLAY_MAX = 320;
+
     /**
      * Pick a display encode format from Accept. Logos/GIF/SVG/ICO stay on their source type.
      */
@@ -103,6 +106,24 @@ final class DisplayImageFactory
                 $height = self::FAVICON_DISPLAY_SIZE;
                 $skipWatermark = true;
                 $format = self::FORMAT_FAVICON;
+            }
+        } elseif ($mode === self::MODE_DISPLAY && $this->isCmsBrandLogoPath($relativePath) && max($width, $height) > self::LOGO_DISPLAY_MAX) {
+            $scale = self::LOGO_DISPLAY_MAX / max($width, $height);
+            $targetWidth = max(1, (int) round($width * $scale));
+            $targetHeight = max(1, (int) round($height * $scale));
+            $resized = imagecreatetruecolor($targetWidth, $targetHeight);
+            if ($resized instanceof GdImage) {
+                imagealphablending($resized, false);
+                imagesavealpha($resized, true);
+                $transparent = imagecolorallocatealpha($resized, 0, 0, 0, 127);
+                imagefilledrectangle($resized, 0, 0, $targetWidth - 1, $targetHeight - 1, $transparent);
+                imagealphablending($resized, true);
+                imagecopyresampled($resized, $source, 0, 0, 0, 0, $targetWidth, $targetHeight, $width, $height);
+                imagedestroy($source);
+                $canvas = $resized;
+                $width = $targetWidth;
+                $height = $targetHeight;
+                $skipWatermark = true;
             }
         } elseif ($mode === self::MODE_DISPLAY && $width > self::MAX_WIDTH) {
             $targetWidth = self::MAX_WIDTH;
@@ -512,6 +533,11 @@ final class DisplayImageFactory
         }
 
         return $this->isBrandAsset($relativePath);
+    }
+
+    private function isCmsBrandLogoPath(string $relativePath): bool
+    {
+        return $this->isBrandAsset($relativePath) && ! $this->isCmsFaviconPath($relativePath);
     }
 
     private function isCmsFaviconPath(string $relativePath): bool
