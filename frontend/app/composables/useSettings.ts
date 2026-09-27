@@ -32,11 +32,9 @@ export interface UseSettingsResult {
  * Graceful fallback on upstream failure (no NuxtError payload).
  */
 export const useSettings = (): UseSettingsResult => {
-  const route = useRoute()
   const home = useNuxtData<HomePayload>('home')
   const base = useApiBase()
   const failed = useState('settings-api-failed', () => false)
-  const onHomepage = route.path === '/'
   const homeReady = homeSettingsReady(home.data.value?.settings)
 
   const asyncData = useAsyncData<SiteSettings>(
@@ -54,8 +52,10 @@ export const useSettings = (): UseSettingsResult => {
     {
       ...useLaravelFetchDefaults<SiteSettings>(),
       server: true,
-      // Homepage SSR already awaits /api/home, which includes settings.
-      immediate: !onHomepage && !homeReady,
+      // Fetch unless homepage /api/home already populated settings. Do not
+      // skip the fetch merely because the route is `/` — App.vue siblings can
+      // run before the homepage request has finished.
+      immediate: !homeReady,
       default: (): SiteSettings => emptySettings(),
       getCachedData: (key, nuxtApp) => {
         const fromHome = (nuxtApp.payload.data.home as HomePayload | undefined)?.settings
