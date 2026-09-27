@@ -232,6 +232,8 @@ class SeoApiTest extends TestCase
             ->assertSee('User-agent: *', false)
             ->assertSee('Allow: /', false)
             ->assertSee('Disallow: /admin', false)
+            ->assertSee('Disallow: /account', false)
+            ->assertSee('Disallow: /login', false)
             ->assertSee('Sitemap:', false)
             ->assertSee('/sitemap.xml', false)
             ->getContent();

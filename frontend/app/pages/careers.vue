@@ -1,16 +1,28 @@
 <script setup lang="ts">
 const { data: settings } = useSettings()
+const canonical = `${useRequestURL().origin}/careers`
 
 useSeoMeta({
   title: 'Careers | Balaji Royal Events',
   description: 'Join the Balaji Royal Events team planning weddings and celebrations across Rajasthan.',
   ogTitle: 'Careers | Balaji Royal Events',
+  ogUrl: canonical,
   twitterCard: 'summary_large_image'
+})
+
+useHead({
+  link: [{ rel: 'canonical', href: canonical }]
 })
 </script>
 
 <template>
   <div class="page relative bg-white text-[#333333] max-md:pt-0 md:pt-[121px]">
+    <a
+      href="#main-content"
+      class="absolute left-[-10000px] top-auto z-[10001] h-px w-px overflow-hidden focus:left-2 focus:top-2 focus:h-auto focus:w-auto focus:overflow-visible focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:text-navy-500 focus:outline focus:outline-2 focus:outline-brand-500"
+    >
+      Skip to main content
+    </a>
     <LayoutAppHeader />
     <main id="main-content">
       <SharedPageHeader
@@ -20,7 +32,8 @@ useSeoMeta({
       <section class="py-16">
         <UContainer class="mx-auto max-w-[800px] text-center">
           <p class="m-0 text-base leading-7 text-[#555]">
-            Balaji Royal Events is growing across Jaipur, Udaipur, Jhunjhunu, and destination venues.
+            Balaji Royal Events is based in Jhunjhunu and plans weddings and celebrations across Rajasthan,
+            including Mandawa, Alsisar, Khetri, and other destination venues.
             We welcome planners, décor stylists, coordinators, and hospitality professionals who care about detail.
           </p>
           <p class="mt-4 text-sm leading-6 text-[#666]">

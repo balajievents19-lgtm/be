@@ -498,6 +498,16 @@ class SeoService
             'Disallow: /admin/',
             'Disallow: /livewire',
             'Disallow: /livewire/',
+            'Disallow: /account',
+            'Disallow: /account/',
+            'Disallow: /login',
+            'Disallow: /login/',
+            'Disallow: /register',
+            'Disallow: /register/',
+            'Disallow: /forgot-password',
+            'Disallow: /forgot-password/',
+            'Disallow: /reset-password',
+            'Disallow: /reset-password/',
             '',
         ];
 
