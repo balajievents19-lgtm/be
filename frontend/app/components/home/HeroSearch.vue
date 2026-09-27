@@ -40,6 +40,7 @@ const apiError = ref('')
 const mobileError = ref('')
 const mobileTouched = ref(false)
 const showLoginRequired = ref(false)
+const enquiryAuthBannerReady = useSwiperAfterHydrate()
 
 const enquiryErrorFromApi = (error: unknown): string => {
   const err = error as { data?: { code?: string, message?: string, errors?: Record<string, string[]> }, message?: string }
@@ -261,7 +262,7 @@ const search = async () => {
     </div>
 
     <div
-      v-if="showLoginRequired || (loaded && !customer)"
+      v-if="showLoginRequired || (enquiryAuthBannerReady && loaded && !customer)"
       class="mb-2.5 rounded-[3px] border border-solid border-brand-500 bg-white px-4 py-3 text-center"
       role="alert"
     >
