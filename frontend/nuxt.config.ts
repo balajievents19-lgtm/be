@@ -40,6 +40,9 @@ export default defineNuxtConfig({
 
   // Same-origin /storage, /protected-media, /api, and /sanctum during `nuxt dev`.
   vite: {
+    define: {
+      __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: 'true'
+    },
     server: {
       proxy: laravelDevProxy
     }
