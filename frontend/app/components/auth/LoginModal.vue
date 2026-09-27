@@ -61,10 +61,13 @@ const goForgot = async () => {
   closeModal()
   await navigateTo('/forgot-password')
 }
+
+const uiReady = useSwiperAfterHydrate()
 </script>
 
 <template>
   <UModal
+    v-if="uiReady"
     v-model:open="open"
     :ui="{ content: 'max-w-[860px] w-[calc(100%-1.5rem)] overflow-hidden rounded-sm p-0' }"
   >

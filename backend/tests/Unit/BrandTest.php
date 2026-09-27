@@ -39,5 +39,9 @@ class BrandTest extends TestCase
             'Jhunjhunu • Mandawa • Alsisar',
             Brand::rewrite('Udaipur • Jaipur • Shekhawati')
         );
+        $this->assertSame(
+            'Plan Royal Wedding Rajasthan, Destination Wedding Rajasthan',
+            Brand::rewrite('Plan Royal Wedding Jaipur, Destination Wedding Udaipur')
+        );
     }
 }

@@ -20,6 +20,7 @@ const props = withDefaults(defineProps<{
 })
 
 const open = ref(false)
+const uiReady = useSwiperAfterHydrate()
 const minValue = today(getLocalTimeZone())
 
 const calendarValue = computed<DateValue | undefined>({
@@ -69,7 +70,23 @@ const onSelect = (value: DateValue | DateValue[] | { start?: DateValue, end?: Da
       class="icon icon-calander-month pointer-events-none absolute top-0 left-0 z-20 mt-1 h-10 w-[37px] text-center text-lg leading-[48px] text-[#464e7b]"
       aria-hidden="true"
     />
+    <button
+      v-if="!uiReady"
+      :id="id"
+      type="button"
+      :class="[
+        fieldClass,
+        !model ? 'text-[#595959]' : '',
+        'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500'
+      ]"
+      :aria-required="required || undefined"
+      :aria-expanded="false"
+      aria-haspopup="dialog"
+    >
+      {{ displayValue }}
+    </button>
     <UPopover
+      v-else
       v-model:open="open"
       :content="{ side: 'bottom', align: 'start', sideOffset: 6 }"
     >
