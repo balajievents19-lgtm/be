@@ -225,6 +225,14 @@ class MediaProtectionTest extends TestCase
         $this->assertSame(560, imagesy($decoded));
         imagedestroy($decoded);
 
+        $phone = $this->withHeaders(['Accept' => 'image/jpeg'])->get('/protected-media/'.$token.'?w=800');
+        $phone->assertOk();
+        $phoneImage = imagecreatefromstring((string) $phone->getContent());
+        $this->assertInstanceOf(\GdImage::class, $phoneImage);
+        $this->assertSame(800, imagesx($phoneImage));
+        $this->assertSame(350, imagesy($phoneImage));
+        imagedestroy($phoneImage);
+
         $ignored = $this->withHeaders(['Accept' => 'image/jpeg'])->get('/protected-media/'.$token.'?w=999');
         $ignored->assertOk();
         $ignoredImage = imagecreatefromstring((string) $ignored->getContent());

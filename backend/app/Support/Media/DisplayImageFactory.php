@@ -37,6 +37,9 @@ final class DisplayImageFactory
     /** Optional mobile/srcset cap (1600:700 → 1280:560). Query `w` must match this exactly. */
     public const DISPLAY_WIDTH_1280 = 1280;
 
+    /** Narrow phones (~390 CSS px at 2×). Query `w` must match this exactly. */
+    public const DISPLAY_WIDTH_800 = 800;
+
     /**
      * Pick a display encode format from Accept. Logos/GIF/SVG/ICO stay on their source type.
      */
@@ -161,12 +164,20 @@ final class DisplayImageFactory
 
     public static function allowedDisplayWidth(int $width): int
     {
-        return $width === self::DISPLAY_WIDTH_1280 ? self::DISPLAY_WIDTH_1280 : 0;
+        return match ($width) {
+            self::DISPLAY_WIDTH_800 => self::DISPLAY_WIDTH_800,
+            self::DISPLAY_WIDTH_1280 => self::DISPLAY_WIDTH_1280,
+            default => 0,
+        };
     }
 
     private function displayCap(int $maxWidth): int
     {
-        return $maxWidth === self::DISPLAY_WIDTH_1280 ? self::DISPLAY_WIDTH_1280 : self::MAX_WIDTH;
+        return match ($maxWidth) {
+            self::DISPLAY_WIDTH_800 => self::DISPLAY_WIDTH_800,
+            self::DISPLAY_WIDTH_1280 => self::DISPLAY_WIDTH_1280,
+            default => self::MAX_WIDTH,
+        };
     }
 
     /**

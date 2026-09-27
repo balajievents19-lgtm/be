@@ -22,14 +22,17 @@ const props = withDefaults(defineProps<{
 const { data: settings } = useSettings()
 const heroSearchEnabled = computed(() => settings.value?.hero_search?.enabled !== false)
 
-const heroMobileSrc = (slide: HeroSlide): string => {
+const heroSrcWithWidth = (slide: HeroSlide, width: 800 | 1280): string => {
   const url = slide.mobile_image || slide.desktop_image
   if (!url || !url.includes('/protected-media/')) {
     return url
   }
 
-  return `${url}${url.includes('?') ? '&' : '?'}w=1280`
+  return `${url}${url.includes('?') ? '&' : '?'}w=${width}`
 }
+
+const heroPhoneSrc = (slide: HeroSlide): string => heroSrcWithWidth(slide, 800)
+const heroTabletSrc = (slide: HeroSlide): string => heroSrcWithWidth(slide, 1280)
 
 const lcpPreloadLinks = computed(() => {
   const slide = props.slides[0]
@@ -50,13 +53,23 @@ const lcpPreloadLinks = computed(() => {
     media: string
     fetchpriority: 'high'
   }> = []
-  const mobileSrc = heroMobileSrc(slide)
-  if (mobileSrc) {
+  const phoneSrc = heroPhoneSrc(slide)
+  const tabletSrc = heroTabletSrc(slide)
+  if (phoneSrc) {
     links.push({
       rel: 'preload',
       as: 'image',
-      href: mobileSrc,
-      media: '(max-width: 991px)',
+      href: phoneSrc,
+      media: '(max-width: 767px)',
+      fetchpriority: 'high'
+    })
+  }
+  if (tabletSrc) {
+    links.push({
+      rel: 'preload',
+      as: 'image',
+      href: tabletSrc,
+      media: '(min-width: 768px) and (max-width: 991px)',
       fetchpriority: 'high'
     })
   }
@@ -65,7 +78,7 @@ const lcpPreloadLinks = computed(() => {
       rel: 'preload',
       as: 'image',
       href: slide.desktop_image,
-      media: mobileSrc ? '(min-width: 992px)' : 'all',
+      media: phoneSrc || tabletSrc ? '(min-width: 992px)' : 'all',
       fetchpriority: 'high'
     })
   }
@@ -159,8 +172,13 @@ onUnmounted(() => {
           />
           <picture v-else>
             <source
-              v-if="heroMobileSrc(firstSlide)"
-              :srcset="heroMobileSrc(firstSlide)"
+              v-if="heroPhoneSrc(firstSlide)"
+              :srcset="heroPhoneSrc(firstSlide)"
+              media="(max-width: 767px)"
+            >
+            <source
+              v-if="heroTabletSrc(firstSlide)"
+              :srcset="heroTabletSrc(firstSlide)"
               media="(max-width: 991px)"
             >
             <img
@@ -223,8 +241,13 @@ onUnmounted(() => {
             />
             <picture v-else>
               <source
-                v-if="heroMobileSrc(slide)"
-                :srcset="heroMobileSrc(slide)"
+                v-if="heroPhoneSrc(slide)"
+                :srcset="heroPhoneSrc(slide)"
+                media="(max-width: 767px)"
+              >
+              <source
+                v-if="heroTabletSrc(slide)"
+                :srcset="heroTabletSrc(slide)"
                 media="(max-width: 991px)"
               >
               <img

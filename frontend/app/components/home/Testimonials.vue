@@ -150,9 +150,19 @@ const onShareSubmit = async (event: Event) => {
 
 <template>
   <section
-    class="friends-block relative block w-full bg-[url('/images/parallax/friend-infoBg.jpg')] bg-[length:cover] bg-[position:50%_50%] bg-fixed py-10 pb-16 max-md:bg-scroll min-[768px]:py-12 min-[768px]:pb-[72px]"
+    class="friends-block relative block w-full overflow-hidden bg-[#8a3a1c] py-10 pb-16 min-[768px]:py-12 min-[768px]:pb-[72px]"
     aria-labelledby="client-says-heading"
   >
+    <img
+      src="/images/parallax/friend-infoBg.jpg"
+      alt=""
+      width="1920"
+      height="1080"
+      loading="lazy"
+      decoding="async"
+      class="pointer-events-none absolute inset-0 h-full w-full object-cover object-center"
+      aria-hidden="true"
+    >
     <div
       class="pointer-events-none absolute inset-0 bg-[rgba(241,91,34,0.72)] content-['']"
       aria-hidden="true"
