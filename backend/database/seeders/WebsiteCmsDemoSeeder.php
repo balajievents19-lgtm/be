@@ -337,7 +337,7 @@ class WebsiteCmsDemoSeeder extends Seeder
             [
                 'key' => CtaSectionKey::HomeMid,
                 'title' => 'Plan Your Royal Wedding with Balaji Royal Events',
-                'subtitle' => 'Trusted across Jhunjhunu, Jaipur and Udaipur',
+                'subtitle' => 'Trusted across Jhunjhunu, Mandawa and Alsisar',
                 'body' => 'Share your date and celebration style. Our planners will craft a clear roadmap for décor, catering, photography and hospitality.',
                 'button_text' => 'Talk to Planner',
                 'button_url' => '/contact',
@@ -349,8 +349,8 @@ class WebsiteCmsDemoSeeder extends Seeder
             [
                 'key' => CtaSectionKey::HomeBottom,
                 'title' => 'Ready for a Destination Celebration?',
-                'subtitle' => 'Udaipur • Jaipur • Shekhawati',
-                'body' => 'Book a complimentary consultation for Destination Wedding Udaipur or Royal Wedding Jaipur packages.',
+                'subtitle' => 'Jhunjhunu • Mandawa • Alsisar',
+                'body' => 'Book a complimentary consultation for destination and royal wedding planning across Rajasthan.',
                 'button_text' => 'Book Consultation',
                 'button_url' => '/contact',
                 'show_on_homepage' => true,

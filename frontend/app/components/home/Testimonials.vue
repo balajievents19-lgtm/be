@@ -23,6 +23,7 @@ const { submitContact } = usePublicForms()
 
 const modules = [A11y, Autoplay, Keyboard, Pagination]
 const prefersReducedMotion = ref(false)
+const swiperActive = useSwiperAfterHydrate()
 const swiperRef = ref<{ slideNext: () => void, slidePrev: () => void } | null>(null)
 
 let mediaQuery: MediaQueryList | undefined
@@ -211,7 +212,28 @@ const onShareSubmit = async (event: Event) => {
         v-else
         class="relative mt-[21px]"
       >
+        <div
+          v-if="!swiperActive"
+          class="testimonials-swiper grid w-full grid-cols-1 gap-4 min-[768px]:grid-cols-2 min-[768px]:px-10 min-[1024px]:grid-cols-3"
+        >
+          <article
+            v-for="item in testimonials.slice(0, 3)"
+            :key="item.id"
+            class="friends-info flex flex-col items-center px-1 pb-10 text-center"
+          >
+            <div class="name px-2 pt-3 text-center font-['Domine',Georgia,'Times_New_Roman',serif] text-base leading-6 text-white">
+              {{ item.name }}
+            </div>
+            <p
+              v-if="item.quote || item.body"
+              class="m-0 mt-3 max-w-md text-sm leading-6 text-white/90"
+            >
+              {{ item.quote || item.body }}
+            </p>
+          </article>
+        </div>
         <Swiper
+          v-else
           :modules="modules"
           :slides-per-view="1"
           :slides-per-group="1"

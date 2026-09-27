@@ -447,8 +447,6 @@ class SchemaBuilder
             'Jhunjhunu' => 'City',
             'Mandawa' => 'City',
             'Alsisar' => 'City',
-            'Jaipur' => 'City',
-            'Udaipur' => 'City',
             'Rajasthan' => 'State',
         ];
 

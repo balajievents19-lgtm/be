@@ -79,7 +79,9 @@ useHead(() => ({
 
 const modules = [A11y, Autoplay, EffectFade, Keyboard, Navigation]
 const prefersReducedMotion = ref(false)
+const swiperActive = useSwiperAfterHydrate()
 const swiperRef = ref<{ slideNext: () => void, slidePrev: () => void } | null>(null)
+const firstSlide = computed(() => props.slides[0] ?? null)
 
 const overlayStyleFor = (opacity: number | null | undefined) => {
   const value = Math.min(100, Math.max(0, Number(opacity ?? 35))) / 100
@@ -140,8 +142,48 @@ onUnmounted(() => {
         Unable to load slides.
       </p>
 
+      <div
+        v-else-if="slides.length && !swiperActive && firstSlide"
+        class="h-full w-full"
+      >
+        <div class="relative h-full min-h-full w-full overflow-hidden">
+          <video
+            v-if="firstSlide.video_url"
+            :src="firstSlide.video_url"
+            class="absolute inset-0 block h-full w-full object-cover"
+            autoplay
+            muted
+            loop
+            playsinline
+            :aria-label="firstSlide.title || 'Balaji Royal Events'"
+          />
+          <picture v-else>
+            <source
+              v-if="heroMobileSrc(firstSlide)"
+              :srcset="heroMobileSrc(firstSlide)"
+              media="(max-width: 991px)"
+            >
+            <img
+              :src="firstSlide.desktop_image"
+              :alt="firstSlide.title || 'Balaji Royal Events'"
+              fetchpriority="high"
+              loading="eager"
+              decoding="async"
+              width="1600"
+              height="700"
+              class="absolute inset-0 block h-full w-full object-cover"
+              draggable="false"
+            >
+          </picture>
+          <div
+            class="pointer-events-none absolute inset-0"
+            :style="overlayStyleFor(firstSlide.overlay_opacity)"
+          />
+        </div>
+      </div>
+
       <Swiper
-        v-else-if="slides.length"
+        v-else-if="slides.length && swiperActive"
         :modules="modules"
         :slides-per-view="1"
         :loop="false"

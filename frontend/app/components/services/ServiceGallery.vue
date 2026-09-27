@@ -13,6 +13,7 @@ const props = defineProps<{
 }>()
 
 const modules = [A11y, Keyboard, Navigation]
+const swiperActive = useSwiperAfterHydrate()
 const swiperRef = ref<{ slideNext: () => void, slidePrev: () => void } | null>(null)
 
 const relatedItems = computed(() => props.service.related_gallery?.filter(item => !isGalleryVideo(item) && galleryItemSrc(item)) ?? [])
@@ -54,7 +55,20 @@ const onSwiper = (swiper: { slideNext: () => void, slidePrev: () => void }) => {
       </NuxtLink>
     </h2>
     <div class="event-gallerSlider relative px-12 py-10 max-[767px]:px-[50px] min-[768px]:px-24">
+      <span
+        v-if="!swiperActive && gallery[0]"
+        class="gallery-image-wrapper"
+      >
+        <img
+          :src="gallery[0]"
+          :alt="`${service.name} gallery 1`"
+          loading="lazy"
+          decoding="async"
+          draggable="false"
+        >
+      </span>
       <Swiper
+        v-else-if="swiperActive"
         :modules="modules"
         :slides-per-view="1"
         :space-between="16"

@@ -18,6 +18,7 @@ withDefaults(defineProps<{
 })
 
 const modules = [A11y, Keyboard, Navigation]
+const swiperActive = useSwiperAfterHydrate()
 const swiperRef = ref<{ slideNext: () => void, slidePrev: () => void } | null>(null)
 
 const onSwiper = (swiper: { slideNext: () => void, slidePrev: () => void }) => {
@@ -87,7 +88,48 @@ const eventLink = (item: EventOverviewItem) => item.link_url || '/services'
         v-else
         class="relative mt-0 max-[991px]:px-[15px]"
       >
+        <div
+          v-if="!swiperActive"
+          class="event-slider grid w-full grid-cols-1 gap-0 min-[768px]:grid-cols-2 min-[991px]:grid-cols-3"
+        >
+          <div
+            v-for="event in items.slice(0, 3)"
+            :key="event.id"
+            class="px-[15px]"
+          >
+            <article class="event-box block pt-[42px] text-center">
+              <div class="group relative mb-[22px] card-media-frame text-center">
+                <img
+                  v-if="event.image"
+                  :src="event.image"
+                  :alt="event.title"
+                  width="1200"
+                  height="1200"
+                  class="transition-opacity duration-[350ms] ease-in-out group-hover:opacity-70"
+                  loading="lazy"
+                  decoding="async"
+                >
+                <div
+                  v-else
+                  class="card-media-fallback"
+                  aria-hidden="true"
+                >
+                  <i class="icon icon-camera" />
+                </div>
+                <NuxtLink
+                  :to="eventLink(event)"
+                  class="absolute inset-0 z-[1] block"
+                  :aria-label="event.title"
+                />
+              </div>
+              <h3 class="m-0 mb-2 text-lg font-bold text-[#333333] font-['Domine',Georgia,'Times_New_Roman',serif]">
+                {{ event.title }}
+              </h3>
+            </article>
+          </div>
+        </div>
         <Swiper
+          v-else
           :modules="modules"
           :slides-per-view="1"
           :space-between="0"
