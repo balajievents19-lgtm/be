@@ -71,10 +71,13 @@ const onLogout = async () => {
   await logout()
   await navigateTo('/')
 }
+
+const uiReady = useSwiperAfterHydrate()
 </script>
 
 <template>
   <USlideover
+    v-if="uiReady"
     v-model:open="open"
     side="right"
     :ui="{ content: 'max-w-sm' }"
