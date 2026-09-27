@@ -32,6 +32,10 @@ class BrandTest extends TestCase
             Brand::rewrite('Trusted across Jhunjhunu, Jaipur and Udaipur')
         );
         $this->assertSame(
+            'weddings across Jhunjhunu, Mandawa, Alsisar, Khetri and nearby destinations',
+            Brand::rewrite('weddings across Jhunjhunu, Mandawa, Alsisar, Jaipur and nearby destinations')
+        );
+        $this->assertSame(
             'Jhunjhunu • Mandawa • Alsisar',
             Brand::rewrite('Udaipur • Jaipur • Shekhawati')
         );

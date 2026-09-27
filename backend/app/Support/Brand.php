@@ -44,6 +44,9 @@ final class Brand
         return [
             '/Trusted across Jhunjhunu,\s*Jaipur and Udaipur/i' => 'Trusted across Jhunjhunu, Mandawa and Alsisar',
             '/Udaipur\s+\S+\s+Jaipur\s+\S+\s+Shekhawati/iu' => 'Jhunjhunu • Mandawa • Alsisar',
+            '/Jhunjhunu,\s*Jaipur,\s*Alsisar,\s*Mandawa/i' => 'Jhunjhunu, Mandawa, Alsisar, Khetri',
+            '/Jhunjhunu,\s*Mandawa,\s*Alsisar,\s*Jaipur and nearby destinations/i' => 'Jhunjhunu, Mandawa, Alsisar, Khetri and nearby destinations',
+            '/,\s*Jaipur and Udaipur/i' => ', Khetri and Abheygarh',
             '/Jaipur,\s*Udaipur and Shekhawati/i' => 'Jhunjhunu, Mandawa and Alsisar',
             '/across Jaipur,\s*Udaipur/i' => 'across Jhunjhunu, Mandawa',
             '/in Jaipur,\s*Udaipur/i' => 'in Jhunjhunu, Mandawa',
