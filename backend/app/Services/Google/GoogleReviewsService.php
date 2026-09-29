@@ -149,7 +149,12 @@ class GoogleReviewsService
         $resource = str_starts_with($placeId, 'places/') ? $placeId : 'places/'.$placeId;
         $apiKey = (string) config('services.google_places.api_key');
 
-        $response = Http::timeout(12)
+        $response = Http::withOptions([
+            'curl' => [
+                CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
+            ],
+        ])
+            ->timeout(12)
             ->acceptJson()
             ->withHeaders([
                 'X-Goog-Api-Key' => $apiKey,
