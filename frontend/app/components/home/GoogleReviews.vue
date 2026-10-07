@@ -93,7 +93,7 @@ const formatDate = (value: string | null | undefined) => {
         v-else-if="reviews?.configured && !reviews.reviews.length"
         class="text-center text-sm text-[#666]"
       >
-        Google reviews will appear here after the Business Profile is connected.
+        Google review details are currently unavailable from Google. The live rating above is from Google; open the link below to read full guest reviews.
       </p>
 
       <div
@@ -112,7 +112,16 @@ const formatDate = (value: string | null | undefined) => {
             {{ item.text }}
           </p>
           <p class="mt-4 text-sm font-semibold text-[#222]">
-            {{ item.author_name }}
+            <a
+              v-if="item.author_url"
+              :href="item.author_url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-inherit underline-offset-2 hover:underline"
+            >{{ item.author_name }}</a>
+            <template v-else>
+              {{ item.author_name }}
+            </template>
           </p>
           <p
             v-if="item.relative_time || formatDate(item.publish_time)"
