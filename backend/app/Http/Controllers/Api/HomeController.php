@@ -70,7 +70,6 @@ class HomeController extends Controller
                     'link_url',
                     'featured',
                     'homepage_featured',
-                    'google_reviews_featured',
                     'sort_order',
                     'status',
                 ])
