@@ -131,6 +131,7 @@ export interface TestimonialItem {
   video_url?: string | null
   featured: boolean
   homepage_featured: boolean
+  google_reviews_featured?: boolean
   sort_order: number
 }
 
@@ -267,6 +268,7 @@ export interface HomePayload {
   external_media?: ExternalMediaItem[]
   event_types?: EventType[]
   testimonials: TestimonialItem[]
+  featured_customer_reviews?: TestimonialItem[]
   success_stories: TestimonialItem[]
   featured_blog: BlogPostItem[]
   featured_faqs: FaqItem[]
@@ -389,6 +391,7 @@ export const emptyHome = (): HomePayload => ({
   external_media: [],
   event_types: [],
   testimonials: [],
+  featured_customer_reviews: [],
   success_stories: [],
   featured_blog: [],
   featured_faqs: [],

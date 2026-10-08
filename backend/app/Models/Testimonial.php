@@ -10,6 +10,7 @@ use App\Models\Concerns\Publication\HasPublicationWindow;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Validation\ValidationException;
 
 class Testimonial extends Model
 {
@@ -31,6 +32,7 @@ class Testimonial extends Model
         'sort_order',
         'featured',
         'homepage_featured',
+        'google_reviews_featured',
         'status',
         'publish_at',
         'unpublish_at',
@@ -42,6 +44,7 @@ class Testimonial extends Model
             'type' => TestimonialType::class,
             'featured' => 'boolean',
             'homepage_featured' => 'boolean',
+            'google_reviews_featured' => 'boolean',
             'status' => 'boolean',
             'sort_order' => 'integer',
             'rating' => 'integer',
@@ -58,5 +61,42 @@ class Testimonial extends Model
     public function scopeSuccessStories(Builder $query): Builder
     {
         return $query->where('type', TestimonialType::SuccessStory);
+    }
+
+    public function scopeGoogleReviewsFeatured(Builder $query): Builder
+    {
+        return $query
+            ->clientSays()
+            ->where('google_reviews_featured', true);
+    }
+
+    public static function publishedGoogleReviewsFeaturedCount(?int $exceptId = null): int
+    {
+        return static::query()
+            ->active()
+            ->googleReviewsFeatured()
+            ->when($exceptId, fn (Builder $query) => $query->where('id', '!=', $exceptId))
+            ->count();
+    }
+
+    protected static function booted(): void
+    {
+        static::saving(function (Testimonial $testimonial): void {
+            if ($testimonial->type !== TestimonialType::ClientSays) {
+                $testimonial->google_reviews_featured = false;
+
+                return;
+            }
+
+            if (! $testimonial->google_reviews_featured || ! $testimonial->status) {
+                return;
+            }
+
+            if (static::publishedGoogleReviewsFeaturedCount($testimonial->id) >= 4) {
+                throw ValidationException::withMessages([
+                    'google_reviews_featured' => 'At most 4 published Client Reviews can be featured in the Google Reviews section.',
+                ]);
+            }
+        });
     }
 }

@@ -70,6 +70,7 @@ class HomeController extends Controller
                     'link_url',
                     'featured',
                     'homepage_featured',
+                    'google_reviews_featured',
                     'sort_order',
                     'status',
                 ])
@@ -140,6 +141,29 @@ class HomeController extends Controller
                 ->ordered()
                 ->get();
 
+            $featuredCustomerReviews = Testimonial::query()
+                ->active()
+                ->googleReviewsFeatured()
+                ->ordered()
+                ->select([
+                    'id',
+                    'type',
+                    'name',
+                    'quote',
+                    'body',
+                    'avatar',
+                    'image',
+                    'rating',
+                    'video_url',
+                    'featured',
+                    'homepage_featured',
+                    'google_reviews_featured',
+                    'sort_order',
+                    'status',
+                ])
+                ->take(4)
+                ->get();
+
             $testimonials = Testimonial::query()
                 ->active()
                 ->homepage()
@@ -157,6 +181,7 @@ class HomeController extends Controller
                     'video_url',
                     'featured',
                     'homepage_featured',
+                    'google_reviews_featured',
                     'sort_order',
                     'status',
                 ])
@@ -179,6 +204,7 @@ class HomeController extends Controller
                     'video_url',
                     'featured',
                     'homepage_featured',
+                    'google_reviews_featured',
                     'sort_order',
                     'status',
                 ])
@@ -255,6 +281,7 @@ class HomeController extends Controller
                 'external_media' => $homepageExternalMedia,
                 'event_types' => $eventTypes,
                 'testimonials' => $testimonials,
+                'featured_customer_reviews' => $featuredCustomerReviews,
                 'success_stories' => $successStories,
                 'featured_blog' => $featuredBlog,
                 'featured_faqs' => $featuredFaqs,

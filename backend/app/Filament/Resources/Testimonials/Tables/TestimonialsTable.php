@@ -45,6 +45,11 @@ class TestimonialsTable
                     ->badge()
                     ->formatStateUsing(fn (bool $state): string => $state ? 'Yes' : 'No')
                     ->color(fn (bool $state): string => $state ? 'success' : 'gray'),
+                TextColumn::make('google_reviews_featured')
+                    ->label('Google Reviews section')
+                    ->badge()
+                    ->formatStateUsing(fn (bool $state): string => $state ? 'Featured' : 'No')
+                    ->color(fn (bool $state): string => $state ? 'warning' : 'gray'),
                 TextColumn::make('status')
                     ->badge()
                     ->formatStateUsing(fn (bool $state): string => $state ? 'Active' : 'Inactive')
@@ -59,6 +64,7 @@ class TestimonialsTable
                 SelectFilter::make('type')->options(TestimonialType::options()),
                 TernaryFilter::make('status')->label('Active')->boolean(),
                 TernaryFilter::make('homepage_featured')->label('Homepage')->boolean(),
+                TernaryFilter::make('google_reviews_featured')->label('Google Reviews section')->boolean(),
                 TrashedFilter::make(),
             ])
             ->recordActions([

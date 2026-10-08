@@ -3,6 +3,7 @@
 namespace Tests\Feature\Api;
 
 use App\Enums\TestimonialType;
+use App\Models\HomepageSection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Tests\Support\CreatesWebsiteContent;
@@ -53,6 +54,7 @@ class HomeApiTest extends TestCase
                     'external_media',
                     'event_types',
                     'testimonials',
+                    'featured_customer_reviews',
                     'success_stories',
                     'featured_blog',
                     'featured_faqs',
@@ -124,11 +126,11 @@ class HomeApiTest extends TestCase
 
     public function test_home_section_toggles_are_reflected_in_api(): void
     {
-        $faq = \App\Models\HomepageSection::query()->where('section_key', 'faq')->firstOrFail();
+        $faq = HomepageSection::query()->where('section_key', 'faq')->firstOrFail();
         $faq->is_active = true;
         $faq->save();
 
-        $blog = \App\Models\HomepageSection::query()->where('section_key', 'blog')->firstOrFail();
+        $blog = HomepageSection::query()->where('section_key', 'blog')->firstOrFail();
         $blog->is_active = false;
         $blog->save();
 

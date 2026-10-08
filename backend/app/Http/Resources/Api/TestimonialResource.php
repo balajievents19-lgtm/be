@@ -27,6 +27,7 @@ class TestimonialResource extends JsonResource
             'video_url' => $this->video_url,
             'featured' => $this->featured,
             'homepage_featured' => $this->homepage_featured,
+            'google_reviews_featured' => (bool) $this->google_reviews_featured,
             'sort_order' => $this->sort_order,
         ];
     }

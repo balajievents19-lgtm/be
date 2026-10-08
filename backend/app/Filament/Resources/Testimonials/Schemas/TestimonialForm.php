@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Testimonials\Schemas;
 
 use App\Enums\TestimonialType;
 use App\Filament\Support\WebsitePublishFields;
+use App\Models\Testimonial;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -88,6 +89,17 @@ class TestimonialForm
                                     ->columns(2)
                                     ->schema([
                                         ...WebsitePublishFields::statusAndSort(withHomepage: true),
+                                        Toggle::make('google_reviews_featured')
+                                            ->label('Feature in Google Reviews section')
+                                            ->helperText(function (): string {
+                                                $used = Testimonial::publishedGoogleReviewsFeaturedCount();
+
+                                                return 'Shows under the live Google rating on the homepage (labelled Featured Customer Review). Maximum 4 published reviews. Currently '.$used.' of 4 used.';
+                                            })
+                                            ->default(false)
+                                            ->inline(false)
+                                            ->visible(fn (Get $get): bool => $get('type') === TestimonialType::ClientSays->value)
+                                            ->columnSpanFull(),
                                         Toggle::make('featured')
                                             ->label('Featured')
                                             ->default(false)

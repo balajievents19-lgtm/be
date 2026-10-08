@@ -191,9 +191,10 @@ class GoogleReviewsService
             ];
         }
 
-        $mapsUrl = $data['googleMapsUri']
-            ?? Setting::query()->value('google_reviews_url')
-            ?? config('services.google_places.reviews_url');
+        $mapsUrl = $this->mapsUrl(
+            is_string($data['googleMapsUri'] ?? null) ? $data['googleMapsUri'] : null,
+            $placeId,
+        );
 
         return [
             'configured' => true,
@@ -222,13 +223,41 @@ class GoogleReviewsService
         ], self::TTL_SECONDS * 4);
     }
 
+    private function mapsUrl(?string $placesMapsUri, string $placeId): ?string
+    {
+        $configured = trim((string) (
+            Setting::query()->value('google_reviews_url')
+            ?: config('services.google_places.reviews_url')
+            ?: ''
+        ));
+        if ($configured !== '') {
+            return $configured;
+        }
+
+        if (is_string($placesMapsUri) && $placesMapsUri !== '') {
+            return $placesMapsUri;
+        }
+
+        $placeId = trim($placeId);
+        if ($placeId === '') {
+            return null;
+        }
+
+        $id = str_starts_with($placeId, 'places/') ? substr($placeId, 7) : $placeId;
+
+        return 'https://www.google.com/maps/place/?q=place_id:'.$id;
+    }
+
     /**
      * @return array<string, mixed>
      */
     private function emptyPublicPayload(bool $configured, ?string $error): array
     {
-        $mapsUrl = Setting::query()->value('google_reviews_url')
-            ?: config('services.google_places.reviews_url');
+        $mapsUrl = $this->mapsUrl(null, trim((string) (
+            Setting::query()->value('google_place_id')
+            ?: config('services.google_places.place_id')
+            ?: ''
+        )));
 
         return [
             'configured' => $configured,

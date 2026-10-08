@@ -4,6 +4,7 @@ namespace App\Filament\Pages\Contact;
 
 use App\Filament\Clusters\ContactCluster;
 use App\Filament\Pages\EditWebsiteSettingPage;
+use App\Filament\Resources\ClientReviews\ClientReviewResource;
 use App\Services\Google\GoogleReviewsService;
 use App\Support\ContentCache;
 use BackedEnum;
@@ -49,7 +50,8 @@ class ManageGoogleReviews extends EditWebsiteSettingPage
                 <li>Cache present: <strong>%s</strong></li>
                 <li>Google Business Profile OAuth (review replies): <strong>%s</strong></li>
             </ul>
-            <p class="mt-3 text-sm">The website shows live Google reviews only after a successful Places fetch. Empty credentials never produce fake reviews.</p>
+            <p class="mt-3 text-sm">The live Google rating and review count come from Places API. Google currently does not return review text for this listing. Homepage cards are <strong>Featured Customer Reviews</strong> chosen in Client Stories → Reviews (maximum 4). They are not live Places API review bodies.</p>
+            <p class="mt-2 text-sm">Google Business Profile OAuth is only for review replies, not for showing featured testimonials.</p>
             <p class="mt-2 text-sm">Required env: <code>GOOGLE_PLACES_API_KEY</code>. Optional: <code>GOOGLE_PLACE_ID</code>, <code>GOOGLE_REVIEWS_URL</code>, <code>GOOGLE_GBP_CLIENT_ID</code>, <code>GOOGLE_GBP_CLIENT_SECRET</code>, <code>GOOGLE_GBP_LOCATION_ID</code>.</p>',
             $status['places_api_key_configured'] ? 'configured' : 'missing',
             $status['place_id'] ?: 'missing',
@@ -77,7 +79,7 @@ class ManageGoogleReviews extends EditWebsiteSettingPage
                 ->label('Google reviews / Business Profile URL')
                 ->url()
                 ->maxLength(500)
-                ->helperText('Used for “View all reviews on Google”.')
+                ->helperText('Used for “View More Google Reviews” on the homepage.')
                 ->columnSpanFull(),
         ];
     }
@@ -85,6 +87,11 @@ class ManageGoogleReviews extends EditWebsiteSettingPage
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('manageFeaturedReviews')
+                ->label('Featured Customer Reviews')
+                ->icon(Heroicon::OutlinedStar)
+                ->url(ClientReviewResource::getUrl('index'))
+                ->color('gray'),
             Action::make('refreshGoogleReviews')
                 ->label('Refresh Google reviews')
                 ->icon(Heroicon::OutlinedArrowPath)

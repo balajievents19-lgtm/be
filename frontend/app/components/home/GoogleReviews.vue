@@ -1,40 +1,44 @@
 <script setup lang="ts">
-import type { GoogleReviewsPayload } from '~/types/home'
+import type { GoogleReviewsPayload, TestimonialItem } from '~/types/home'
+
+const GOOGLE_PLACE_ID_FALLBACK = 'ChIJBymY3mE5EzkRsExzAapRL1o'
 
 const props = withDefaults(defineProps<{
   reviews?: GoogleReviewsPayload | null
+  featuredReviews?: TestimonialItem[]
   pending?: boolean
   failed?: boolean
 }>(), {
   reviews: null,
+  featuredReviews: () => [],
   pending: false,
   failed: false
+})
+
+const featuredCards = computed(() => (props.featuredReviews ?? []).slice(0, 4))
+
+const mapsUrl = computed(() => {
+  const configured = props.reviews?.maps_url?.trim()
+  if (configured) {
+    return configured
+  }
+
+  return `https://www.google.com/maps/place/?q=place_id:${GOOGLE_PLACE_ID_FALLBACK}`
 })
 
 const showSection = computed(() => {
   if (props.pending) {
     return true
   }
-  if (props.reviews?.configured) {
+  if (props.reviews?.configured || props.reviews?.rating || mapsUrl.value) {
     return true
   }
-  return Boolean(props.reviews?.maps_url)
+  return featuredCards.value.length > 0
 })
 
 const stars = (rating: number | null | undefined) => {
   const value = Math.round(Number(rating || 0))
   return Math.min(5, Math.max(0, value))
-}
-
-const formatDate = (value: string | null | undefined) => {
-  if (!value) {
-    return ''
-  }
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) {
-    return ''
-  }
-  return new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }).format(date)
 }
 </script>
 
@@ -63,86 +67,64 @@ const formatDate = (value: string | null | undefined) => {
           <span class="ml-2">{{ reviews.rating.toFixed(1) }}</span>
           <span
             v-if="reviews.review_count"
-            class="text-[#666]"
-          > ({{ reviews.review_count }} Google reviews)</span>
+            class="block text-[#666] min-[480px]:ml-2 min-[480px]:inline"
+          >{{ reviews.review_count }} Google Reviews</span>
         </p>
       </div>
 
       <p
-        v-if="failed && !reviews?.reviews?.length"
+        v-if="failed && !reviews?.rating && !featuredCards.length"
         class="text-center text-sm text-[#666]"
         role="alert"
       >
         Google reviews are temporarily unavailable.
       </p>
       <p
-        v-else-if="pending && !reviews?.reviews?.length && reviews?.configured"
+        v-else-if="pending && !featuredCards.length && !reviews?.rating"
         class="text-center text-sm text-[#666]"
         role="status"
       >
         Loading Google reviews…
       </p>
-      <p
-        v-else-if="reviews?.configured && reviews.error && !reviews.reviews.length"
-        class="text-center text-sm text-[#666]"
-        role="alert"
-      >
-        {{ reviews.error }}
-      </p>
-      <p
-        v-else-if="reviews?.configured && !reviews.reviews.length"
-        class="text-center text-sm text-[#666]"
-      >
-        Google review details are currently unavailable from Google. The live rating above is from Google; open the link below to read full guest reviews.
-      </p>
 
       <div
-        v-else-if="reviews?.reviews?.length"
-        class="grid gap-5 md:grid-cols-2 lg:grid-cols-3"
+        v-if="featuredCards.length"
+        class="grid grid-cols-1 gap-5 min-[768px]:grid-cols-2"
       >
         <article
-          v-for="(item, index) in reviews.reviews.slice(0, 6)"
-          :key="`${item.author_name}-${index}`"
+          v-for="item in featuredCards"
+          :key="item.id"
           class="rounded-2xl border border-[#ead9c4] bg-white p-6 shadow-[0_8px_24px_rgba(26,18,8,0.06)]"
         >
-          <p class="m-0 text-[#b8863b]">
+          <p class="m-0 text-xs font-semibold tracking-[0.16em] text-[#b8863b] uppercase">
+            Featured Customer Review
+          </p>
+          <p
+            v-if="item.rating"
+            class="mt-2 text-[#b8863b]"
+          >
             {{ '★'.repeat(stars(item.rating)) }}
           </p>
           <p class="mt-3 text-sm leading-6 text-[#444]">
-            {{ item.text }}
+            {{ item.quote }}
           </p>
           <p class="mt-4 text-sm font-semibold text-[#222]">
-            <a
-              v-if="item.author_url"
-              :href="item.author_url"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="text-inherit underline-offset-2 hover:underline"
-            >{{ item.author_name }}</a>
-            <template v-else>
-              {{ item.author_name }}
-            </template>
-          </p>
-          <p
-            v-if="item.relative_time || formatDate(item.publish_time)"
-            class="mt-1 text-xs text-[#777]"
-          >
-            {{ item.relative_time || formatDate(item.publish_time) }}
+            {{ item.name }}
           </p>
         </article>
       </div>
 
       <div
-        v-if="reviews?.maps_url"
+        v-if="mapsUrl"
         class="mt-10 text-center"
       >
         <a
-          :href="reviews.maps_url"
+          :href="mapsUrl"
           target="_blank"
           rel="noopener noreferrer"
           class="inline-flex min-h-11 items-center rounded-full border border-[#b8863b] px-6 text-sm font-semibold tracking-wide text-[#8a6428] uppercase hover:bg-[#b8863b] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b8863b]"
         >
-          View all reviews on Google
+          View More Google Reviews →
         </a>
       </div>
     </UContainer>

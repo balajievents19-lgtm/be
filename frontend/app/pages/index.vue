@@ -18,6 +18,7 @@ const featuredFaqs = computed(() => home.value?.featured_faqs ?? [])
 const statistics = computed(() => home.value?.statistics ?? [])
 const ctaSections = computed(() => home.value?.cta_sections ?? [])
 const googleReviews = computed(() => home.value?.google_reviews ?? null)
+const featuredCustomerReviews = computed(() => home.value?.featured_customer_reviews ?? [])
 const galleryCategories = computed(() => home.value?.gallery_categories ?? [])
 const homepageMedia = computed(() => home.value?.external_media ?? [])
 const sections = computed(() => ({
@@ -78,6 +79,7 @@ const sections = computed(() => ({
       />
       <HomeGoogleReviews
         :reviews="googleReviews"
+        :featured-reviews="featuredCustomerReviews"
         :pending="pending"
         :failed="failed"
       />
