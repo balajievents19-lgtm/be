@@ -1,10 +1,12 @@
 <?php
 
+use App\Http\Controllers\Admin\DownloadEstimateCustomerPdfController;
 use App\Http\Controllers\AdminMediaPreviewController;
 use App\Http\Controllers\MediaDisplayController;
 use App\Http\Controllers\RobotsController;
 use App\Http\Controllers\ServePublicStorageController;
 use App\Http\Controllers\SitemapController;
+use App\Http\Middleware\DenyCustomerAdminAccess;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -25,3 +27,7 @@ Route::get('/admin/preview/{token}', AdminMediaPreviewController::class)
 Route::get('/storage/{path}', ServePublicStorageController::class)
     ->where('path', '.*')
     ->name('storage.gated');
+
+Route::middleware(['web', 'auth', DenyCustomerAdminAccess::class])
+    ->get('/admin/estimates/{estimate}/pdf', DownloadEstimateCustomerPdfController::class)
+    ->name('admin.estimates.pdf');

@@ -73,6 +73,7 @@ final class AdminModules
     public const CRM = [
         'leads',
         'newsletter',
+        'estimates',
     ];
 
     /**
